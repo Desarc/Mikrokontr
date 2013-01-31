@@ -75,7 +75,14 @@ right:
         rjmp turnOn
 turnOn:
         st.w r2[r5], r9         /* turns on the selected LED */
+        mov r10, 0xff
         rjmp loop
+
+intr_sleep_start:
+        sub r10, 1
+        cp.w r0, 0
+        breq loop
+        rjmp intr_sleep_start
 
         
 
