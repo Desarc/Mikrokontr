@@ -59,7 +59,6 @@ loop:
         breq right
         rjmp loop
 left:
-        st.w r2[r6], r8         /* set LEDs off */
         lsl r9, 1               /* shift left to enable previous LED */
         cp.w r9, r11            /* check if out of bounds */
         brle turnOn
@@ -67,25 +66,24 @@ left:
         rjmp turnOn
         
 right:
-        st.w r2[r6], r8         /* set LEDs off */
         lsr r9, 1               /* shift right to enable next LED */
         cp.w r9, r12            /* check if out of bounds */
         brge turnOn
         mov r9, r11             /* min wrap around */
         rjmp turnOn
 turnOn:
+        st.w r2[r6], r8         /* set LEDs off */
         st.w r2[r5], r9         /* turns on the selected LED */
-        mov r10, 0xff
-        rjmp loop
+        mov r10, 0xffff
+        rjmp intr_sleep_start
 
 intr_sleep_start:
         sub r10, 1
-        cp.w r0, 0
+        cp.w r10, 0
         breq loop
         rjmp intr_sleep_start
 
         
-
 
 pioc_ptr:
         .int AVR32_PIOC
