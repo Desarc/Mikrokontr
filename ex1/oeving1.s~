@@ -1,0 +1,77 @@
+/******************************************************************************
+ *	
+ * Øving 1 UCSysDes
+ *	
+ *****************************************************************************/
+
+.include "io.s"  /* inkludere noen nyttige symboler (konstanter) */
+
+/* Eksempel på hvordan sette symboler (se også io.s) */
+SR_GM =   16  /* statusregisterflag "GM" er bit 16 */
+	
+/*****************************************************************************/
+/* text-segment */
+/* all programkoden må plasseres i dette segmentet */
+	
+.text
+	
+.globl  _start
+_start: /* programutføring vil starte her */
+
+        lddpc r0, piob_ptr      /*Laster minneadressen til pioa inn i r0*/
+        mov r8, 0xFF            /* 1111 1111 */
+        
+        mov r1, AVR32_PIO_PER   /* PIO enable bits */
+        st.b r0[r1], r8         /*Enable pins on PIOA by setting PER high */
+
+        mov r1, AVR32_PIO_PUER  /* PIO pull-up enable bits */
+        st.b r0[r1], r8         /* set enable */
+
+        lddpc r2, pioc_ptr      /* PIOC address */
+        mov r1, AVR32_PIO_PER   /* PIO enable bits */
+        
+        
+        st.b r2[r1], r8         /* set enable */
+        
+        mov r1, AVR32_PIO_OER   /* PIOC set input/output */
+
+        st.b r2[r1], r8         /* set output */
+        
+        mov r1, AVR32_PIO_CODR  /* LED enable bits */
+
+        st.b r2[r1], r8         /* set enable */
+
+        mov r1, AVR32_PIO_PDSR  /* button status bits */
+        mov r5, AVR32_PIO_SODR  /* LEDS on bits */
+        mov r6, AVR32_PIO_CODR  /* LEDS off bits */
+        mov r3, 0x01            /* 0000 0000 */
+        st.b r2[r5], r3         /* set LEDs off */
+/*loop:   
+        ld.ub r4, r0[r1]        /* load button status */
+/*        cp.b r3, r4
+        breq turnon
+        
+        st.b r2[r5], r8         /* set LEDs off */
+/*        rjmp loop
+        
+turnon:        
+        st.b r2[r6], r8         /* set LEDs on */
+      /*  rjmp loop*/
+
+
+pioc_ptr:
+        .int AVR32_PIOC
+
+piob_ptr:
+        .int AVR32_PIOB
+
+pioa_ptr:
+        .int AVR32_PIOA
+/*****************************************************************************/
+/* data-segment */
+/* alle dataområder som skal kunne skrives til må plasseres her */
+	
+.data
+	
+eksempelvariabel:       /* eksempel på variabel med startverdien 5 */
+        .int 5     
