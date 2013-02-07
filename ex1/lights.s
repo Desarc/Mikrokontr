@@ -18,11 +18,11 @@ SR_GM =   16  /* statusregisterflag "GM" er bit 16 */
 .globl  _start
 _start: /* programutføring vil starte her */
 
-        lddpc r0, piob_ptr      /*Laster minneadressen til pioa inn i r0*/
+        lddpc r0, piob_ptr      /*Laster minneadressen til piob inn i r0*/
         lddpc r8, setOn_ptr     /* 0xffffffff */
         
         mov r1, AVR32_PIO_PER   /* PIO enable bits */
-        st.w r0[r1], r8         /*Enable pins on PIOA by setting PER high */
+        st.w r0[r1], r8         /*Enable pins on PIOB by setting PER high */
 
         mov r1, AVR32_PIO_PUER  /* PIO pull-up enable bits */
         st.w r0[r1], r8         /* set enable */
@@ -91,9 +91,6 @@ pioc_ptr:
 piob_ptr:
         .int AVR32_PIOB
 
-pioa_ptr:
-        .int AVR32_PIOA
-
 button1_ptr:
         .int button1
 
@@ -115,8 +112,6 @@ max_ptr:
 	
 .data
 	
-eksempelvariabel:       /* eksempel på variabel med startverdien 5 */
-        .int 5
 button1 = 0x3fcfffff
 button2 = 0x7fceffff
 setOn = 0xffffffff

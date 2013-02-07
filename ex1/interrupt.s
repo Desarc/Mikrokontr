@@ -16,82 +16,96 @@ SR_GM =   16  /* statusregisterflag "GM" er bit 16 */
 .text
 	
 .globl  _start
-_start: /* programutføring vil starte her */
 
-        lddpc r0, piob_ptr      	/*Laster minneadressen til piob inn i r0*/
-        lddpc r8, setOn_ptr    		/* 0xffffffff */
+_start: /* programutføring vil starte her */
+	lddpc r0, piob_ptr      	/* PIOB address */
+	lddpc r1, pioc_ptr      	/* PIOC address */
+	lddpc r2, intc_ptr		/* INTC address */
+
+	lddpc r8, setOn_ptr    		/* 0xffffffff */
+
+	st.w r1[AVR32_PIO_PER], r8      /* enable PIOC pins */
+        st.w r1[AVR32_PIO_OER], r8      /* set PIOC to output */
+	st.w r1[AVR32_PIO_CODR], r8    	/* turn off all LEDs */
+	lddpc r12, max_ptr       	/* load max LED vector value */
+        mov r4, r12
+        lddpc r11, min_ptr      	/* load min LED vector value */
+	mov r3, 0b00100000
+	st.w r1[AVR32_PIO_SODR], r3     /* start with the leftmost LED */
         
         st.w r0[AVR32_PIO_PER], r8      /* Enable pins on PIOB by setting PER high */
-        st.w r0[AVR32_PIO_PUER], r8     /* enable PUER on PIOB */
+        st.w r0[AVR32_PIO_PUER], r8     /* enable PUER on PIOB (enable input) */
+
+
+	
         st.w r0[AVR32_PIO_IER], r8      /* enable all interrupts for PIOB */
-	mov r1, 0x3f
-        st.w r0[AVR32_PIO_IDR], r1 	/* disable buttons 3-8 */
+	mov r3,0b00111111
+	st.w r0[AVR32_PIO_IDR], r3 	/* disable buttons 3-8 */
 
-	mov r4, 0		
-	mtsr 4, r4			/* set EVBA to 0 */
+	mov r3, 0b00000000		
+	mtsr 4, r3			/* set EVBA to 0 */
 	
-	lddpc r2, intc_ptr
-	mov r4, interruptRoutine	
+	mov r3, interrupt_routine	
+	st.w r2[AVR32_INTC_IPR14], r3	/* set autovector to interrupt_routine */
 	
-	st.w r2[AVR32_INTC_IPR14], r4	/* set autovector to interruptRoutine */
-	
+        mov r10, 0
+
 	csrf SR_GM			/* turn on interrupts */
-
-	lddpc r2, pioc_ptr      	/* PIOC address */
-	st.w r2[AVR32_PIO_PER], r8      /* enable PIOC pins */
-        st.w r2[AVR32_PIO_OER], r8      /* set PIOC to output */
-        st.w r2[AVR32_PIO_CODR], r8    	/* turn off all LEDs */
-
-	lddpc r9, max_ptr       	/* load max LED vector value */
-        mov r11, r9
-        lddpc r12, min_ptr      	/* load min LED vector value */
-        st.w r2[AVR32_PIO_SODR], r9     /* start with the leftmost LED */
-	rjmp sleep
-
-interruptRoutine:
-	/*st.w --sp, r10			/* save stack */	
-		
-        lddpc r3, button1_ptr   	/* button 1 vector */
-        lddpc r7, button2_ptr   	/* button 2 vector */
+	rjmp loop
 	
-        ld.w r4, r0[AVR32_PIO_PDSR]     /* load button status */
-        cp.w r3, r4             	/* check if button 1 (left) */
+interrupt_routine:	
+	cp.w r10, 1			/* introducing an alternating state, */
+	breq skip			/* since buttons generate two interrupts */
+	mov r10, 1			/* on every push */
+	
+        lddpc r5, button1_ptr   	/* button 1 vector */
+        lddpc r6, button2_ptr   	/* button 2 vector */
+	lddpc r11, min_ptr      	/* load min LED vector value */
+	lddpc r12, max_ptr       	/* load max LED vector value */
+	
+        ld.w r7, r0[AVR32_PIO_PDSR]     /* load button status */
+        cp.w r5, r7             	/* check if button 1 (left) */
         breq left
-        cp.w r7, r4             	/* check if button 2 (right)*/
+        cp.w r6, r7             	/* check if button 2 (right)*/
         breq right
-
-left:
-        lsl r9, 1               /* shift left to enable previous LED */
-        cp.w r9, r11            /* check if out of bounds */
-        brle turnOn
-        mov r9, r12             /* max wrap around */
-        rjmp turnOn
-        
-right:
-        lsr r9, 1               /* shift right to enable next LED */
-        cp.w r9, r12            /* check if out of bounds */
-        brge turnOn
-        mov r9, r11             /* min wrap around */
-        rjmp turnOn
-turnOn:
-        st.w r2[AVR32_PIO_CODR], r8         /* set LEDs off */
-        st.w r2[AVR32_PIO_SODR], r9         /* turns on the selected LED */
-        mov r10, 0xffff
-        rjmp intr_sleep_start
-
-intr_sleep_start:		/* busy waiting to avoid bounce */
-        sub r10, 1
-        cp.w r10, 0
-        breq return
-	rjmp intr_sleep_start
-
+	rjmp return
 return:
-	ld.w r2, r0[AVR32_PIO_ISR]		/* reading ISR to enable new interrupts */
-	/*ld.w r10, sp++		/* load stack */
+	ld.w r3, r0[AVR32_PIO_ISR]		/* reading ISR to enable new interrupts */
 	rete
 
-sleep:
+skip:						/* we skip every second interrupt */
+	mov r10, 0
+	rjmp return
+left:
+        lsl r4, 1               		/* shift left to enable previous LED */
+        cp.w r4, r12            		/* check if out of bounds */
+        brle turn_on
+        mov r4, r11             		/* max wrap around */
+        rjmp turn_on
+        
+right:
+        lsr r4, 1              			/* shift right to enable next LED */
+        cp.w r4, r11           			/* check if out of bounds */
+        brge turn_on
+        mov r4, r12             		/* min wrap around */
+        rjmp turn_on
+turn_on:
+        st.w r1[AVR32_PIO_CODR], r8        	/* set LEDs off */
+        st.w r1[AVR32_PIO_SODR], r4        	/* turns on the selected LED */
+        mov r9, 0xffff
+        rjmp intr_sleep
+
+intr_sleep:					/* busy waiting for debouncing */
+        sub r9, 1
+        cp.w r9, 0
+        breq return
+	rjmp intr_sleep
+	
+loop:	
 	sleep 1
+	rjmp loop
+
+
 
 
 piob_ptr:
@@ -124,11 +138,8 @@ max_ptr:
 	
 .data
 	
-eksempelvariabel:       /* eksempel på variabel med startverdien 5 */
-        .int 5
 button1 = 0x3fcfffff
 button2 = 0x7fceffff
 setOn = 0xffffffff
-vector = 0x00fff0ff
-max = 0x00000080
-min = 0x00000001
+max = 0b10000000
+min = 0b00000001
