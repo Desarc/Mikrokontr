@@ -1,23 +1,12 @@
-/******************************************************************************
- *	
- *Interrupt routine
- *	
- *****************************************************************************/
+.include "io.s" 
 
-.include "io.s"  /* inkludere noen nyttige symboler (konstanter) */
-
-/* Eksempel på hvordan sette symboler (se også io.s) */
 SR_GM =   16  /* statusregisterflag "GM" er bit 16 */
-	
-/*****************************************************************************/
-/* text-segment */
-/* all programkoden må plasseres i dette segmentet */
 	
 .text
 	
 .globl  _start
 
-_start: /* programutføring vil starte her */
+_start:
 	lddpc r0, piob_ptr      	/* PIOB address */
 	lddpc r1, pioc_ptr      	/* PIOC address */
 	lddpc r2, intc_ptr		/* INTC address */
@@ -30,7 +19,7 @@ _start: /* programutføring vil starte her */
 	lddpc r12, max_ptr       	/* load max LED vector value */
         mov r4, r12
         lddpc r11, min_ptr      	/* load min LED vector value */
-	mov r3, 0b00100000
+	mov r3, 0b10000000
 	st.w r1[AVR32_PIO_SODR], r3     /* start with the leftmost LED */
         
         st.w r0[AVR32_PIO_PER], r8      /* Enable pins on PIOB by setting PER high */
