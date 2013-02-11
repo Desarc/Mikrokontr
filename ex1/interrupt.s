@@ -7,7 +7,7 @@ SR_GM =   16
 .text
 .globl  _start
 _start:
-	/* Set registers */
+	/* Set up registers */
 	lddpc r0, piob_ptr      	/* PIOB address */
 	lddpc r1, pioc_ptr      	/* PIOC address */
 	lddpc r2, intc_ptr		/* INTC address */
@@ -15,7 +15,7 @@ _start:
         lddpc r6, button2_ptr   	/* Button 2 vector */
 	lddpc r8, setOn_ptr		/* 0xffffffff */
 
-	/* Set LEDS */
+	/* Set up LEDS */
 	st.w r1[AVR32_PIO_PER], r8      /* Enable PIOC pins */
         st.w r1[AVR32_PIO_OER], r8      /* Set PIOC to output */
 	mov r11, 0b00000001      	/* Load min LED vector value */
@@ -23,7 +23,7 @@ _start:
 	mov r4, r12			/* Set LED status */
 	st.w r1[AVR32_PIO_SODR], r12    /* Start with the leftmost LED */
         
-	/* Set buttons */
+	/* Set up buttons */
         st.w r0[AVR32_PIO_PER], r8      /* Enable pins on PIOB by setting PER high */
         st.w r0[AVR32_PIO_PUER], r8     /* Enable PUER on PIOB (enable input) */
         st.w r0[AVR32_PIO_IER], r8      /* Enable interrupts for all buttons */
