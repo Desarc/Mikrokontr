@@ -13,11 +13,10 @@ _start:
 	/* Set LEDS */
 	st.w r1[AVR32_PIO_PER], r8      /* Enable PIOC pins */
         st.w r1[AVR32_PIO_OER], r8      /* Set PIOC to output */
-	lddpc r11, min_ptr      	/* Load min LED vector value */
-	lddpc r12, max_ptr       	/* Load max LED vector value */
+	mov r11, 0b00000001     	/* Load min LED vector value */
+	mov r12, 0b10000000        	/* Load max LED vector value */
 	mov r4, r12			/* Set LED status */
-	mov r3, 0b10000000
-	st.w r1[AVR32_PIO_SODR], r3     /* Start with the leftmost LED */
+	st.w r1[AVR32_PIO_SODR], r12     /* Start with the leftmost LED */
         
 	/* Set buttons */
         st.w r0[AVR32_PIO_PER], r8      /* Enable pins on PIOB by setting PER high */
@@ -38,7 +37,7 @@ _start:
 	rjmp loop
 	
 interrupt_routine:	
-	/* Check the state of r10 to avoid doulbe interrupts on button presses */
+	/* Check the state of r10 to avoid double interrupts on button presses */
 	cp.w r10, 1
 	breq skip
 	mov r10, 1
@@ -111,15 +110,8 @@ button2_ptr:
 setOn_ptr:
         .int setOn
 
-min_ptr:
-        .int min
-
-max_ptr:
-        .int max
-
 .data
 button1 = 0x3fcfffff
 button2 = 0x7fceffff
 setOn = 0xffffffff
-max = 0b10000000
-min = 0b00000001
+
