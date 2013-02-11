@@ -38,7 +38,7 @@ _start:
 	rjmp loop
 	
 interrupt_routine:	
-	/* Check the state of r10 to avoid doulbe interrupts on button presses */
+	/* Check the state of r10 to avoid double interrupts on button presses */
 	cp.w r10, 1
 	breq skip
 	mov r10, 1
