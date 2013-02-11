@@ -8,7 +8,7 @@ _start:
 	lddpc r0, piob_ptr      	/* PIOB address */
 	lddpc r1, pioc_ptr      	/* PIOC address */
 	lddpc r2, intc_ptr		/* INTC address */
-	lddpc r8, setOn_ptr		/* 
+	lddpc r8, setOn_ptr		/* 0xffffffff */
         lddpc r5, button1_ptr   	/* Button 1 vector */
         lddpc r6, button2_ptr   	/* Button 2 vector */
 
