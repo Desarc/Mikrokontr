@@ -8,7 +8,9 @@ _start:
 	lddpc r0, piob_ptr      	/* PIOB address */
 	lddpc r1, pioc_ptr      	/* PIOC address */
 	lddpc r2, intc_ptr		/* INTC address */
-	lddpc r8, setOn_ptr
+	lddpc r8, setOn_ptr		/* 
+        lddpc r5, button1_ptr   	/* Button 1 vector */
+        lddpc r6, button2_ptr   	/* Button 2 vector */
 
 	/* Set LEDS */
 	st.w r1[AVR32_PIO_PER], r8      /* Enable PIOC pins */
@@ -21,17 +23,15 @@ _start:
 	/* Set buttons */
         st.w r0[AVR32_PIO_PER], r8      /* Enable pins on PIOB by setting PER high */
         st.w r0[AVR32_PIO_PUER], r8     /* Enable PUER on PIOB (enable input) */
-        st.w r0[AVR32_PIO_IER], r8      /* Enable all interrupts for PIOB */
-        lddpc r5, button1_ptr   	/* Button 1 vector */
-        lddpc r6, button2_ptr   	/* Button 2 vector */
-	mov r3, 0b00111111
-	st.w r0[AVR32_PIO_IDR], r3 	/* Disable buttons 3-8 */
+        st.w r0[AVR32_PIO_IER], r8      /* Enable interrupts for all buttons */
+	mov r3, 0b00111111		/* Disable interrupt for buttons 3-8 */
+	st.w r0[AVR32_PIO_IDR], r3 	
 
 	/* Set up interrupt */
 	mov r3, 0b00000000		
 	mtsr 4, r3			/* Set EVBA to 0 */
-	mov r3, interrupt_routine	
-	st.w r2[AVR32_INTC_IPR14], r3	/* Set autovector to interrupt_routine */
+	mov r3, interrupt_routine	/* Set autovector to interrupt_routine */
+	st.w r2[AVR32_INTC_IPR14], r3	
         mov r10, 0			/* Set register to check the button state to avoid jumps */
 	csrf SR_GM			/* Turn on interrupts */
 	rjmp loop
@@ -48,7 +48,6 @@ interrupt_routine:
         breq left
         cp.w r6, r7             	/* Check if button right */
         breq right
-	rjmp return
 
 return:
 	ld.w r3, r0[AVR32_PIO_ISR]	/* Reading ISR to enable new interrupts */
