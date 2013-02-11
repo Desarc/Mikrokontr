@@ -1,3 +1,6 @@
+/*****************************************************************************************
+* TDT4258: Exercise 1 by group 9, Stian Habbestad, Øyvin Richardsen and Sandor Zeestraten
+*****************************************************************************************/
 .include "io.s" 
 SR_GM =   16  
 	
@@ -29,35 +32,33 @@ _start:
 
 	/* Set up interrupt */
 	mov r3, 0b00000000		
-	mtsr 4, r3			/* Set EVBA to 0 */
+	mtsr 4, r3			/* Set EVBA offset to 0 */
 	mov r3, interrupt_routine	/* Set autovector to interrupt_routine */
 	st.w r2[AVR32_INTC_IPR14], r3	
-        mov r10, 0			/* Set register to check the button state to avoid jumps */
 	csrf SR_GM			/* Turn on interrupts */
 	rjmp loop
 	
 interrupt_routine:	
-	/* Check the state of r10 to avoid double interrupts on button presses */
-	cp.w r10, 1
-	breq skip
-	mov r10, 1
-	
-	/* Check button status */
-        ld.w r7, r0[AVR32_PIO_PDSR]     
+	/* Load which button was pressed */ 
+        ld.w r7, r0[AVR32_PIO_PDSR]  	/* Read Pin Data Status Register */   
+
+	/* Avoid double interrups on single button press */
+	cp.w r10, r7 			/* Check if button was pressed on last interrupt */
+	breq return			/* Skip to avoid double interrupt */
+	mov r10, r7 			/* Note which button was pressed for next time */			
+	/* Check which button was pressed */
         cp.w r5, r7             	/* Check if button left */
         breq left
         cp.w r6, r7             	/* Check if button right */
         breq right
 
 return:
-	ld.w r3, r0[AVR32_PIO_ISR]	/* Reading ISR to enable new interrupts */
+	/* Read ISR and return to normal state after interrupt */
+	ld.w r3, r0[AVR32_PIO_ISR]	/* Read Interrupt Status Register to allow new interrupts */
 	rete
 
-skip:					/* We skip every second interrupt */
-	mov r10, 0
-	rjmp return
-
 left:
+	/* Move LED to the left */
         lsl r4, 1               	/* Shift left to enable previous LED */
         cp.w r4, r12           		/* Check if out of bounds */
         brle turn_on
@@ -65,6 +66,7 @@ left:
         rjmp turn_on
         
 right:
+	/* Move LED to the right */
         lsr r4, 1       		/* Shift right to enable next LED */
         cp.w r4, r11   			/* Check if out of bounds */
         brge turn_on
@@ -72,18 +74,21 @@ right:
         rjmp turn_on
 
 turn_on:
-        st.w r1[AVR32_PIO_CODR], r8    	/* Set LEDs off */
-        st.w r1[AVR32_PIO_SODR], r4    	/* Turns on the selected LED */
-        mov r9, 0xffff
+	/* Turn on the selected LED */
+        st.w r1[AVR32_PIO_CODR], r8    	/* Turn off all LED's */
+        st.w r1[AVR32_PIO_SODR], r4    	/* Turn on the LED specified in r4 */
+        mov r9, 0xffff			/* Countdown value used for debouncing */
         rjmp intr_sleep
 
-intr_sleep:				/* Busy waiting for debouncing */
+intr_sleep:				
+	/* Debouncing by counting down from 0xffff to 0 */
         sub r9, 1
         cp.w r9, 0
         breq return
 	rjmp intr_sleep
 	
 loop:	
+	/* Sleep loop */
 	sleep 1
 	rjmp loop
 
@@ -104,7 +109,6 @@ button2_ptr:
 
 setOn_ptr:
         .int setOn
-
 
 .data
 button1 = 0x3fcfffff
