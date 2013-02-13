@@ -4,6 +4,7 @@
 \usepackage[plain]{fullpage}
 \usepackage{graphicx}  %This enables the inclusion of pdf graphic files in figures
 \usepackage{wrapfig}
+\usepackage{array}
 
 \title{Lab exercise 1}
 \author{\O yvin Richardsen, Sandor Zeestraten, Stian Habbestad}
@@ -18,37 +19,63 @@ TTM4258 Energy Efficient Computer Design \\
 \begin{abstract}
 
 \end{abstract}
+\newpage
 
 \tableofcontents
+\newpage
 
 
 
 \section{Introduction}
-
+The objective of this exercise was to become familiar with GNU development tools, AVR32 assembly code programming and it’s architecture, the use of interrupts and general I/O programming. The task was to create a simple program in assembly code that enables the manipulation of LED’s with a pair of switches using interrupt based code. As the goal of this course is energy efficient computer design, the main focus is on creating interrupt-based systems. 
 
 \section{Description and methodology}
 \paragraph{LEDs}
 \addcontentsline{toc}{subsection}{LEDs}
+First off we start with trying to turn on all the LED’s. Thereafter we try to turn LED’s on and off, for example by only leaving one LED on. 
 
 \paragraph{Switches}
 \addcontentsline{toc}{subsection}{Switches}
+We activate the switches as inputs and we also enable the pull-up resistors to make the input signals from the switches logically “high”. 
+Now we assign two of the switches for left and right movement of the LED’s. If the LED is pushed off the edge, it returns on the other side due to some code we have implemented.
+The switches actually sends two signals for each complete press, one on pressed and one on released. We fixed this problem with an alternating state so that it only takes in one press. 
 
 \paragraph{Interrupts}
 \addcontentsline{toc}{subsection}{Interrupts}
+Now that we had a working program we saved this as a “lights.s” file. The next step is to implement interrupt, specifically for reading the switch status. Otherwise we want the program to go into a sleep mode to save energy. 
 
 \section{Results}
+During this exercise we have become acquainted with assembly coding and how to use interrupts. We have also learned about the AVR32 architecture and used the GNU debugger tools extensively. 
+
+We have managed to program the development board to satisfy exercise 1. The LED's are easily moved with the switches.
 
 \section{Tests}
-\begin{tabular}[pos]{l | c | r}
+\renewcommand{\arraystretch}{1.5} %vertical cell padding
+\begin{tabular}[pos]{|m{70pt}|m{90pt}|m{90pt}|m{100pt}|m{60pt}|}
 \hline
-tekst & tekst & tekst \\ \hline
-tekst & tekst & tekst \\ \hline
+\textbf{Name} 				& \textbf{Preconditions}				& \textbf{Description} 					& \textbf{Expected result} 													& \textbf{Test result} 		\\ \hline
+
+Steady-state test			& Power is on, and the board is connected & Upload program to card, push reset switch 	& The board is powered and LED 7 should be on 									& Passed 				\\ \hline
+
+Move LED right test			& Program is active, only LED 7 is on 		& Push switch 6						 	& LED 7 should be turned off and LED 6 should be turned on 							& Passed 				\\ \hline
+
+Move LED left test			& Program is active, only LED 6 is on 		& Push switch 7						 	& LED 6 should be turned off and LED 7 should be turned on 							& Passed 				\\ \hline
+
+Left LED wrap-around test		& Program is active, only LED 7 is on 		& Push switch 67					 	& LED 7 should be turned off and LED 0 should be turned on 							& Passed 				\\ \hline
+
+Right LED wrap-around test	& Program is active, only LED 0 is on 		& Push switch 6						 	& LED 0 should be turned off and LED 7 should be turned on 							& Passed 				\\ \hline
+
+Long push test				& Program is active, only LED 7 is on 		& Push and hold switch 6 for a few seconds 	& LED 7 should be turned off and LED 6 should be turned on as soon as the switch is pushed 	& Passed 				\\ \hline
 \end{tabular}
 
 
 \section{Evaluation of assignment}
+The assignment gives valuable insight to how..
+Sometimes the debugger gave different results than a test run, which we found rather confusing. 
 
 \section{Conclusion}
+
+\section{Acknowledgements}
 
 \section{Appendix}
 

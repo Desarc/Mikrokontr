@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.10.9)  13 FEB 2013 14:04
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.10.9)  13 FEB 2013 16:39
 entering extended mode
  %&-line parsing enabled.
 **ex1-report.tex
@@ -59,60 +59,175 @@ File: pdftex.def 2010/03/12 v0.04p Graphics/color for pdfTeX
 \WF@box=\box26
 \WF@everypar=\toks15
 Package: wrapfig 2003/01/31  v 3.6
+)
+(/usr/share/texmf-texlive/tex/latex/tools/array.sty
+Package: array 2008/09/09 v2.4c Tabular extension package (FMi)
+\col@sep=\dimen107
+\extrarowheight=\dimen108
+\NC@list=\toks16
+\extratabsurround=\skip44
+\backup@length=\skip45
 ) (./ex1-report.aux)
 \openout1 = `ex1-report.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 14.
-LaTeX Font Info:    ... okay on input line 14.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 14.
-LaTeX Font Info:    ... okay on input line 14.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 14.
-LaTeX Font Info:    ... okay on input line 14.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 14.
-LaTeX Font Info:    ... okay on input line 14.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 14.
-LaTeX Font Info:    ... okay on input line 14.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 14.
-LaTeX Font Info:    ... okay on input line 14.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 15.
+LaTeX Font Info:    ... okay on input line 15.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 15.
+LaTeX Font Info:    ... okay on input line 15.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 15.
+LaTeX Font Info:    ... okay on input line 15.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 15.
+LaTeX Font Info:    ... okay on input line 15.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 15.
+LaTeX Font Info:    ... okay on input line 15.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 15.
+LaTeX Font Info:    ... okay on input line 15.
 
 (/usr/share/texmf-texlive/tex/context/base/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count89
-\scratchdimen=\dimen107
+\scratchdimen=\dimen109
 \scratchbox=\box27
 \nofMPsegments=\count90
 \nofMParguments=\count91
-\everyMPshowfont=\toks16
+\everyMPshowfont=\toks17
 \MPscratchCnt=\count92
-\MPscratchDim=\dimen108
+\MPscratchDim=\dimen110
 \MPnumerator=\count93
-\everyMPtoPDFconversion=\toks17
+\everyMPtoPDFconversion=\toks18
 )
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <12> on input line 15.
+(Font)              <12> on input line 16.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 15.
+(Font)              <8> on input line 16.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 15.
+(Font)              <6> on input line 16.
  [1
 
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] (./ex1-report.toc
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2] (./ex1-report.toc
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <10.95> on input line 3.
 )
 \tf@toc=\write3
 \openout3 = `ex1-report.toc'.
 
+[3]
+Missing character: There is no ‚ in font cmr10!
+Missing character: There is no Ä in font cmr10!
+Missing character: There is no ô in font cmr10!
+Missing character: There is no ‚ in font cmr10!
+Missing character: There is no Ä in font cmr10!
+Missing character: There is no ô in font cmr10!
+Missing character: There is no ‚ in font cmr10!
+Missing character: There is no Ä in font cmr10!
+Missing character: There is no ô in font cmr10!
+Missing character: There is no ‚ in font cmr10!
+Missing character: There is no Ä in font cmr10!
+Missing character: There is no ô in font cmr10!
+Missing character: There is no ‚ in font cmr10!
+Missing character: There is no Ä in font cmr10!
+Missing character: There is no ú in font cmr10!
+Missing character: There is no ‚ in font cmr10!
+Missing character: There is no Ä in font cmr10!
+Missing character: There is no ù in font cmr10!
+Missing character: There is no ‚ in font cmr10!
+Missing character: There is no Ä in font cmr10!
+Missing character: There is no ô in font cmr10!
+Missing character: There is no ‚ in font cmr10!
+Missing character: There is no Ä in font cmr10!
+Missing character: There is no ú in font cmr10!
+Missing character: There is no ‚ in font cmr10!
+Missing character: There is no Ä in font cmr10!
+Missing character: There is no ù in font cmr10!
 
-[2] [3] (./ex1-report.aux) ) 
+Underfull \hbox (badness 10000) in paragraph at lines 58--58
+[]|\OT1/cmr/m/n/10.95 Steady-state
+ []
+
+
+Underfull \hbox (badness 3769) in paragraph at lines 58--58
+\OT1/cmr/m/n/10.95 card, push re-set
+ []
+
+
+Underfull \hbox (badness 1052) in paragraph at lines 58--58
+[]|\OT1/cmr/m/n/10.95 The board is pow-
+ []
+
+
+Underfull \hbox (badness 7576) in paragraph at lines 58--58
+\OT1/cmr/m/n/10.95 ered and LED 7
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 60--60
+[]|\OT1/cmr/m/n/10.95 Move LED
+ []
+
+
+Underfull \hbox (badness 3895) in paragraph at lines 60--60
+[]|\OT1/cmr/m/n/10.95 LED 7 should be
+ []
+
+
+Underfull \hbox (badness 3895) in paragraph at lines 62--62
+[]|\OT1/cmr/m/n/10.95 LED 6 should be
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 64--64
+[]|\OT1/cmr/m/n/10.95 Left LED
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 64--64
+\OT1/cmr/m/n/10.95 wrap-around
+ []
+
+
+Underfull \hbox (badness 3895) in paragraph at lines 64--64
+[]|\OT1/cmr/m/n/10.95 LED 7 should be
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 66--66
+[]|\OT1/cmr/m/n/10.95 Right LED
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 66--66
+\OT1/cmr/m/n/10.95 wrap-around
+ []
+
+
+Underfull \hbox (badness 3895) in paragraph at lines 66--66
+[]|\OT1/cmr/m/n/10.95 LED 0 should be
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 68--68
+[]|\OT1/cmr/m/n/10.95 Push and hold
+ []
+
+
+Underfull \hbox (badness 3895) in paragraph at lines 68--68
+[]|\OT1/cmr/m/n/10.95 LED 7 should be
+ []
+
+
+Overfull \hbox (19.43207pt too wide) in paragraph at lines 54--70
+[] 
+ []
+
+[4] [5] (./ex1-report.aux) ) 
 Here is how much of TeX's memory you used:
- 1008 strings out of 495061
- 12614 string characters out of 1182621
- 63751 words of memory out of 3000000
- 4220 multiletter control sequences out of 15000+50000
+ 1052 strings out of 495061
+ 13147 string characters out of 1182621
+ 68434 words of memory out of 3000000
+ 4261 multiletter control sequences out of 15000+50000
  9625 words of font info for 34 fonts, out of 3000000 for 9000
  28 hyphenation exceptions out of 8191
- 25i,6n,19p,207b,187s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 25i,9n,19p,476b,182s stack positions out of 5000i,500n,10000p,200000b,50000s
 </usr/share/texmf-texlive/fonts/type1/public/amsfon
 ts/cm/cmbx10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmbx1
 2.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/
@@ -121,9 +236,9 @@ texlive/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texmf-texlive/font
 s/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texmf-texlive/fonts/type1/publi
 c/amsfonts/cm/cmti9.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/c
 m/cmtt12.pfb>
-Output written on ex1-report.pdf (3 pages, 106882 bytes).
+Output written on ex1-report.pdf (5 pages, 120370 bytes).
 PDF statistics:
- 44 PDF objects out of 1000 (max. 8388607)
+ 50 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
