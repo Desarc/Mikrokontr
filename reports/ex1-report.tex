@@ -4,6 +4,7 @@
 \usepackage{graphicx}  %This enables the inclusion of pdf graphic files in figures
 \usepackage{wrapfig}
 \usepackage{array}
+\usepackage[hidelinks]{hyperref}
 \usepackage{color}
 \definecolor{light-gray}{gray}{0.95}
 \usepackage{listings}
@@ -15,20 +16,20 @@ xleftmargin=.10in,
 xrightmargin=.10in,
 }
 
-\title{Lab exercise 1}
-\author{\O yvin Richardsen, Sandor Zeestraten, Stian Habbestad}
-\date{{Group 9}\\
-TDT4258 Energy Efficient Computer Design \\
+\title{\textbf{Report: Exercise 1}}
+\author{Group 9: \O yvin Richardsen, Sandor Zeestraten, Stian Habbestad}
+\date{{Norwegian University of Science and Technology \\
+TDT4258 Energy Efficient Computer Design \\}
 \today}
+ 
+ 
  
 \begin{document}
 \maketitle
-\newpage
 
 \begin{abstract}
 In this exercise in we write assembly code for a AVR microcontroller on a development board. The goal is to be able to move an active LED left and right, on the 8 LED's available. Through this exercise we aim to become more familiar with AVR, assembly and energy efficiency related to the interrupt-based system. We build up our code step by step from simple LED activation, to moving it, and then introducing the interrupt design of the code. During the programming we also got well acquainted with GNU tools and the AVR toolchain for compiling and debugging.
 \end{abstract}
-\newpage
 
 \tableofcontents
 \newpage
@@ -40,7 +41,6 @@ The objective of this exercise was to become familiar with GNU development tools
 \paragraph{LEDs}
 \addcontentsline{toc}{subsection}{LEDs}
 As advised in the compendium, we started by becoming familiar with the operation of the LED's. First off we started with trying to turn on all the LED’s. Thereafter we try to turn LED’s on and off, for example by only leaving one LED on. After a while we became comfortable manipulating the LED's and created a method for making the LED's either go left or right with the possibility of wrapping around, i.e. jumping from the far right to the far left and vice versa.
-
 
 \begin{lstlisting}
 left:
@@ -65,7 +65,7 @@ rjmp intr_sleep
 
 \paragraph{Switches}
 \addcontentsline{toc}{subsection}{Switches}
-After the LED's we looked at how to use the switches. We activate the switches as inputs and we also enable the pull-up resistors to make the input signals from the switches logically “high”. Now we assign two of the switches, \emph{SW7} and \emph{SW5}, for left and right movement respectively of the LED’s. If the LED was at the far left or far right, it wraps around as described in the previous section. The switches actually sends two signals for each complete press, one when pressed down and one when released.
+After the LED's we looked at how to use the switches. We activate the switches as inputs and we also enable the pull-up resistors to make the input signals from the switches logically “high”. Now we assign two of the switches, \emph{SW7} and \emph{SW5}, for left and right movement respectively of the LED’s. If the LED was at the far left or far right, it wraps around as described in the previous section. The switches actually sends two signals for each complete press, one when pressed down and one when released. Below is the \emph{interrupt routine} that reads the switch status, makes sure to avoid the double signals from a single press and calls the correct method for which button was pressed.
 
 \begin{lstlisting}
 interrupt_routine:	
@@ -81,12 +81,22 @@ cp.w r5, r7             /* Check if left button was pressed */
 breq left
 cp.w r6, r7             /* Check if right button was pressed */
 breq right
+\end{lstlisting}
 
+Bouncing is an issue with switches where there may be many registered contacts during a press which is often an unwanted feature. Below is the \emph{intr sleep} method that gets called after a new LED is turned on to avoid the bouncing effect by waiting for a short duration.
+
+\begin{lstlisting}
+intr_sleep:				
+/* Debouncing by counting down from 0xffff to 0 */
+sub r9, 1
+cp.w r9, 0
+breq return
+rjmp intr_sleep
 \end{lstlisting}
 
 \paragraph{Interrupts}
 \addcontentsline{toc}{subsection}{Interrupts}
-Now that we had a working program we saved this as a “lights.s” file. The next step is to implement interrupt, specifically for reading the switch status. Otherwise we want the program to go into a sleep mode to save energy. 
+Now that we had a working program using a simple loop that checked for changes of the switch statuses, we saved this as a seperate file called \emph{lights.s}. The next step is to implement interrupt, specifically for reading the switch status. Otherwise we want the program to go into a sleep mode to save energy. In the start of the program we set the \emph{EVBA} offset to 0 as advised in the compendium so we could directly point to the part of the program we wanted to jump to in case of an interrupt.
 
 \begin{lstlisting}
 _start:
@@ -100,14 +110,27 @@ csrf SR_GM  		   /* Turn on interrupts */
 rjmp loop
 \end{lstlisting}
 
+At the end of the whole process of waking up to an interrupt, detecting which switch was pressed, turning on the desired LED, we need to read the \emph{Interrupt Status Register} to clear it so it can receive new interrupts. It then jumps back from the interrupt routine and to the original state before the interrupt as seen below.
+
+\begin{lstlisting}
+return:
+/* Read ISR and return to normal state after interrupt */
+ld.w r3, r0[AVR32_PIO_ISR]	/* Read ISR to allow new interrupts */
+rete
+\end{lstlisting}
+
 \section{Results}
-During this exercise we have become acquainted with assembly coding and how to use interrupts. We have also learned about the AVR32 architecture and used the GNU debugger tools extensively. We have managed to program the development board to satisfy exercise 1. The LED's are easily moved with the switches.
+The result of the exercise is that we have coded a simple program with assembly coding. It uses interrupt-based code where the microcontroller sleeps while waiting for input via I/O. In our case it checks for activity on the switches \emph{SW7} and \emph{SW5}. If they are pressed, they send an interrupt signal which wakes up the microcontroller and jumps to an interrupt routine that figures out if the left or right switch was pressed. It then moves a single active LED left or right depending on which switch was pressed. At the end it goes back to sleep waiting for further interrupts.
+
+\newpage
 
 \section{Tests}
 \paragraph{Description}
+\addcontentsline{toc}{subsection}{Description}
 We've created a few test scenarios in order to test different aspects and corner cases of our code. The main prerequisite was that the STK1000 development board was setup with given jumper settings given in the compendium and the parallel I/O port B connected to the switches and port C to the LED’s. Both the STK1000 and JTAGICE MKII debugger were connected and powered on. The tests were conducted by a person interacting with the switches and another person logging the results.
 
 \paragraph{Results}
+\addcontentsline{toc}{subsection}{Results}
 Below is a table of the different tests we ran, the preconditions and the results.
 \linebreak
 
@@ -130,22 +153,24 @@ Long push test				& Program is active, only LED 7 is on 		& Push and hold switch
 \end{tabular}
 
 \section{Evaluation of assignment}
-The assignment gives valuable insight to how..
-Sometimes the debugger gave different results than a test run, which we found rather confusing. 
+The compendium was of great help. Sometimes running in debug mode gave different results than a test run, which we found rather confusing. Overall the difficulty was just right although it was sometimes difficult to find the needed documentation. 
 
 \section{Conclusion}
-After having completed this exercise we now possess a deeper understanding of how a micro processor works on a low level by coding in assembly. This will be beneficiary when we are to move up a level and are to code in C. 
+After having completed this exercise we now have a better understanding of how a to program a microcontroller on a low level by coding in assembly. This will be helpful when we will start coding in C in the next exercises. 
 
 \section{Appendix}
-
 
 \footnotesize{  % This makes the Reference items print in footnotesize fonts
 \begin{thebibliography}{N}
 
-\bibitem[1]{secure} A. Patwardhan, J. Parker, A. Joshi, M. Iorga, T. Karygiannis.
-\textit{Secure Routing and Intrusion Detection in Ad Hoc Networks.}
-Third IEEE International Conference on Pervasive Computing and Communications (PerCom 2005), pp. 191-199. IEEE, 2005 .
+\bibitem[1]{secure} AVR32 Architecture Document
+\url{http://www.atmel.com/images/doc32000.pdf}
 
+\bibitem[2]{secure} AT32AP7000 Datasheet
+\url{http://www.atmel.com/Images/doc32003.pdf}
+
+\bibitem[3]{secure} TDT4258 Compendium
+\url{http://www.idi.ntnu.no/emner/tdt4258/_media/kompendium.pdf}
 
 \end{thebibliography}.  
 }

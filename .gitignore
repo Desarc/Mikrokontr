@@ -1,5 +1,6 @@
 # Object files
 *.o
+*.elf
 
 # Libraries
 *.lib
@@ -15,3 +16,13 @@
 *.exe
 *.out
 *.app
+
+# LaTeX stuff
+*.aux
+*.bbl
+*.blg
+*.idx
+*.log
+*.out
+*.synctex.gz
+*.toc
