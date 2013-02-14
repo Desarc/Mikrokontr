@@ -4,7 +4,16 @@
 \usepackage{graphicx}  %This enables the inclusion of pdf graphic files in figures
 \usepackage{wrapfig}
 \usepackage{array}
+\usepackage{color}
+\definecolor{light-gray}{gray}{0.95}
 \usepackage{listings}
+\lstset{
+basicstyle=\footnotesize, 
+morecomment=[l]{/*},
+backgroundcolor=\color{light-gray}, 
+xleftmargin=.10in,
+xrightmargin=.10in,
+}
 
 \title{Lab exercise 1}
 \author{\O yvin Richardsen, Sandor Zeestraten, Stian Habbestad}
@@ -17,34 +26,71 @@ TDT4258 Energy Efficient Computer Design \\
 \newpage
 
 \begin{abstract}
+<<<<<<< HEAD
 In this exercise in we write assembly code on a development board. The goal is to be able to move an active LED left and right, on the 8 LED's available. Through this exercise we aim to become more familiar with AVR, assembly and energy efficiency related to the interrupt-based system. We build up our code step by step from simple LED activation, to moving it, and then introducing the interrupt design of the code. During the programming we also got well acquainted with debugging when we met problems.
+=======
+In this exercise in we write assembly code for a AVR microcontroller on a development board. The goal is to be able to move an active LED left and right, on the 8 LED's available. Through this exercise we aim to become more familiar with AVR, assembly and energy efficiency related to the interrupt-based system. We build up our code step by step from simple LED activation, to moving it, and then introducing the interrupt design of the code. During the programming we also got well acquainted with GNU tools and the AVR toolchain for compiling and debugging.
+>>>>>>> Sandors fix
 \end{abstract}
 \newpage
 
 \tableofcontents
 \newpage
 
-
-
 \section{Introduction}
-The objective of this exercise was to become familiar with GNU development tools, AVR32 assembly code programming and it’s architecture, the use of interrupts and general I/O programming. The task was to create a simple program in assembly code that enables the manipulation of LED’s with a pair of switches using interrupt based code. As the goal of this course is energy efficient computer design, the main focus is on creating interrupt-based systems. 
+The objective of this exercise was to become familiar with GNU development tools, AVR32 assembly code programming and it’s architecture, AVR toolchain, the use of interrupts and general I/O programming. The task was to create a simple program in assembly code that enables the manipulation of LED’s with a pair of switches using interrupt based code. As the goal of this course is energy efficient computer design, the main focus is on creating interrupt-based systems. 
 
 \section{Description and methodology}
 \paragraph{LEDs}
 \addcontentsline{toc}{subsection}{LEDs}
 As advised in the compendium, we started by becoming familiar with the operation of the LED's. First off we started with trying to turn on all the LED’s. Thereafter we try to turn LED’s on and off, for example by only leaving one LED on. After a while we became comfortable manipulating the LED's and created a method for making the LED's either go left or right with the possibility of wrapping around, i.e. jumping from the far right to the far left and vice versa.
 
+
+\begin{lstlisting}
+left:
+/* Move LED to the left */
+lsl r4, 1		/* Shift left to enable previous LED */
+cp.w r4, r12        	/* Check if out of bounds */
+brle turn_on
+mov r4, r11		/* Max wraparound */
+rjmp turn_on
+\end{lstlisting}
+
+Above is an excerpt of the code that moves the LED and takes in account for the wrap around by checking if it is going out of bounds. Both the \emph{left} and \emph{right} methods jump to the \emph{turnon} method in order to turn on the selected LED as seen below.
+
+\begin{lstlisting}
+turn_on:
+/* Turn on the selected LED */
+st.w r1[AVR32_PIO_CODR], r8    	/* Turn off all LED's */
+st.w r1[AVR32_PIO_SODR], r4    	/* Turn on the LED specified in r4 */
+mov r9, 0xffff			/* Countdown value used for debouncing */
+rjmp intr_sleep
+\end{lstlisting}
+
 \paragraph{Switches}
 \addcontentsline{toc}{subsection}{Switches}
-After the LED's we looked at how to use the switches. We activate the switches as inputs and we also enable the pull-up resistors to make the input signals from the switches logically “high”. Now we assign two of the switches, \emph{SW7} and \emph{SW5}, for left and right movement respectively of the LED’s. If the LED was at the far left or far right, it wraps around as described in the previous section. The switches actually sends two signals for each complete press, one when pressed down and one when released.  
+After the LED's we looked at how to use the switches. We activate the switches as inputs and we also enable the pull-up resistors to make the input signals from the switches logically “high”. Now we assign two of the switches, \emph{SW7} and \emph{SW5}, for left and right movement respectively of the LED’s. If the LED was at the far left or far right, it wraps around as described in the previous section. The switches actually sends two signals for each complete press, one when pressed down and one when released.
+
+\begin{lstlisting}
+interrupt_routine:	
+/* Load which button was pressed */ 
+ld.w r7, r0[AVR32_PIO_PDSR]  	/* Read Pin Data Status Register */   
+
+/* Avoid double interrups on single button press */
+cp.w r10, r7 		/* Check if button was pressed on last interrupt */
+breq return		/* Skip to avoid double interrupt */
+mov r10, r7 		/* Note which button was pressed for next time */			
+/* Check which button was pressed */
+cp.w r5, r7             /* Check if left button was pressed */
+breq left
+cp.w r6, r7             /* Check if right button was pressed */
+breq right
+
+\end{lstlisting}
 
 \paragraph{Interrupts}
 \addcontentsline{toc}{subsection}{Interrupts}
 Now that we had a working program we saved this as a “lights.s” file. The next step is to implement interrupt, specifically for reading the switch status. Otherwise we want the program to go into a sleep mode to save energy. 
-
-\paragraph{Source code}
-\addcontentsline{toc}{subsection}{Source code}
-Hello
 
 \begin{lstlisting}
 _start:
