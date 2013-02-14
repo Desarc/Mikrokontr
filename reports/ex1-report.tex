@@ -1,15 +1,15 @@
-
 \documentclass[a4paper,11pt]{article}
 
 \usepackage[plain]{fullpage}
 \usepackage{graphicx}  %This enables the inclusion of pdf graphic files in figures
 \usepackage{wrapfig}
 \usepackage{array}
+\usepackage{listings}
 
 \title{Lab exercise 1}
 \author{\O yvin Richardsen, Sandor Zeestraten, Stian Habbestad}
-\date{ {\tt oyvinric@stud.ntnu.no }\\
-TTM4258 Energy Efficient Computer Design \\
+\date{{Group 9}\\
+TDT4258 Energy Efficient Computer Design \\
 \today}
  
 \begin{document}
@@ -32,25 +32,44 @@ The objective of this exercise was to become familiar with GNU development tools
 \section{Description and methodology}
 \paragraph{LEDs}
 \addcontentsline{toc}{subsection}{LEDs}
-First off we start with trying to turn on all the LED’s. Thereafter we try to turn LED’s on and off, for example by only leaving one LED on. 
+As advised in the compendium, we started by becoming familiar with the operation of the LED's. First off we started with trying to turn on all the LED’s. Thereafter we try to turn LED’s on and off, for example by only leaving one LED on. After a while we became comfortable manipulating the LED's and created a method for making the LED's either go left or right with the possibility of wrapping around, i.e. jumping from the far right to the far left and vice versa.
 
 \paragraph{Switches}
 \addcontentsline{toc}{subsection}{Switches}
-We activate the switches as inputs and we also enable the pull-up resistors to make the input signals from the switches logically “high”. 
-Now we assign two of the switches for left and right movement of the LED’s. If the LED is pushed off the edge, it returns on the other side due to some code we have implemented.
-The switches actually sends two signals for each complete press, one on pressed and one on released. We fixed this problem with an alternating state so that it only takes in one press. 
+After the LED's we looked at how to use the switches. We activate the switches as inputs and we also enable the pull-up resistors to make the input signals from the switches logically “high”. Now we assign two of the switches, \emph{SW7} and \emph{SW5}, for left and right movement respectively of the LED’s. If the LED was at the far left or far right, it wraps around as described in the previous section. The switches actually sends two signals for each complete press, one when pressed down and one when released.  
 
 \paragraph{Interrupts}
 \addcontentsline{toc}{subsection}{Interrupts}
 Now that we had a working program we saved this as a “lights.s” file. The next step is to implement interrupt, specifically for reading the switch status. Otherwise we want the program to go into a sleep mode to save energy. 
 
-\section{Results}
-During this exercise we have become acquainted with assembly coding and how to use interrupts. We have also learned about the AVR32 architecture and used the GNU debugger tools extensively. 
+\paragraph{Source code}
+\addcontentsline{toc}{subsection}{Source code}
+Hello
 
-We have managed to program the development board to satisfy exercise 1. The LED's are easily moved with the switches.
+\begin{lstlisting}
+_start:
+...
+/* Set up interrupt */
+mov r3, 0b00000000  	   /* Set EVBA offset to 0 */
+mtsr 4, r3			
+mov r3, interrupt_routine  /* Set autovector to interrupt_routine */
+st.w r2[AVR32_INTC_IPR14], r3	
+csrf SR_GM  		   /* Turn on interrupts */
+rjmp loop
+\end{lstlisting}
+
+\section{Results}
+During this exercise we have become acquainted with assembly coding and how to use interrupts. We have also learned about the AVR32 architecture and used the GNU debugger tools extensively. We have managed to program the development board to satisfy exercise 1. The LED's are easily moved with the switches.
 
 \section{Tests}
-\renewcommand{\arraystretch}{1.5} %vertical cell padding
+\paragraph{Description}
+We've created a few test scenarios in order to test different aspects and corner cases of our code. The main prerequisite was that the STK1000 development board was setup with given jumper settings given in the compendium and the parallel I/O port B connected to the switches and port C to the LED’s. Both the STK1000 and JTAGICE MKII debugger were connected and powered on. The tests were conducted by a person interacting with the switches and another person logging the results.
+
+\paragraph{Results}
+Below is a table of the different tests we ran, the preconditions and the results.
+\linebreak
+
+\renewcommand{\arraystretch}{1.25} %vertical cell padding
 \begin{tabular}[pos]{|m{70pt}|m{90pt}|m{90pt}|m{100pt}|m{60pt}|}
 \hline
 \textbf{Name} 				& \textbf{Preconditions}				& \textbf{Description} 					& \textbf{Expected result} 													& \textbf{Test result} 		\\ \hline
@@ -68,15 +87,12 @@ Right LED wrap-around test	& Program is active, only LED 0 is on 		& Push switch
 Long push test				& Program is active, only LED 7 is on 		& Push and hold switch 6 for a few seconds 	& LED 7 should be turned off and LED 6 should be turned on as soon as the switch is pushed 	& Passed 				\\ \hline
 \end{tabular}
 
-
 \section{Evaluation of assignment}
 The assignment gives valuable insight to how..
 Sometimes the debugger gave different results than a test run, which we found rather confusing. 
 
 \section{Conclusion}
 After having completed this exercise we now possess a deeper understanding of how a micro processor works on a low level by coding in assembly. This will be beneficiary when we are to move up a level and are to code in C. 
-
-\section{Acknowledgements}
 
 \section{Appendix}
 

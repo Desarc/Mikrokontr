@@ -6,9 +6,12 @@
 \contentsline {paragraph}{Switches}{4}
 \contentsline {subsection}{Interrupts}{4}
 \contentsline {paragraph}{Interrupts}{4}
+\contentsline {subsection}{Source code}{4}
+\contentsline {paragraph}{Source code}{4}
 \contentsline {section}{\numberline {3}Results}{4}
 \contentsline {section}{\numberline {4}Tests}{5}
+\contentsline {paragraph}{Description}{5}
+\contentsline {paragraph}{Results}{5}
 \contentsline {section}{\numberline {5}Evaluation of assignment}{5}
 \contentsline {section}{\numberline {6}Conclusion}{5}
-\contentsline {section}{\numberline {7}Acknowledgements}{5}
-\contentsline {section}{\numberline {8}Appendix}{5}
+\contentsline {section}{\numberline {7}Appendix}{5}
