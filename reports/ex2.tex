@@ -1,0 +1,85 @@
+\documentclass[a4paper,11pt]{article}
+
+\usepackage[plain]{fullpage}
+\usepackage{graphicx}  %This enables the inclusion of pdf graphic files in figures
+\usepackage{wrapfig}
+\usepackage{array}
+\usepackage[hidelinks]{hyperref}
+\usepackage{color}
+\definecolor{light-gray}{gray}{0.95}
+\usepackage{listings}
+\lstset{
+basicstyle=\footnotesize, 
+morecomment=[l]{/*},
+backgroundcolor=\color{light-gray}, 
+xleftmargin=.10in,
+xrightmargin=.10in,
+}
+
+\title{\textbf{Report: Exercise 2}}
+\author{Group 9: \O yvin Richardsen, Sandor Zeestraten, Stian Habbestad}
+\date{{Norwegian University of Science and Technology \\
+TDT4258 Energy Efficient Computer Design \\}
+\today}
+ 
+ 
+ 
+\begin{document}
+\maketitle
+
+\begin{abstract}
+
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section{Introduction} 
+
+\section{Description and methodology}
+
+\section{Results}
+
+\section{Tests}
+\paragraph{Description}
+
+
+\paragraph{Results}
+\addcontentsline{toc}{subsection}{Results}
+Below is a table of the different tests we ran, the preconditions and the results.
+\linebreak
+
+\renewcommand{\arraystretch}{1.25} %vertical cell padding
+\begin{tabular}[pos]{|m{70pt}|m{90pt}|m{90pt}|m{100pt}|m{60pt}|}
+\hline
+\textbf{Name} 				& \textbf{Preconditions}				& \textbf{Description} 					& \textbf{Expected result} 													& \textbf{Test result} 		\\ \hline
+
+Steady-state test			& Power is on, and the board is connected & Upload program to card, push reset switch 	& The board is powered and LED 7 should be on 									& Passed 				\\ \hline
+
+Move LED right test			& Program is active, only LED 7 is on 		& Push switch 6						 	& LED 7 should be turned off and LED 6 should be turned on 							& Passed 				\\ \hline
+
+Move LED left test			& Program is active, only LED 6 is on 		& Push switch 7						 	& LED 6 should be turned off and LED 7 should be turned on 							& Passed 				\\ \hline
+
+Left LED wrap-around test		& Program is active, only LED 7 is on 		& Push switch 67					 	& LED 7 should be turned off and LED 0 should be turned on 							& Passed 				\\ \hline
+
+Right LED wrap-around test	& Program is active, only LED 0 is on 		& Push switch 6						 	& LED 0 should be turned off and LED 7 should be turned on 							& Passed 				\\ \hline
+
+Long push test				& Program is active, only LED 7 is on 		& Push and hold switch 6 for a few seconds 	& LED 7 should be turned off and LED 6 should be turned on as soon as the switch is pushed 	& Passed 				\\ \hline
+\end{tabular}
+
+\section{Evaluation of assignment}
+
+\section{Conclusion}
+
+\section{Appendix}
+
+\footnotesize{  % This makes the Reference items print in footnotesize fonts
+\begin{thebibliography}{N}
+
+\bibitem[1]{secure} TDT4258 Compendium
+\url{http://www.idi.ntnu.no/emner/tdt4258/_media/kompendium.pdf}
+
+\end{thebibliography}.  
+}
+
+\end{document} 
