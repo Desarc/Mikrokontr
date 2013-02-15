@@ -1,4 +1,4 @@
-TDT4258
+TDT4258: Energy Efficient Computer Design
 =======
 
-Øvinger
+Group 9: Øyvin Richardsen, Stian Habbestad and Sandor Zeestraten
