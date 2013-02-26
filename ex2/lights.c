@@ -10,7 +10,8 @@ int main(int argc, char *argv[]) {
 void initLeds(void) {
 	
 	volatile avr32_pio_t *pioc = &AVR32_PIOC;
-	pio->per = 0xff;
-	pio->oer = 0xff;
-	pio->sodr = 0xff;	
+	pioc->per = 0xff;
+	pioc->oer = 0xff;
+	pioc->sodr = 0xf0;	
 }
+
