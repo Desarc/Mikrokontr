@@ -1,7 +1,8 @@
 CC=avr32-gcc
 CFLAGS=-g -Wall -Iinclude 
 LDFLAGS=-g -Wall -pedantic -Llib -lavr32b-interrupts -lm
-TARGET=oeving2.elf
+FILE=lights
+TARGET=$(FILE).elf
 
 
 # Command to upload program to flash 
@@ -11,10 +12,10 @@ AVR32PROGRAM = avr32program
 .PHONY : all
 all: $(TARGET)
 
-oeving2.elf: oeving2.o
+$(FILE).elf: $(FILE).o
 	$(CC) $^ -o $@ $(LDFLAGS)
 
-oeving2.o: oeving2.c 
+$(FILE).o: $(FILE).c 
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # upload to STK1000 (program flash)
