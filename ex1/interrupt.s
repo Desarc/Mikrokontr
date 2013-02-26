@@ -53,6 +53,10 @@ interrupt_routine:
         cp.w r6, r7             	/* Check if right button was pressed */
         breq right
 
+skip:
+	mov r10, 0
+	rjmp return
+
 return:
 	/* Read ISR and return to normal state after interrupt */
 	ld.w r3, r0[AVR32_PIO_ISR]	/* Read Interrupt Status Register to allow new interrupts */

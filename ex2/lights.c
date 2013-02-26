@@ -8,14 +8,18 @@ const int button1 = 0x3fcfffff;
 const int button2 = 0x7fceffff;
 
 int main(int argc, char *argv[]) {
+	
 	initLeds();
 	initButtons();
 	initInterrupts();
-	while(1);
+	while(1) {
+		//interruptRoutine();
+	}
 	return 0;
 }
 
 void interruptRoutine(void) {
+	pioc->codr = SET_ALL;
 	int buttons = piob->pdsr;
 	if (buttons == button1) {
 		goLeft();
@@ -40,10 +44,12 @@ void initButtons(void) {
 }
 
 void initInterrupts(void) {
-	set_interrupts_base((void*)piob);
-	init_interrupts();
+	set_interrupts_base((void*)AVR32_INTC_ADDRESS);
+
 	register_interrupt(interruptRoutine, AVR32_PIOB_IRQ/32, AVR32_PIOB_IRQ % 32, 0);
-	
+	int x = piob->isr;
+	init_interrupts();
+		
 }
 
 void goLeft(void) {
