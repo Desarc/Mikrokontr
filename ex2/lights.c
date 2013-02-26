@@ -10,17 +10,20 @@ const int button2 = 0x7fceffff;
 int main(int argc, char *argv[]) {
 	initLeds();
 	initButtons();
-	while (1) {	
-		int buttons = piob->pdsr;
-		if (buttons == button1) {
-			goLeft();
-		}
-		if (buttons == button2) {
-			goRight();
-		}
-		
-	}
+	initInterrupts();
+	while(1);
 	return 0;
+}
+
+void interruptRoutine(void) {
+	int buttons = piob->pdsr;
+	if (buttons == button1) {
+		goLeft();
+	}
+	if (buttons == button2) {
+		goRight();
+	}
+	int x = piob->isr;
 }
 
 void initLeds(void) {
@@ -33,6 +36,14 @@ void initLeds(void) {
 void initButtons(void) {
 	piob->per = SET_ALL;
 	piob->puer = SET_ALL;
+	piob->ier = SET_ALL;
+}
+
+void initInterrupts(void) {
+	set_interrupts_base((void*)piob);
+	init_interrupts();
+	register_interrupt(interruptRoutine, AVR32_PIOB_IRQ/32, AVR32_PIOB_IRQ % 32, 0);
+	
 }
 
 void goLeft(void) {

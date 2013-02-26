@@ -10,8 +10,11 @@ volatile avr32_pio_t *piob = &AVR32_PIOB;
 int main (int argc, char *argv[]);
 static void initLeds(void);
 static void initButtons(void);
+static void initInterrupts(void);
 static void goLeft(void);
 static void goRight(void);
 static void debounce(void);
+
+__int_handler *interruptroutine(void);
 
 #endif
