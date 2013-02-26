@@ -1,6 +1,6 @@
-#include lights.h
+#include "lights.h"
 
-int main(void) {
+int main(int argc, char *argv[]) {
 
 
 	initLeds();
