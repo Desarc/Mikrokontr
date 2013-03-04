@@ -57,14 +57,13 @@ void initLeds(void) {
 
 void initAudio(void) {
 	register_interrupt( abdac_isr, AVR32_ABDAC_IRQ/32, AVR32_ABDAC_IRQ%32, ABDAC_INT_LEVEL);
-	sm->gcctrl[6] = 0x04;
+	sm->gcctrl[6] = 0x4;  //using OSC0
 	piob->PDR.p20 = 1;
 	piob->PDR.p21 = 1;
 	piob->ASR.p20 = 1;
 	piob->ASR.p21 = 1;
 	dac->CR.en = 1;
 	dac->IER.tx_ready = 1;
-	
 	return;
 }
 
@@ -73,7 +72,7 @@ void button_isr(void) {
 	clearLeds();
 	int buttons = pioc->pdsr;
 	if (buttons == BUTTON7) {
-		dac->sdr = rand() % 22000;
+		playSound(TEST);
 		LED_VECTOR = LED7;
 	}
 	else if (buttons == BUTTON6) {
@@ -103,6 +102,30 @@ void button_isr(void) {
 	return;
 }
 
+void playSound(int code) {
+	//this is probably completely wrong.
+	int sample_size = 10000;
+	int sound[sample_size];
+	int i;
+	for (i = 0; i < sample_size; i++) {
+		sound[i] = (int)floor(sin(1000*(2*M_PI)*i/44100));
+	}
+	int j;
+	for (j = 0; j < sample_size; j++) {
+		dac->sdr = sound[i];
+	}
+
+
+}
+
+void miniWait(void) {
+	int n = 0x0;
+	while (n < 0xfff) {
+		n++;
+	}	
+	return;
+}
+
 void abdac_isr(void) {
 
 	return;
@@ -110,7 +133,7 @@ void abdac_isr(void) {
 
 void debounce(void) {
 	int n = 0x0;
-	while (n < 0x01ffff) {
+	while (n < 0x1ffff) {
 		n++;
 	}
 	return;

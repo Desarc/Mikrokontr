@@ -12,6 +12,7 @@
 #include <avr32/ap7000.h> /* inkludere Atmel-headerfil */
 #include <sys/interrupts.h>
 #include <stdlib.h>
+#include <math.h>
 
 /* legg andre "includes" her, sammen med "defines" og prototyper */
 #define ABDAC_INT_LEVEL 0
@@ -36,6 +37,12 @@ const int LED2 = 0x04;
 const int LED1 = 0x02;
 const int LED0 = 0x01;
 
+const int TEST = 0;
+
+const int SAMPLE_RATE = 4000;
+const int SAMPLE_SIZE = 8;
+const int channels = 4;
+
 volatile avr32_pio_t *piob = &AVR32_PIOB;
 volatile avr32_pio_t *pioc = &AVR32_PIOC;
 volatile avr32_pm_t *sm = &AVR32_PM;
@@ -53,5 +60,7 @@ static void initHardware (void);
 static void button_isr(void);
 static void abdac_isr(void);
 static void debounce(void);
+static void playSound(int code);
+static void miniWait(void);
 
 #endif

@@ -20,7 +20,6 @@ int main(int argc, char *argv[]) {
 	initLeds();
 	initInterrupts();
 	initButtons();
-	
 	while(1);
 	return 0;
 }
@@ -74,7 +73,6 @@ void goLeft(void) {
 	else {	
 		LED_VECTOR = LED_VECTOR << 1;
 	}
-	//piob->sodr = LED_VECTOR;
 	return;
 }
 
@@ -85,13 +83,12 @@ void goRight(void) {
 	else {	
 		LED_VECTOR = LED_VECTOR >> 1;
 	}
-	//piob->sodr = LED_VECTOR;
 	return;
 }
 
 void debounce(void) {
 	int n = 0x0;
-	while (n < 0x01ffff) {
+	while (n < 0x1ffff) {
 		n++;
 	}
 	return;
