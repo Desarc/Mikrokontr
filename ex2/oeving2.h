@@ -24,6 +24,10 @@ static void initLeds(void);
 static void initAudio(void);
 static void initHardware (void);
 
+static void goLeft(void);
+static void goRight(void);
+static void debounce(void);
+
 static void button_isr(void);
 static void abdac_isr(void);
 

@@ -1,6 +1,7 @@
 #include "lights.h"
 
 volatile int LED_VECTOR = 0x80;
+volatile int LED_TEST = 0x08;
 const int LED_MAX = 0x80;
 const int LED_MIN = 0x01;
 const int SET_ALL = 0xff;
@@ -10,8 +11,9 @@ const int button2 = 0x7fceffff;
 int main(int argc, char *argv[]) {
 	
 	initLeds();
-	initButtons();
 	initInterrupts();
+	initButtons();
+	
 	while(1) {
 		//interruptRoutine();
 	}
@@ -19,66 +21,77 @@ int main(int argc, char *argv[]) {
 }
 
 void interruptRoutine(void) {
-	pioc->codr = SET_ALL;
-	int buttons = piob->pdsr;
+	pioc->isr;
+	clearLeds();
+	int buttons = pioc->pdsr;
 	if (buttons == button1) {
 		goLeft();
 	}
 	if (buttons == button2) {
 		goRight();
 	}
-	int x = piob->isr;
+	goLeft();
+	piob->sodr = LED_VECTOR;
+	return;
 }
 
 void initLeds(void) {
-	pioc->per = SET_ALL;
-	pioc->oer = SET_ALL;
-	pioc->codr = SET_ALL;
-	pioc->sodr = LED_VECTOR;
+	piob->per = SET_ALL;
+	piob->oer = SET_ALL;
+	clearLeds();
+	piob->sodr = LED_VECTOR;
+	return;
 }
 
 void initButtons(void) {
-	piob->per = SET_ALL;
-	piob->puer = SET_ALL;
-	piob->ier = SET_ALL;
+	pioc->per = SET_ALL;
+	pioc->puer = SET_ALL;
+	pioc->ier = SET_ALL;
+  	register_interrupt(interruptRoutine, AVR32_PIOC_IRQ/32, AVR32_PIOC_IRQ % 32, BUTTONS_INT_LEVEL);
+	pioc->isr;	
+	init_interrupts();
+	return;
 }
 
 void initInterrupts(void) {
-	set_interrupts_base((void*)AVR32_INTC_ADDRESS);
+	set_interrupts_base((void *)AVR32_INTC_ADDRESS);
+	return;
+}
 
-	register_interrupt(interruptRoutine, AVR32_PIOB_IRQ/32, AVR32_PIOB_IRQ % 32, 0);
-	int x = piob->isr;
-	init_interrupts();
-		
+void clearLeds(void) {
+	piob->codr = SET_ALL;
 }
 
 void goLeft(void) {
-	pioc->codr = SET_ALL;
+	clearLeds();
 	if (LED_VECTOR == LED_MAX) {
 		LED_VECTOR = LED_MIN;
 	}
 	else {	
 		LED_VECTOR = LED_VECTOR << 1;
 	}
-	pioc->sodr = LED_VECTOR;
+	piob->sodr = LED_VECTOR;
 	debounce();
+	return;
 }
 
 void goRight(void) {
-	pioc->codr = SET_ALL;
+	clearLeds();
 	if (LED_VECTOR == LED_MIN) {
 		LED_VECTOR = LED_MAX;
 	}
 	else {	
 		LED_VECTOR = LED_VECTOR >> 1;
 	}
-	pioc->sodr = LED_VECTOR;
+	piob->sodr = LED_VECTOR;
 	debounce();
+	return;
 }
 
 void debounce(void) {
 	int n = 0x0;
-	while (n < 0x4ffff) {
+	while (n < 0x01ffff) {
 		n++;
 	}
+	return;
 }
