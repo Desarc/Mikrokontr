@@ -1,7 +1,7 @@
 CC=avr32-gcc
 CFLAGS=-g -Wall -Iinclude 
 LDFLAGS=-g -Wall -pedantic -Llib -lavr32b-interrupts -lm
-FILE=lights
+FILE=oeving2
 TARGET=$(FILE).elf
 
 

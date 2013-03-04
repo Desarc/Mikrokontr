@@ -21,9 +21,7 @@ int main(int argc, char *argv[]) {
 	initInterrupts();
 	initButtons();
 	
-	while(1) {
-		//interruptRoutine();
-	}
+	while(1);
 	return 0;
 }
 
@@ -33,11 +31,9 @@ void interruptRoutine(void) {
 	int buttons = pioc->pdsr;
 	if (buttons == button7) {
 		goLeft();
-		//buttons = state;
 	}
 	if (buttons == button6) {
 		goRight();
-		//buttons = state;
 	}
 	piob->sodr = LED_VECTOR;
 	debounce();
