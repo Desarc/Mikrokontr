@@ -14,8 +14,8 @@ volatile int LED_TEST = 0x08;
 const int LED_MAX = 0x80;
 const int LED_MIN = 0x01;
 const int SET_ALL = 0xff;
-const int button1 = 0x3fcfffff;
-const int button2 = 0x7fceffff;
+const int button1 = 0x80;
+const int button2 = 0x40;
 
 
 int main (int argc, char *argv[]) {
