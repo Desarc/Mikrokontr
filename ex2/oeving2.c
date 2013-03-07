@@ -7,17 +7,23 @@
 #include "oeving2.h"
 
 #define max_sample_size 5000
-#define sound_length 50000
 #define Fs 46875
+#define song_length 22
 
+volatile int sound_length;
 volatile int A = 1500;
 volatile int sample_size;
 volatile int LED_VECTOR = 0x0;
 volatile int sound[max_sample_size];
 volatile int sample_counter;
 volatile int repeat_counter;
+volatile int song_counter;
 volatile int playing_sound = 0;
 volatile int skip = 0;
+
+
+const float song[song_length] = {C6, D6, E6, F6, G6, G6, A6, A6, A6, A6, G6, F6, F6, F6, F6, E6, E6, D6, D6, D6, D6, C6};
+const int song_tone_length[song_length] = {Q, Q, Q, Q, H, H, Q, Q, Q, Q, F, Q, Q, Q, Q, H, H, Q, Q, Q, Q, F};
 
 int main (int argc, char *argv[]) {
 	//int i;
@@ -133,7 +139,10 @@ void button_isr(void) {
 void playSound(int code) {
 	float f;
 	if (code == SOUND7) {
-		f = C6;
+		song_counter = 0;
+		f = song[song_counter];
+		sound_length = song_tone_length[song_counter];
+		song_counter++;
 	}
 	else if (code == SOUND6) {
 		f = D6;
@@ -184,10 +193,18 @@ void abdac_isr(void) {
 	if (playing_sound == 0) {
 		return;
 	}
-	if (repeat_counter == sound_length) {
+	if (song_counter == song_length) {
 		playing_sound = 0;
 		return;
 	}
+	if (repeat_counter == sound_length) {
+		sample_counter = 0;
+		repeat_counter = 0;
+		generate_tone(song[song_counter]);
+		sound_length = song_tone_length[song_counter];
+		song_counter++;
+	}
+	
 	if (sample_counter == sample_size) {
 		sample_counter = 0;
 		repeat_counter++;

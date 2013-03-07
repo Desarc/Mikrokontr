@@ -41,6 +41,11 @@
 #define G7 3135.96
 #define A7 3520.00
 
+/* tone lengths */
+#define Q 500
+#define H 1000
+#define F 2000
+
 const int SET_ALL = 0xff;
 
 /* button masks */
