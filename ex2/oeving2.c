@@ -6,26 +6,24 @@
 
 #include "oeving2.h"
 
-#define max_sample_size 1024
-#define sound_length 5000
+#define max_sample_size 5000
+#define sound_length 50000
 #define Fs 46875
 
+volatile int A = 1500;
 volatile int sample_size;
 volatile int LED_VECTOR = 0x0;
 volatile int sound[max_sample_size];
-volatile int sound2[107];
-volatile int counter;
-volatile int counter2;
-volatile int playingSound = 0;
+volatile int sample_counter;
+volatile int repeat_counter;
+volatile int playing_sound = 0;
+volatile int skip = 0;
 
 int main (int argc, char *argv[]) {
-	int i;
-	for (i = 0; i < max_sample_size; i++) {
-		sound[i] = 0;
-	}
-	for (i = 0; i < 107; i++) {
-		sound2[i] = 0;
-	}
+	//int i;
+	//for (i = 0; i < max_sample_size; i++) {
+	//	sound[i] = 0;
+	//}
 	initHardware();
  	while(1);
   	return 0;
@@ -86,8 +84,15 @@ void initAudio(void) {
 
 void button_isr(void) {
 	pioc->isr;
-	clearLeds();
 	int buttons = pioc->pdsr;
+	if (skip == 1) {
+		skip = 0;
+		//return;
+	}
+	else {
+		skip = 1;
+	}
+	clearLeds();
 	if (buttons == BUTTON7) {
 		playSound(SOUND7);
 		LED_VECTOR = LED7;
@@ -128,79 +133,73 @@ void button_isr(void) {
 void playSound(int code) {
 	float f;
 	if (code == SOUND7) {
-		f = A4;
-		//sample_size = 107;
+		f = C6;
 	}
 	else if (code == SOUND6) {
-		f = A4;
-		//sample_size = 108;
+		f = D6;
 	}
 	else if (code == SOUND5) {
-		f = A4;
-		//sample_size = 109;
+		f = E6;
 	}
 	else if (code == SOUND4) {
-		f = D9;
-		//sample_size = 100;
+		f = F6;
 	}
 	else if (code == SOUND3) {
-		f = E9;
-		//sample_size = 100;
+		f = G6;
 	}
 	else if (code == SOUND2) {
-		f = F9;
-		//sample_size = 100;
+		f = A6;
 	}
 	else if (code == SOUND1) {
-		f = G9;
-		//sample_size = 100;
+		f = B6;
 	}
 	else if (code == SOUND0) {
-		f = A4;
-		//sample_size = 100;
+		f = C7;
 	}
+	generate_tone(f);
+	init_sound();	
+}
+
+void generate_tone(float f) {
 	sample_size = ceil(Fs/f);
 	if (sample_size > max_sample_size) {
 		sample_size = max_sample_size;
 	}
-	
-	int A = 1500;
 	int i;
 	for (i = 0; i < sample_size; i++) {
 		sound[i] = (int)floor(A*sin(f*(2*M_PI)*i/Fs));
 	}
-
-	//for (i = 0; i < 107; i++) {
-	//	sound2[i] = (int)floor(A*sin(f*(2*M_PI)*i/46875));
-	//}
-	counter = 0;
-	counter2 = 0;
-	playingSound = 1;
-	dac->sdr = sound[counter];
-	counter++;
 }
 
+void init_sound(void) {
+	sample_counter = 0;
+	repeat_counter = 0;
+	playing_sound = 1;
+	dac->sdr = sound[sample_counter];
+	sample_counter++;
+}
+
+
 void abdac_isr(void) {
-	//piob->isr;
-	if (playingSound == 0) {
+	if (playing_sound == 0) {
 		return;
 	}
-	if (counter2 == sound_length) {
-		playingSound = 0;
+	if (repeat_counter == sound_length) {
+		playing_sound = 0;
 		return;
 	}
-	if (counter == sample_size) {
-		counter = 0;
-		counter2++;
+	if (sample_counter == sample_size) {
+		sample_counter = 0;
+		repeat_counter++;
 	}
-	dac->sdr = sound[counter];
-	counter++;
+	dac->sdr = sound[sample_counter];
+	sample_counter++;
 	return;
 }
 
 void debounce(void) {
 	int n = 0x0;
-	while (n < 0x1ffff) {
+	while (n < 0xffff) {
 		n++;
 	}
 	return;
