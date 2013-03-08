@@ -5,83 +5,28 @@
  *****************************************************************************/
 
 #include "oeving2.h"
-
-#define max_sample_size 500
-#define default_sample_size 400
-#define Fs 46875
-#define song_length 22
-#define test_sound_length 10
+#include "samples.h"
 
 volatile int tone_length;
 const int A = 1500;
-volatile int sample_size;
 volatile int LED_VECTOR = 0x0;
+volatile int sample_size;
 volatile int sample_counter;
 volatile int repeat_counter;
 volatile int sound_counter;
 volatile int sound_length;
 volatile int playing_sound = 0;
 
-
-volatile int sound[max_sample_size];
-
-volatile int G5_wave[default_sample_size];
-volatile int A5_wave[default_sample_size];
-volatile int B5_wave[default_sample_size];
-volatile int C6_wave[default_sample_size];
-volatile int D6_wave[default_sample_size];
-volatile int E6_wave[default_sample_size];
-volatile int F6_wave[default_sample_size];
-volatile int G6_wave[default_sample_size];
-volatile int A6_wave[default_sample_size];
-volatile int B6_wave[default_sample_size];
-volatile int C7_wave[default_sample_size];
-
 volatile int *current_wave_ptr;
 volatile float *current_sound_ptr;
 volatile int *current_sound_tl_ptr;
 
-float test_sound[test_sound_length] = {G5, A5, B5, C6, D6, F6, G6, A6, B6, C7 };
-int test_sound_tone_length[test_sound_length] = {S, S, S, S, S, S, S, S, S, S};
-
-float song_tone[song_length] = {C6, D6, E6, F6, G6, G6, A6, A6, A6, A6, G6, F6, F6, F6, F6, E6, E6, D6, D6, D6, D6, C6 };
-int song_tone_length[song_length] = {Q, Q, Q, Q, H, H, Q, Q, Q, Q, F, Q, Q, Q, Q, H, H, Q, Q, Q, Q, F };
-
 int main (int argc, char *argv[]) {
 	int i;
 	/* pre-generating wave samples */
-	for (i = 0; i < default_sample_size; i++) {
-		G5_wave[i] = (int)floor(A*sin(G5*(2*M_PI)*i/Fs));
-	}
-	for (i = 0; i < default_sample_size; i++) {
-		A5_wave[i] = (int)floor(A*sin(A5*(2*M_PI)*i/Fs));
-	}
-	for (i = 0; i < default_sample_size; i++) {
-		B5_wave[i] = (int)floor(A*sin(B5*(2*M_PI)*i/Fs));
-	}
-	for (i = 0; i < default_sample_size; i++) {
-		C6_wave[i] = (int)floor(A*sin(C6*(2*M_PI)*i/Fs));
-	}
-	for (i = 0; i < default_sample_size; i++) {
-		D6_wave[i] = (int)floor(A*sin(D6*(2*M_PI)*i/Fs));
-	}
-	for (i = 0; i < default_sample_size; i++) {
-		E6_wave[i] = (int)floor(A*sin(E6*(2*M_PI)*i/Fs));
-	}
-	for (i = 0; i < default_sample_size; i++) {
-		F6_wave[i] = (int)floor(A*sin(F6*(2*M_PI)*i/Fs));
-	}
-	for (i = 0; i < default_sample_size; i++) {
-		G6_wave[i] = (int)floor(A*sin(G6*(2*M_PI)*i/Fs));
-	}
-	for (i = 0; i < default_sample_size; i++) {
-		A6_wave[i] = (int)floor(A*sin(A6*(2*M_PI)*i/Fs));
-	}
-	for (i = 0; i < default_sample_size; i++) {
-		B6_wave[i] = (int)floor(A*sin(B6*(2*M_PI)*i/Fs));
-	}
-	for (i = 0; i < default_sample_size; i++) {
-		C7_wave[i] = (int)floor(A*sin(C7*(2*M_PI)*i/Fs));
+	for (i = 0; i < scale_length; i++) {
+		current_wave_ptr = wave_pointers[i];
+		generate_tone(scale[i]);
 	}
 	initHardware();
  	while(1);
@@ -142,14 +87,10 @@ void initAudio(void) {
 }
 
 void generate_tone(float f) {
-	//sample_size = ceil(Fs/f);
-	sample_size = default_sample_size;
-	if (sample_size > max_sample_size) {
-		sample_size = max_sample_size;
-	}
-	int i;
-	for (i = 0; i < sample_size; i++) {
-		sound[i] = (int)floor(A*sin(f*(2*M_PI)*i/Fs));
+	int j;
+	for (j = 0; j < default_sample_size; j++) {
+		*current_wave_ptr = (int)floor(A*sin(f*(2*M_PI)*j/Fs));
+		current_wave_ptr++;
 	}
 }
 
@@ -164,13 +105,15 @@ void button_isr(void) {
 		LED_VECTOR = LED7;
 	}
 	else if (buttons == BUTTON6) {
-		current_sound_ptr = test_sound;
-		current_sound_tl_ptr = test_sound_tone_length;
-		sound_length = test_sound_length;
+		current_sound_ptr = scale;
+		current_sound_tl_ptr = scale_tone_length;
+		sound_length = scale_length;
 		LED_VECTOR = LED6;
 	}
 	else if (buttons == BUTTON5) {
-		//playSound(SOUND5);
+		current_sound_ptr = sirene;
+		current_sound_tl_ptr = sirene_tone_length;
+		sound_length = sirene_length;
 		LED_VECTOR = LED5;
 	}
 	else if (buttons == BUTTON4) {
@@ -205,7 +148,6 @@ void init_sound(void) {
 	sample_counter = 0;
 	repeat_counter = 0;
 	playing_sound = 1;
-	//set_tone(song_tone[sound_counter]);
 	set_tone(*current_sound_ptr);
 	tone_length = *current_sound_tl_ptr;
 	dac->sdr = *current_wave_ptr;
@@ -214,6 +156,7 @@ void init_sound(void) {
 }
 
 void set_tone(float tone) {
+	sample_size = default_sample_size;	
 	/* make current_wave_ptr point to the first sample (e.g. C6_wave[0]) of the desired wave */
 	if (tone == G5f) {
 		current_wave_ptr = G5_wave;
@@ -249,9 +192,9 @@ void set_tone(float tone) {
 		current_wave_ptr = C7_wave;
 	}
 	else {
-		current_wave_ptr = sound;
+		current_wave_ptr = silence;
+		sample_size = 1;
 	}
-	sample_size = default_sample_size;
 	return;
 }
 
@@ -274,8 +217,6 @@ void abdac_isr(void) {
 		sound_counter++;
 		current_sound_ptr++;
 		current_sound_tl_ptr++;
-		//set_tone(song_tone[sound_counter]);
-		//tone_length = song_tone_length[sound_counter];
 		set_tone(*current_sound_ptr);
 		tone_length = *current_sound_tl_ptr;
 	}
@@ -283,7 +224,6 @@ void abdac_isr(void) {
 	if (sample_counter == sample_size) {
 		sample_counter = 0;
 		repeat_counter++;
-		//set_tone(song_tone[sound_counter]);
 		set_tone(*current_sound_ptr);
 	}
 	dac->sdr = *current_wave_ptr;

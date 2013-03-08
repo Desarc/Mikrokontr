@@ -17,49 +17,6 @@
 #define ABDAC_INT_LEVEL 0
 #define BUTTONS_INT_LEVEL 0
 
-/* frequency levels for various tones */
-#define A4 440.00
-#define B4 493.88
-#define C5 523.25
-#define D5 587.33
-#define E5 659.26
-#define F5 698.46
-#define G5 783.99
-#define A5 880.00
-#define B5 987.77
-#define C6 1046.50
-#define D6 1174.66
-#define E6 1318.51
-#define F6 1396.91
-#define G6 1567.98
-#define A6 1760.00
-#define B6 1975.53
-#define C7 2093.00
-#define D7 2349.32
-#define E7 2637.02
-#define F7 2793.83
-#define G7 3135.96
-#define A7 3520.00
-
-const float G5f = G5;	
-const float A5f = A5;	
-const float B5f = B5;
-const float C6f = C6;
-const float D6f = D6;
-const float E6f = E6;
-const float F6f = F6;
-const float G6f = G6;
-const float A6f = A6;
-const float B6f = B6;
-const float C7f = C7;
-
-
-/* tone lengths */
-#define S 5
-#define Q 50
-#define H 100
-#define F 200
-
 const int SET_ALL = 0xff;
 
 /* button masks */
