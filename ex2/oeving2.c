@@ -12,7 +12,7 @@
 #define song_length 22
 
 volatile int sound_length;
-volatile int A = 1500;
+const int A = 1500;
 volatile int sample_size;
 volatile int LED_VECTOR = 0x0;
 volatile int sound[max_sample_size];
@@ -204,8 +204,8 @@ void init_sound(void) {
 	sample_counter = 0;
 	repeat_counter = 0;
 	playing_sound = 1;
-	//dac->sdr = C6_wave[sample_counter];
-	dac->sdr = *current_wave_ptr;		//send first sample to DAC
+	dac->sdr = C6_wave[sample_counter];
+	//dac->sdr = *current_wave_ptr;		//send first sample to DAC
 	current_wave_ptr++;			//increment pointer (to XX_wave[1])
 	sample_counter++;
 }
@@ -251,7 +251,7 @@ void abdac_isr(void) {
 		song_counter++;
 		sample_counter = 0;
 		repeat_counter = 0;
-		set_tone(song_tone[song_counter]);
+		//set_tone(song_tone[song_counter]);
 		sound_length = song_tone_length[song_counter];
 		
 	}
@@ -259,11 +259,11 @@ void abdac_isr(void) {
 	if (sample_counter == sample_size) {
 		sample_counter = 0;
 		repeat_counter++;
-		set_tone(song_tone[song_counter]);
+		//set_tone(song_tone[song_counter]);
 	}
 	/* send next sample to DAC */
-	dac->sdr = *current_wave_ptr;
-	//dac->sdr = C6_wave[sample_counter];
+	//dac->sdr = *current_wave_ptr;
+	dac->sdr = C6_wave[sample_counter];
 	current_wave_ptr++;
 	sample_counter++;
 	return;
