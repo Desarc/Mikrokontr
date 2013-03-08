@@ -184,12 +184,14 @@ void playSound(int code) {
 	else if (code == SOUND0) {
 		f = C7;
 	}
-	set_tone(f);				//point to the correct wave
+	//set_tone(f);				//point to the correct wave
+	generate_tone(f);	
 	init_sound();				//start playing the sound
 }
 
 void generate_tone(float f) {
-	sample_size = ceil(Fs/f);
+	sample_size = 50;
+	//sample_size = ceil(Fs/f);
 	if (sample_size > max_sample_size) {
 		sample_size = max_sample_size;
 	}
@@ -204,9 +206,10 @@ void init_sound(void) {
 	sample_counter = 0;
 	repeat_counter = 0;
 	playing_sound = 1;
-	dac->sdr = C6_wave[sample_counter];
+	dac->sdr = sound[sample_counter];
+	//dac->sdr = C6_wave[sample_counter];
 	//dac->sdr = *current_wave_ptr;		//send first sample to DAC
-	current_wave_ptr++;			//increment pointer (to XX_wave[1])
+	//current_wave_ptr++;			//increment pointer (to XX_wave[1])
 	sample_counter++;
 }
 
@@ -252,6 +255,7 @@ void abdac_isr(void) {
 		sample_counter = 0;
 		repeat_counter = 0;
 		//set_tone(song_tone[song_counter]);
+		generate_tone(song_tone[song_counter]);
 		sound_length = song_tone_length[song_counter];
 		
 	}
@@ -263,8 +267,10 @@ void abdac_isr(void) {
 	}
 	/* send next sample to DAC */
 	//dac->sdr = *current_wave_ptr;
-	dac->sdr = C6_wave[sample_counter];
-	current_wave_ptr++;
+	//dac->sdr = C6_wave[sample_counter];
+	//dac->sdr = sound[sample_counter];
+	dac->sdr = rand()%1000;
+	//current_wave_ptr++;
 	sample_counter++;
 	return;
 }
