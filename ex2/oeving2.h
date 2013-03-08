@@ -6,10 +6,10 @@
  *
  *****************************************************************************/
 
-#ifndef OEVING_2_H /* vanlig måte å unngå headerrekursjon på */
+#ifndef OEVING_2_H
 #define OEVING_2_H
 
-#include <avr32/ap7000.h> /* inkludere Atmel-headerfil */
+#include <avr32/ap7000.h>
 #include <sys/interrupts.h>
 #include <stdlib.h>
 #include <math.h>
@@ -41,8 +41,21 @@
 #define G7 3135.96
 #define A7 3520.00
 
+const float G5f = G5;	
+const float A5f = A5;	
+const float B5f = B5;
+const float C6f = C6;
+const float D6f = D6;
+const float E6f = E6;
+const float F6f = F6;
+const float G6f = G6;
+const float A6f = A6;
+const float B6f = B6;
+const float C7f = C7;
+
 
 /* tone lengths */
+#define S 5
 #define Q 50
 #define H 100
 #define F 200
@@ -96,7 +109,6 @@ static void initHardware (void);
 static void button_isr(void);
 static void abdac_isr(void);
 static void debounce(void);
-static void playSound(int code);
 static void generate_tone(float f);
 static void init_sound(void);
 static void set_tone(float tone);

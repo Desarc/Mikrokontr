@@ -10,34 +10,55 @@
 #define default_sample_size 400
 #define Fs 46875
 #define song_length 22
+#define test_sound_length 10
 
-volatile int sound_length;
+volatile int tone_length;
 const int A = 1500;
 volatile int sample_size;
 volatile int LED_VECTOR = 0x0;
 volatile int sample_counter;
 volatile int repeat_counter;
-volatile int song_counter;
+volatile int sound_counter;
+volatile int sound_length;
 volatile int playing_sound = 0;
 
 
 volatile int sound[max_sample_size];
 
+volatile int G5_wave[default_sample_size];
+volatile int A5_wave[default_sample_size];
+volatile int B5_wave[default_sample_size];
 volatile int C6_wave[default_sample_size];
 volatile int D6_wave[default_sample_size];
 volatile int E6_wave[default_sample_size];
 volatile int F6_wave[default_sample_size];
 volatile int G6_wave[default_sample_size];
 volatile int A6_wave[default_sample_size];
+volatile int B6_wave[default_sample_size];
+volatile int C7_wave[default_sample_size];
 
 volatile int *current_wave_ptr;
+volatile float *current_sound_ptr;
+volatile int *current_sound_tl_ptr;
 
-const float song_tone[song_length] = {C6, D6, E6, F6, G6, G6, A6, A6, A6, A6, G6, F6, F6, F6, F6, E6, E6, D6, D6, D6, D6, C6 };
-const int song_tone_length[song_length] = {Q, Q, Q, Q, H, H, Q, Q, Q, Q, F, Q, Q, Q, Q, H, H, Q, Q, Q, Q, F };
+float test_sound[test_sound_length] = {G5, A5, B5, C6, D6, F6, G6, A6, B6, C7 };
+int test_sound_tone_length[test_sound_length] = {S, S, S, S, S, S, S, S, S, S};
+
+float song_tone[song_length] = {C6, D6, E6, F6, G6, G6, A6, A6, A6, A6, G6, F6, F6, F6, F6, E6, E6, D6, D6, D6, D6, C6 };
+int song_tone_length[song_length] = {Q, Q, Q, Q, H, H, Q, Q, Q, Q, F, Q, Q, Q, Q, H, H, Q, Q, Q, Q, F };
 
 int main (int argc, char *argv[]) {
 	int i;
 	/* pre-generating wave samples */
+	for (i = 0; i < default_sample_size; i++) {
+		G5_wave[i] = (int)floor(A*sin(G5*(2*M_PI)*i/Fs));
+	}
+	for (i = 0; i < default_sample_size; i++) {
+		A5_wave[i] = (int)floor(A*sin(A5*(2*M_PI)*i/Fs));
+	}
+	for (i = 0; i < default_sample_size; i++) {
+		B5_wave[i] = (int)floor(A*sin(B5*(2*M_PI)*i/Fs));
+	}
 	for (i = 0; i < default_sample_size; i++) {
 		C6_wave[i] = (int)floor(A*sin(C6*(2*M_PI)*i/Fs));
 	}
@@ -55,6 +76,12 @@ int main (int argc, char *argv[]) {
 	}
 	for (i = 0; i < default_sample_size; i++) {
 		A6_wave[i] = (int)floor(A*sin(A6*(2*M_PI)*i/Fs));
+	}
+	for (i = 0; i < default_sample_size; i++) {
+		B6_wave[i] = (int)floor(A*sin(B6*(2*M_PI)*i/Fs));
+	}
+	for (i = 0; i < default_sample_size; i++) {
+		C7_wave[i] = (int)floor(A*sin(C7*(2*M_PI)*i/Fs));
 	}
 	initHardware();
  	while(1);
@@ -114,82 +141,6 @@ void initAudio(void) {
 	return;
 }
 
-void button_isr(void) {
-	pioc->isr;
-	int buttons = pioc->pdsr;
-	clearLeds();
-	if (buttons == BUTTON7) {
-		playSound(SOUND7);
-		LED_VECTOR = LED7;
-	}
-	else if (buttons == BUTTON6) {
-		playSound(SOUND6);
-		LED_VECTOR = LED6;
-	}
-	else if (buttons == BUTTON5) {
-		playSound(SOUND5);
-		LED_VECTOR = LED5;
-	}
-	else if (buttons == BUTTON4) {
-		playSound(SOUND4);
-		LED_VECTOR = LED4;
-	}
-	else if (buttons == BUTTON3) {
-		playSound(SOUND3);
-		LED_VECTOR = LED3;
-	}
-	else if (buttons == BUTTON2) {
-		playSound(SOUND2);
-		LED_VECTOR = LED2;
-	}
-	else if (buttons == BUTTON1) {
-		playSound(SOUND1);
-		LED_VECTOR = LED1;
-	}
-	else if (buttons == BUTTON0) {
-		playSound(SOUND0);
-		LED_VECTOR = LED0;
-	}
-	setLeds();
-	debounce();
-	return;
-}
-
-void playSound(int code) {
-	float f;
-	if (code == SOUND7) {
-		/* initialize song_counter, keeps track of which tone to play. get tone and length from array */
-		song_counter = 0;
-		f = song_tone[song_counter];
-		sound_length = song_tone_length[song_counter];
-		//song_counter++;
-	}
-	else if (code == SOUND6) {
-		f = D6;
-	}
-	else if (code == SOUND5) {
-		f = E6;
-	}
-	else if (code == SOUND4) {
-		f = F6;
-	}
-	else if (code == SOUND3) {
-		f = G6;
-	}
-	else if (code == SOUND2) {
-		f = A6;
-	}
-	else if (code == SOUND1) {
-		f = B6;
-	}
-	else if (code == SOUND0) {
-		f = C7;
-	}
-	//set_tone(f);				//point to the correct wave
-	generate_tone(f);	
-	init_sound();				//start playing the sound
-}
-
 void generate_tone(float f) {
 	//sample_size = ceil(Fs/f);
 	sample_size = default_sample_size;
@@ -202,12 +153,61 @@ void generate_tone(float f) {
 	}
 }
 
+void button_isr(void) {
+	pioc->isr;
+	int buttons = pioc->pdsr;
+	clearLeds();
+	if (buttons == BUTTON7) {
+		current_sound_ptr = song_tone;
+		current_sound_tl_ptr = song_tone_length;
+		sound_length = song_length;
+		LED_VECTOR = LED7;
+	}
+	else if (buttons == BUTTON6) {
+		current_sound_ptr = test_sound;
+		current_sound_tl_ptr = test_sound_tone_length;
+		sound_length = test_sound_length;
+		LED_VECTOR = LED6;
+	}
+	else if (buttons == BUTTON5) {
+		//playSound(SOUND5);
+		LED_VECTOR = LED5;
+	}
+	else if (buttons == BUTTON4) {
+		//playSound(SOUND4);
+		LED_VECTOR = LED4;
+	}
+	else if (buttons == BUTTON3) {
+		//playSound(SOUND3);
+		LED_VECTOR = LED3;
+	}
+	else if (buttons == BUTTON2) {
+		//playSound(SOUND2);
+		LED_VECTOR = LED2;
+	}
+	else if (buttons == BUTTON1) {
+		//playSound(SOUND1);
+		LED_VECTOR = LED1;
+	}
+	else if (buttons == BUTTON0) {
+		//playSound(SOUND0);
+		LED_VECTOR = LED0;
+	}
+	init_sound();				//start playing the sound
+	setLeds();
+	debounce();
+	return;
+}
+
 void init_sound(void) {
 	/* initialize counters */
+	sound_counter = 0;
 	sample_counter = 0;
 	repeat_counter = 0;
 	playing_sound = 1;
-	set_tone(song_tone[song_counter]);
+	//set_tone(song_tone[sound_counter]);
+	set_tone(*current_sound_ptr);
+	tone_length = *current_sound_tl_ptr;
 	dac->sdr = *current_wave_ptr;
 	current_wave_ptr++;
 	sample_counter++;
@@ -215,13 +215,16 @@ void init_sound(void) {
 
 void set_tone(float tone) {
 	/* make current_wave_ptr point to the first sample (e.g. C6_wave[0]) of the desired wave */
-	float C6f = C6;
-	float D6f = D6;
-	float E6f = E6;
-	float F6f = F6;
-	float G6f = G6;
-	float A6f = A6;
-	if (tone == C6f) {
+	if (tone == G5f) {
+		current_wave_ptr = G5_wave;
+	}
+	else if (tone == A5f) {
+		current_wave_ptr = A5_wave;
+	}	
+	else if (tone == B5f) {
+		current_wave_ptr = B5_wave;
+	}	
+	else if (tone == C6f) {
 		current_wave_ptr = C6_wave;
 	}
 	else if (tone == D6f) {
@@ -239,6 +242,12 @@ void set_tone(float tone) {
 	else if (tone == A6f) {
 		current_wave_ptr = A6_wave;
 	}
+	else if (tone == B6f) {
+		current_wave_ptr = B6_wave;
+	}
+	else if (tone == C7f) {
+		current_wave_ptr = C7_wave;
+	}
 	else {
 		current_wave_ptr = sound;
 	}
@@ -252,9 +261,9 @@ void abdac_isr(void) {
 		return;
 	}
 	/* check if tone has completed its duration */
-	if (repeat_counter == sound_length) {
+	if (repeat_counter == tone_length) {
 		/* if last tone in song, stop playing */
-		if (song_counter >= song_length-1) {
+		if (sound_counter >= sound_length-1) {
 			playing_sound = 0;
 			dac->sdr = 0;
 			return;
@@ -262,15 +271,20 @@ void abdac_isr(void) {
 		/* reset counters and get next tone + duration */
 		sample_counter = 0;
 		repeat_counter = 0;
-		song_counter++;
-		set_tone(song_tone[song_counter]);
-		sound_length = song_tone_length[song_counter];
+		sound_counter++;
+		current_sound_ptr++;
+		current_sound_tl_ptr++;
+		//set_tone(song_tone[sound_counter]);
+		//tone_length = song_tone_length[sound_counter];
+		set_tone(*current_sound_ptr);
+		tone_length = *current_sound_tl_ptr;
 	}
 	/* repeat sample if reached sample end */
 	if (sample_counter == sample_size) {
 		sample_counter = 0;
 		repeat_counter++;
-		set_tone(song_tone[song_counter]);
+		//set_tone(song_tone[sound_counter]);
+		set_tone(*current_sound_ptr);
 	}
 	dac->sdr = *current_wave_ptr;
 	sample_counter++;
