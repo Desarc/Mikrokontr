@@ -42,9 +42,9 @@
 #define A7 3520.00
 
 /* tone lengths */
-#define Q 500
-#define H 1000
-#define F 2000
+#define Q 50
+#define H 100
+#define F 200
 
 const int SET_ALL = 0xff;
 
@@ -98,5 +98,6 @@ static void debounce(void);
 static void playSound(int code);
 static void generate_tone(float f);
 static void init_sound(void);
+static void set_tone(float tone);
 
 #endif
