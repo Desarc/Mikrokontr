@@ -6,21 +6,22 @@
 
 #include "oeving2.h"
 
-#define max_sample_size 1000
+#define max_sample_size 500
+#define default_sample_size 400
 #define Fs 46875
-#define default_sample_size 100
 #define song_length 22
 
 volatile int sound_length;
 const int A = 1500;
 volatile int sample_size;
 volatile int LED_VECTOR = 0x0;
-volatile int sound[max_sample_size];
 volatile int sample_counter;
 volatile int repeat_counter;
 volatile int song_counter;
 volatile int playing_sound = 0;
-//volatile int skip = 0;
+
+
+volatile int sound[max_sample_size];
 
 volatile int C6_wave[default_sample_size];
 volatile int D6_wave[default_sample_size];
@@ -31,8 +32,8 @@ volatile int A6_wave[default_sample_size];
 
 volatile int *current_wave_ptr;
 
-const float song_tone[song_length] = {C6, D6, E6, F6, G6, G6, A6, A6, A6, A6, G6, F6, F6, F6, F6, E6, E6, D6, D6, D6, D6, C6};
-const int song_tone_length[song_length] = {Q, Q, Q, Q, H, H, Q, Q, Q, Q, F, Q, Q, Q, Q, H, H, Q, Q, Q, Q, F};
+const float song_tone[song_length] = {C6, D6, E6, F6, G6, G6, A6, A6, A6, A6, G6, F6, F6, F6, F6, E6, E6, D6, D6, D6, D6, C6 };
+const int song_tone_length[song_length] = {Q, Q, Q, Q, H, H, Q, Q, Q, Q, F, Q, Q, Q, Q, H, H, Q, Q, Q, Q, F };
 
 int main (int argc, char *argv[]) {
 	int i;
@@ -190,8 +191,8 @@ void playSound(int code) {
 }
 
 void generate_tone(float f) {
-	sample_size = 50;
 	//sample_size = ceil(Fs/f);
+	sample_size = default_sample_size;
 	if (sample_size > max_sample_size) {
 		sample_size = max_sample_size;
 	}
@@ -206,37 +207,44 @@ void init_sound(void) {
 	sample_counter = 0;
 	repeat_counter = 0;
 	playing_sound = 1;
-	dac->sdr = sound[sample_counter];
-	//dac->sdr = C6_wave[sample_counter];
-	//dac->sdr = *current_wave_ptr;		//send first sample to DAC
-	//current_wave_ptr++;			//increment pointer (to XX_wave[1])
+	set_tone(song_tone[song_counter]);
+	dac->sdr = *current_wave_ptr;
+	current_wave_ptr++;
 	sample_counter++;
 }
 
-void set_tone(int tone) {
+void set_tone(float tone) {
 	/* make current_wave_ptr point to the first sample (e.g. C6_wave[0]) of the desired wave */
-	if (tone == C6) {
-		current_wave_ptr = &C6_wave[0];
+	float C6f = C6;
+	float D6f = D6;
+	float E6f = E6;
+	float F6f = F6;
+	float G6f = G6;
+	float A6f = A6;
+	if (tone == C6f) {
+		current_wave_ptr = C6_wave;
 	}
-	else if (tone == D6) {
+	else if (tone == D6f) {
 		current_wave_ptr = D6_wave;
 	}
-	else if (tone == E6) {
+	else if (tone == E6f) {
 		current_wave_ptr = E6_wave;
 	}
-	else if (tone == F6) {
-		current_wave_ptr = F6_wave;
+	else if (tone == F6f) {
+		current_wave_ptr = F6_wave;	
 	}
-	else if (tone == G6) {
+	else if (tone == G6f) {
 		current_wave_ptr = G6_wave;
 	}
-	else if (tone == A6) {
+	else if (tone == A6f) {
 		current_wave_ptr = A6_wave;
+	}
+	else {
+		current_wave_ptr = sound;
 	}
 	sample_size = default_sample_size;
 	return;
 }
-
 
 void abdac_isr(void) {
 	/* check if the interrupts comes when we actually want to play a sound, to avoid crash */
@@ -246,32 +254,27 @@ void abdac_isr(void) {
 	/* check if tone has completed its duration */
 	if (repeat_counter == sound_length) {
 		/* if last tone in song, stop playing */
-		if (song_counter == song_length) {
+		if (song_counter >= song_length-1) {
 			playing_sound = 0;
+			dac->sdr = 0;
 			return;
 		}
 		/* reset counters and get next tone + duration */
-		song_counter++;
 		sample_counter = 0;
 		repeat_counter = 0;
-		//set_tone(song_tone[song_counter]);
-		generate_tone(song_tone[song_counter]);
+		song_counter++;
+		set_tone(song_tone[song_counter]);
 		sound_length = song_tone_length[song_counter];
-		
 	}
 	/* repeat sample if reached sample end */
 	if (sample_counter == sample_size) {
 		sample_counter = 0;
 		repeat_counter++;
-		//set_tone(song_tone[song_counter]);
+		set_tone(song_tone[song_counter]);
 	}
-	/* send next sample to DAC */
-	//dac->sdr = *current_wave_ptr;
-	//dac->sdr = C6_wave[sample_counter];
-	//dac->sdr = sound[sample_counter];
-	dac->sdr = rand()%1000;
-	//current_wave_ptr++;
+	dac->sdr = *current_wave_ptr;
 	sample_counter++;
+	current_wave_ptr++;
 	return;
 }
 
