@@ -143,7 +143,7 @@ void button_isr(void) {
 }
 
 void init_sound(void) {
-	/* initialize counters */
+	/* initialize counters and pointers */
 	sound_counter = 0;
 	sample_counter = 0;
 	repeat_counter = 0;
