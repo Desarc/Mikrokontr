@@ -41,6 +41,8 @@
 #define G7 3135.96
 #define A7 3520.00
 
+
+
 /* tone lengths */
 #define Q 500
 #define H 1000
@@ -98,5 +100,6 @@ static void debounce(void);
 static void playSound(int code);
 static void generate_tone(float f);
 static void init_sound(void);
+static void set_tone(int tone);
 
 #endif

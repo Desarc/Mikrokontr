@@ -31,7 +31,7 @@ volatile int A6_wave[default_sample_size];
 
 volatile int *current_wave_ptr;
 
-const float song[song_length] = {C6, D6, E6, F6, G6, G6, A6, A6, A6, A6, G6, F6, F6, F6, F6, E6, E6, D6, D6, D6, D6, C6};
+const float song_tone[song_length] = {C6, D6, E6, F6, G6, G6, A6, A6, A6, A6, G6, F6, F6, F6, F6, E6, E6, D6, D6, D6, D6, C6};
 const int song_tone_length[song_length] = {Q, Q, Q, Q, H, H, Q, Q, Q, Q, F, Q, Q, Q, Q, H, H, Q, Q, Q, Q, F};
 
 int main (int argc, char *argv[]) {
@@ -116,13 +116,6 @@ void initAudio(void) {
 void button_isr(void) {
 	pioc->isr;
 	int buttons = pioc->pdsr;
-	//if (skip == 1) {
-	//	skip = 0;
-	//	//return;
-	//}
-	//else {
-	//	skip = 1;
-	//}
 	clearLeds();
 	if (buttons == BUTTON7) {
 		playSound(SOUND7);
@@ -164,10 +157,11 @@ void button_isr(void) {
 void playSound(int code) {
 	float f;
 	if (code == SOUND7) {
+		/* initialize song_counter, keeps track of which tone to play. get tone and length from array */
 		song_counter = 0;
-		f = song[song_counter];
+		f = song_tone[song_counter];
 		sound_length = song_tone_length[song_counter];
-		song_counter++;
+		//song_counter++;
 	}
 	else if (code == SOUND6) {
 		f = D6;
@@ -190,8 +184,8 @@ void playSound(int code) {
 	else if (code == SOUND0) {
 		f = C7;
 	}
-	set_tone(f);
-	init_sound();	
+	set_tone(f);				//point to the correct wave
+	init_sound();				//start playing the sound
 }
 
 void generate_tone(float f) {
@@ -206,57 +200,71 @@ void generate_tone(float f) {
 }
 
 void init_sound(void) {
+	/* initialize counters */
 	sample_counter = 0;
 	repeat_counter = 0;
 	playing_sound = 1;
-	dac->sdr = *current_wave_ptr[sample_counter];
+	//dac->sdr = C6_wave[sample_counter];
+	dac->sdr = *current_wave_ptr;		//send first sample to DAC
+	current_wave_ptr++;			//increment pointer (to XX_wave[1])
 	sample_counter++;
 }
 
 void set_tone(int tone) {
-	switch(tone) {
-		case C6:
-			current_wave_ptr = *C6_wave;
-			break;
-		case D6:
-			current_wave_ptr = *D6_wave;
-			break;
-		case E6:
-			current_wave_ptr = *E6_wave;
-			break;
-		case F6:
-			current_wave_ptr = *F6_wave;
-			break;
-		case G6:
-			current_wave_ptr = *G6_wave;
-			break;
-		case A6:
-			current_wave_ptr = *A6_wave;
-			break;	
-	return
+	/* make current_wave_ptr point to the first sample (e.g. C6_wave[0]) of the desired wave */
+	if (tone == C6) {
+		current_wave_ptr = &C6_wave[0];
+	}
+	else if (tone == D6) {
+		current_wave_ptr = D6_wave;
+	}
+	else if (tone == E6) {
+		current_wave_ptr = E6_wave;
+	}
+	else if (tone == F6) {
+		current_wave_ptr = F6_wave;
+	}
+	else if (tone == G6) {
+		current_wave_ptr = G6_wave;
+	}
+	else if (tone == A6) {
+		current_wave_ptr = A6_wave;
+	}
+	sample_size = default_sample_size;
+	return;
 }
 
 
 void abdac_isr(void) {
+	/* check if the interrupts comes when we actually want to play a sound, to avoid crash */
 	if (playing_sound == 0) {
 		return;
 	}
-	if (song_counter == song_length) {
-		playing_sound = 0;
-		return;
-	}
+	/* check if tone has completed its duration */
 	if (repeat_counter == sound_length) {
+		/* if last tone in song, stop playing */
+		if (song_counter == song_length) {
+			playing_sound = 0;
+			return;
+		}
+		/* reset counters and get next tone + duration */
+		song_counter++;
 		sample_counter = 0;
 		repeat_counter = 0;
-		set_tone(song[song_counter]);
+		set_tone(song_tone[song_counter]);
 		sound_length = song_tone_length[song_counter];
-		song_counter++;
+		
 	}
+	/* repeat sample if reached sample end */
 	if (sample_counter == sample_size) {
 		sample_counter = 0;
 		repeat_counter++;
+		set_tone(song_tone[song_counter]);
 	}
-	dac->sdr = *current_wave_ptr[sample_counter];
+	/* send next sample to DAC */
+	dac->sdr = *current_wave_ptr;
+	//dac->sdr = C6_wave[sample_counter];
+	current_wave_ptr++;
 	sample_counter++;
 	return;
 }
