@@ -19,11 +19,11 @@ volatile int playing_sound = 0;
 
 volatile int *current_wave_ptr;
 volatile float *current_sound_ptr;
-volatile int *current_sound_tl_ptr;
+volatile float *current_sound_tl_ptr;
 
 int main (int argc, char *argv[]) {
 	int i;
-	/* pre-generating wave samples */
+	/* pre-generating tone sample vectors */
 	for (i = 0; i < scale_length; i++) {
 		current_wave_ptr = wave_pointers[i];
 		generate_tone(scale[i]);
@@ -86,6 +86,7 @@ void initAudio(void) {
 	return;
 }
 
+/* generate the sample vector for ~one period of a pure sine */
 void generate_tone(float f) {
 	set_sample_size(f);
 	int j;
@@ -143,30 +144,32 @@ void button_isr(void) {
 	return;
 }
 
+/* initialize counters and pointers */
 void init_sound(void) {
-	/* initialize counters and pointers */
 	sound_counter = 0;
 	sample_counter = 0;
 	repeat_counter = 0;
 	playing_sound = 1;
-	set_tone(*current_sound_ptr);
-	tone_length = *current_sound_tl_ptr;
+	float tone = *current_sound_ptr;
+	set_tone(tone);
+	float length = *current_sound_tl_ptr;
+	set_tone_length(tone, length);
 	dac->sdr = *current_wave_ptr;
 	current_wave_ptr++;
 	sample_counter++;
 }
 
+/* set the size of the sample vector, depending on the frequency of the tone */
 void set_sample_size(float tone) {
 	sample_size = (int)ceil(Fs/tone);
-	//sample_size = default_sample_size;	
 	if (sample_size > default_sample_size) {
 		sample_size = default_sample_size;
 	}
 }
 
+/* make current_wave_ptr point to the first sample (e.g. C6_wave[0]) of the desired tone */
 void set_tone(float tone) {
 	set_sample_size(tone);
-	/* make current_wave_ptr point to the first sample (e.g. C6_wave[0]) of the desired wave */
 	if (tone == G5f) {
 		current_wave_ptr = G5_wave;
 	}
@@ -207,13 +210,18 @@ void set_tone(float tone) {
 	return;
 }
 
+/* set number of sample vector repeats according to frequency and desired length */
+void set_tone_length(float tone, float length) {
+	tone_length = (int)(tone * length);
+}
+
 void abdac_isr(void) {
 	/* check if the interrupts comes when we actually want to play a sound, to avoid crash */
 	if (playing_sound == 0) {
 		return;
 	}
 	/* check if tone has completed its duration */
-	if (repeat_counter == tone_length) {
+	if (repeat_counter >= tone_length) {
 		/* if last tone in song, stop playing */
 		if (sound_counter >= sound_length-1) {
 			playing_sound = 0;
@@ -228,11 +236,11 @@ void abdac_isr(void) {
 		current_sound_tl_ptr++;
 		float tone = *current_sound_ptr;
 		set_tone(tone);
-		tone_length = *current_sound_tl_ptr;
-		//tone_length = (int)ceil(*current_sound_tl_ptr*tone);
+		float length = *current_sound_tl_ptr;
+		set_tone_length(tone, length);
 	}
-	/* repeat sample if reached sample end */
-	if (sample_counter == sample_size) {
+	/* repeat sample vector if last sample played */
+	if (sample_counter >= sample_size) {
 		sample_counter = 0;
 		repeat_counter++;
 		set_tone(*current_sound_ptr);

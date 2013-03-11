@@ -26,7 +26,7 @@
 #define G7 3135.96
 #define A7 3520.00
 
-/* frequency levels as floats */
+/* frequency levels as floats (for comparison) */
 const float G5f = G5;	
 const float A5f = A5;	
 const float B5f = B5;
@@ -39,23 +39,17 @@ const float A6f = A6;
 const float B6f = B6;
 const float C7f = C7;
 
-/* tone lengths */
-#define S 5
-#define QQ 12
-#define E 25
-#define Q 50
-#define H 100
-#define F 200
+/* tone lengths (seconds) */
 
-//#define S 0.02			// 1/50
-//#define QQ 0.0625		// 1/16
-//#define E 0.125			// 1/8
-//#define Q 0.25			// 1/4
-//#define H 0.5			// 1/2
-//#define F 1
+#define S 0.02			// 1/50
+#define QQ 0.0625		// 1/16
+#define E 0.125			// 1/8
+#define Q 0.25			// 1/4
+#define H 0.5			// 1/2
+#define F 1
 
 /* tone sample arrays */
-#define default_sample_size 400
+#define default_sample_size 200
 
 volatile int G5_wave[default_sample_size];
 volatile int A5_wave[default_sample_size];
@@ -81,13 +75,13 @@ int *wave_pointers[scale_length] = {G5_wave, A5_wave, B5_wave, C6_wave, D6_wave,
 
 /* sound vectors */
 float song_tone[song_length] = {C6, D6, E6, F6, G6, G6, A6, A6, A6, A6, G6, F6, F6, F6, F6, E6, E6, D6, D6, D6, D6, C6 };
-int song_tone_length[song_length] = {Q, Q, Q, Q, H, H, Q, Q, Q, Q, F, Q, Q, Q, Q, H, H, Q, Q, Q, Q, F };
+float song_tone_length[song_length] = {Q, Q, Q, Q, H, H, Q, Q, Q, Q, F, Q, Q, Q, Q, H, H, Q, Q, Q, Q, F };
 
 float scale[scale_length] = {G5, A5, B5, C6, D6, E6, F6, G6, A6, B6, C7 };
-int scale_tone_length[scale_length] = {S, S, S, S, S, S, S, S, S, S};
+float scale_tone_length[scale_length] = {S, S, S, S, S, S, S, S, S, S};
 
 float sirene[sirene_length] = {C6, D6, E6, F6, E6, D6, C6, D6, E6, F6, E6, D6, C6, D6, E6, F6, E6, D6, C6 };
-int sirene_tone_length[sirene_length] = {QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ };
+float sirene_tone_length[sirene_length] = {QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ };
 
 
 

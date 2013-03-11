@@ -70,5 +70,6 @@ static void generate_tone(float f);
 static void init_sound(void);
 static void set_tone(float tone);
 static void set_sample_size(float tone);
+static void set_tone_length(float tone, float length);
 
 #endif
