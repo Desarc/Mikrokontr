@@ -7,13 +7,13 @@
 #include "oeving2.h"
 #include "samples.h"
 
-volatile int tone_length;
 const int A = 1500;
 volatile int LED_VECTOR = 0x0;
 volatile int sample_size;
 volatile int sample_counter;
 volatile int repeat_counter;
 volatile int sound_counter;
+volatile int tone_length;
 volatile int sound_length;
 volatile int playing_sound = 0;
 
@@ -87,8 +87,9 @@ void initAudio(void) {
 }
 
 void generate_tone(float f) {
+	set_sample_size(f);
 	int j;
-	for (j = 0; j < default_sample_size; j++) {
+	for (j = 0; j < sample_size; j++) {
 		*current_wave_ptr = (int)floor(A*sin(f*(2*M_PI)*j/Fs));
 		current_wave_ptr++;
 	}
@@ -155,8 +156,16 @@ void init_sound(void) {
 	sample_counter++;
 }
 
+void set_sample_size(float tone) {
+	sample_size = (int)ceil(Fs/tone);
+	//sample_size = default_sample_size;	
+	if (sample_size > default_sample_size) {
+		sample_size = default_sample_size;
+	}
+}
+
 void set_tone(float tone) {
-	sample_size = default_sample_size;	
+	set_sample_size(tone);
 	/* make current_wave_ptr point to the first sample (e.g. C6_wave[0]) of the desired wave */
 	if (tone == G5f) {
 		current_wave_ptr = G5_wave;
@@ -217,8 +226,10 @@ void abdac_isr(void) {
 		sound_counter++;
 		current_sound_ptr++;
 		current_sound_tl_ptr++;
-		set_tone(*current_sound_ptr);
+		float tone = *current_sound_ptr;
+		set_tone(tone);
 		tone_length = *current_sound_tl_ptr;
+		//tone_length = (int)ceil(*current_sound_tl_ptr*tone);
 	}
 	/* repeat sample if reached sample end */
 	if (sample_counter == sample_size) {

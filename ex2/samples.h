@@ -47,8 +47,16 @@ const float C7f = C7;
 #define H 100
 #define F 200
 
+//#define S 0.02			// 1/50
+//#define QQ 0.0625		// 1/16
+//#define E 0.125			// 1/8
+//#define Q 0.25			// 1/4
+//#define H 0.5			// 1/2
+//#define F 1
+
 /* tone sample arrays */
 #define default_sample_size 400
+
 volatile int G5_wave[default_sample_size];
 volatile int A5_wave[default_sample_size];
 volatile int B5_wave[default_sample_size];
