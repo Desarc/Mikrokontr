@@ -25,8 +25,21 @@ int main (int argc, char *argv[]) {
 	int i;
 	/* pre-generating tone sample vectors */
 	for (i = 0; i < scale_length; i++) {
-		current_wave_ptr = wave_pointers[i];
+		current_wave_ptr = tone_wave_pointers[i];
 		generate_tone(scale[i]);
+	}
+	/* pre-generating harmonics */
+	for (i = 0; i < harmonics_scale_length; i++) {
+		current_wave_ptr = harmonics_wave_pointers[i];
+		float tone1 = harmonics_scale[i][0];
+		float tone2 = harmonics_scale[i][1];
+		float tone3 = harmonics_scale[i][2];
+		generate_harmonics(tone1, tone2, tone3);
+	}
+	/* pre-generating sawteeth */
+	for (i = 0; i < sawtooth_scale_length; i++) {
+		current_wave_ptr = sawtooth_wave_pointers[i];
+		generate_sawtooth(sawtooth_scale[i]);
 	}
 	initHardware();
  	while(1);
@@ -96,6 +109,27 @@ void generate_tone(float f) {
 	}
 }
 
+void generate_sawtooth(float f) {
+	set_sample_size(f);
+	int j;
+	for (j = 0; j < sample_size; j++) {
+		*current_wave_ptr = (int)A*((j/(Fs/f))*floor(0.5+j/(Fs/f)));
+		current_wave_ptr++;
+	}
+}
+
+void generate_harmonics(float f1, float f2, float f3){
+	set_sample_size(1/(1/f1+1/f2+1/f3));
+	int j;
+	for (j = 0; j < sample_size; j++) {
+		int p1 = (int)floor(A*sin(f1*(2*M_PI)*j/Fs));
+		int p2 = (int)floor(A*sin(f2*(2*M_PI)*j/Fs));
+		int p3 = (int)floor(A*sin(f3*(2*M_PI)*j/Fs));
+		*current_wave_ptr = p1+p2+p3;
+		current_wave_ptr++;
+	}
+}
+
 void button_isr(void) {
 	pioc->isr;
 	int buttons = pioc->pdsr;
@@ -119,23 +153,33 @@ void button_isr(void) {
 		LED_VECTOR = LED5;
 	}
 	else if (buttons == BUTTON4) {
-		//playSound(SOUND4);
+		current_sound_ptr = sawtooth_scale;
+		current_sound_tl_ptr = sawtooth_scale_tone_length;
+		sound_length = sawtooth_scale_length;
 		LED_VECTOR = LED4;
 	}
 	else if (buttons == BUTTON3) {
-		//playSound(SOUND3);
+		current_sound_ptr = chords;
+		current_sound_tl_ptr = chords_tone_length;
+		sound_length = chords_length;
 		LED_VECTOR = LED3;
 	}
 	else if (buttons == BUTTON2) {
-		//playSound(SOUND2);
+		current_sound_ptr = chords_comp;
+		current_sound_tl_ptr = chords_comp_tone_length;
+		sound_length = chords_length;
 		LED_VECTOR = LED2;
 	}
 	else if (buttons == BUTTON1) {
-		//playSound(SOUND1);
+		current_sound_ptr = harmonics;
+		current_sound_tl_ptr = harmonics_tone_length;
+		sound_length = harmonics_length;
 		LED_VECTOR = LED1;
 	}
 	else if (buttons == BUTTON0) {
-		//playSound(SOUND0);
+		current_sound_ptr = harmonics_comp;
+		current_sound_tl_ptr = harmonics_comp_tone_length;
+		sound_length = harmonics_length;
 		LED_VECTOR = LED0;
 	}
 	init_sound();				//start playing the sound
@@ -202,6 +246,36 @@ void set_tone(float tone) {
 	}
 	else if (tone == C7f) {
 		current_wave_ptr = C7_wave;
+	}
+	else if (tone == Cf) {
+		current_wave_ptr = C_chord;
+	}
+	else if (tone == Df) {
+		current_wave_ptr = D_chord;
+	}
+	else if (tone == Emf) {
+		current_wave_ptr = Em_chord;
+	}
+	else if (tone == C_hf) {
+		current_wave_ptr = C_harmonic;
+	}
+	else if (tone == A_hf) {
+		current_wave_ptr = A_harmonic;
+	}
+	else if (tone == C6_sf) {
+		current_wave_ptr = C6_sawtooth;
+	}
+	else if (tone == D6_sf) {
+		current_wave_ptr = D6_sawtooth;
+	}
+	else if (tone == E6_sf) {
+		current_wave_ptr = E6_sawtooth;
+	}
+	else if (tone == F6_sf) {
+		current_wave_ptr = F6_sawtooth;
+	}
+	else if (tone == G6_sf) {
+		current_wave_ptr = G6_sawtooth;
 	}
 	else {
 		current_wave_ptr = silence;
