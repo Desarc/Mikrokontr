@@ -111,9 +111,14 @@ void generate_tone(float f) {
 
 void generate_sawtooth(float f) {
 	set_sample_size(f);
+	int i;
 	int j;
-	for (j = 0; j < sample_size; j++) {
-		*current_wave_ptr = (int)A*((j/(Fs/f))*floor(0.5+j/(Fs/f)));
+	for (i = 0; i < sample_size; i++) {
+		float sample;
+		for (j = 1; j < 20; j++) {
+			sample += floor((A/j)*sin(f*j*(2*M_PI)*j/Fs));
+		}
+		*current_wave_ptr = (int)sample;
 		current_wave_ptr++;
 	}
 }
@@ -198,7 +203,9 @@ void init_sound(void) {
 	set_tone(tone);
 	float length = *current_sound_tl_ptr;
 	set_tone_length(tone, length);
-	dac->sdr = *current_wave_ptr;
+	dac->SDR.channel0 = (short)*current_wave_ptr;
+	dac->SDR.channel1 = (short)*current_wave_ptr;	
+	//dac->sdr = *current_wave_ptr;
 	current_wave_ptr++;
 	sample_counter++;
 }
@@ -300,6 +307,8 @@ void abdac_isr(void) {
 		if (sound_counter >= sound_length-1) {
 			playing_sound = 0;
 			dac->sdr = 0;
+			dac->CR.en = 0; // Reset DAC to avoid noise
+			dac->CR.en = 1;
 			return;
 		}
 		/* reset counters and get next tone + duration */
@@ -319,7 +328,9 @@ void abdac_isr(void) {
 		repeat_counter++;
 		set_tone(*current_sound_ptr);
 	}
-	dac->sdr = *current_wave_ptr;
+	dac->SDR.channel0 = (short)*current_wave_ptr;
+	dac->SDR.channel1 = (short)*current_wave_ptr;
+	//dac->sdr = *current_wave_ptr;
 	sample_counter++;
 	current_wave_ptr++;
 	return;
