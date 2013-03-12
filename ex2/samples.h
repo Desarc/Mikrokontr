@@ -27,7 +27,7 @@
 #define G7 3135.96f
 #define A7 3520.00f
 
-/* sawtooth frequencies */
+/* triangle frequencies */
 #define C_s 523.26f
 #define D_s 587.34f
 #define E_s 659.27f
@@ -50,11 +50,11 @@ volatile int G6_wave[default_sample_size];
 volatile int A6_wave[default_sample_size];
 volatile int B6_wave[default_sample_size];
 volatile int C7_wave[default_sample_size];
-volatile int C_sawtooth[default_sample_size];
-volatile int D_sawtooth[default_sample_size];
-volatile int E_sawtooth[default_sample_size];
-volatile int F_sawtooth[default_sample_size];
-volatile int G_sawtooth[default_sample_size];
+volatile int C_triangle[default_sample_size];
+volatile int D_triangle[default_sample_size];
+volatile int E_triangle[default_sample_size];
+volatile int F_triangle[default_sample_size];
+volatile int G_triangle[default_sample_size];
 volatile int silence_wave[1] = {0};
 
 
@@ -74,19 +74,19 @@ volatile int silence_wave[1] = {0};
 
 #define scale_length 13
 #define sirene_length 19
-#define sawtooth_scale_length 5
+#define triangle_scale_length 5
 #define test_sound_length 16
 #define tetris_length 40
 
 int *tone_wave_pointers[scale_length] = { A4_wave, C5_wave, G5_wave, A5_wave, B5_wave, C6_wave, D6_wave, E6_wave, F6_wave, G6_wave, A6_wave, B6_wave, C7_wave };
-int *sawtooth_wave_pointers[sawtooth_scale_length] = { C_sawtooth, D_sawtooth, E_sawtooth, F_sawtooth, G_sawtooth };
+int *triangle_wave_pointers[triangle_scale_length] = { C_triangle, D_triangle, E_triangle, F_triangle, G_triangle };
 
 /* sound vectors */
 float scale[scale_length] = { A4, C5, G5, A5, B5, C6, D6, E6, F6, G6, A6, B6, C7 };
 float scale_tone_length[scale_length] = { S, S, S, S, S, S, S, S, S, S, S, S, S };
 
-float sawtooth_scale[sawtooth_scale_length] = { C_s, D_s, E_s, F_s, G_s };
-float sawtooth_scale_tone_length[sawtooth_scale_length] = { H, H, H, H, H };
+float triangle_scale[triangle_scale_length] = { C_s, D_s, E_s, F_s, G_s };
+float triangle_scale_tone_length[triangle_scale_length] = { H, H, H, H, H };
 
 float sirene[sirene_length] = { C6, D6, E6, F6, E6, D6, C6, D6, E6, F6, E6, D6, C6, D6, E6, F6, E6, D6, C6 };
 float sirene_tone_length[sirene_length] = { QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ };
