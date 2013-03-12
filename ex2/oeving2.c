@@ -116,7 +116,7 @@ void generate_sawtooth(float f) {
 	for (i = 0; i < sample_size; i++) {
 		float sample;
 		for (j = 1; j < 20; j++) {
-			sample += floor((A/j)*sin(f*j*(2*M_PI)*j/Fs));
+			sample += (A/j)*sin(f*j*(2*M_PI)*j/Fs);
 		}
 		*current_wave_ptr = (int)sample;
 		current_wave_ptr++;
