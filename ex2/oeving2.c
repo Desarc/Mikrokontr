@@ -107,7 +107,8 @@ void initLeds(void) {
 
 void initAudio(void) {
 	register_interrupt( abdac_isr, AVR32_ABDAC_IRQ/32, AVR32_ABDAC_IRQ%32, ABDAC_INT_LEVEL);
-	pm->gcctrl[6] = 0x5;  //using OSC1
+	//pm->gcctrl[6] = 0x15;  //using OSC1 divided by 2 (6MHz)
+	pm->gcctrl[6] = 0x5;  //using OSC1 undivided
 	piob->PDR.p20 = 1;
 	piob->PDR.p21 = 1;
 	piob->ASR.p20 = 1;
@@ -202,9 +203,9 @@ void button_isr(void) {
 	clearLeds();
 	/* select sound vector and length */
 	if (buttons == BUTTON7) {
-		current_sound_ptr = song_tone;
-		current_sound_tl_ptr = song_tone_length;
-		sound_length = song_length;
+		current_sound_ptr = test_sound;
+		current_sound_tl_ptr = test_sound_tone_length;
+		sound_length = test_sound_length;
 		LED_VECTOR = LED7;
 	}
 	else if (buttons == BUTTON6) {
@@ -220,9 +221,9 @@ void button_isr(void) {
 		LED_VECTOR = LED5;
 	}
 	else if (buttons == BUTTON4) {
-		current_sound_ptr = sawtooth_scale;
-		current_sound_tl_ptr = sawtooth_scale_tone_length;
-		sound_length = sawtooth_scale_length;
+		current_sound_ptr = tetris;
+		current_sound_tl_ptr = tetris_tone_length;
+		sound_length = tetris_length;
 		LED_VECTOR = LED4;
 	}
 	else if (buttons == BUTTON3) {
@@ -238,16 +239,21 @@ void button_isr(void) {
 		LED_VECTOR = LED2;
 	}
 	else if (buttons == BUTTON1) {
-		current_sound_ptr = test_sound;
-		current_sound_tl_ptr = test_sound_tone_length;
-		sound_length = test_sound_length;
+		current_sound_ptr = song_tone;
+		current_sound_tl_ptr = song_tone_length;
+		sound_length = song_length;
 		LED_VECTOR = LED1;
 	}
 	else if (buttons == BUTTON0) {
-		current_sound_ptr = fm_sound;
-		current_sound_tl_ptr = fm_sound_tone_length;
-		sound_length = fm_scale_length;
+		current_sound_ptr = silence;
+		current_sound_tl_ptr = silence_length;
+		sound_length = 1;
 		LED_VECTOR = LED0;
+	}
+	else {
+		setLeds();
+		debounce();
+		return;
 	}
 	init_sound();				//start playing the sound
 	setLeds();
@@ -288,8 +294,10 @@ void set_tone(float tone) {
 	else if (tone == C6) current_wave_ptr = C6_wave;
 	else if (tone == D6) current_wave_ptr = D6_wave;
 	else if (tone == E6) current_wave_ptr = E6_wave;
-	else if (tone == F6) current_wave_ptr = F6_wave;	
+	else if (tone == F6) current_wave_ptr = F6_wave;
+	else if (tone == Fs6) current_wave_ptr = Fs6_wave;	
 	else if (tone == G6) current_wave_ptr = G6_wave;
+	else if (tone == Gs6) current_wave_ptr = Gs6_wave;
 	else if (tone == A6) current_wave_ptr = A6_wave;
 	else if (tone == B6) current_wave_ptr = B6_wave;
 	else if (tone == C7) current_wave_ptr = C7_wave;
@@ -316,8 +324,11 @@ void set_tone(float tone) {
 	else if (tone == fm_1) current_wave_ptr = fm1_wave;
 	else if (tone == fm_3) current_wave_ptr = fm2_wave;
 	else if (tone == fm_3) current_wave_ptr = fm3_wave;
-	else {
-		current_wave_ptr = silence;
+	else if (tone == s) {
+		current_wave_ptr = silence_wave;
+		sample_size = 1;
+	} else {
+		current_wave_ptr = silence_wave;
 		sample_size = 1;
 	}
 	return;
@@ -369,7 +380,7 @@ void abdac_isr(void) {
 
 void debounce(void) {
 	int n = 0x0;
-	while (n < 0xffff) {
+	while (n < 0x2ffff) {
 		n++;
 	}
 	return;

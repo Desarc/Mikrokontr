@@ -3,6 +3,7 @@
 #define SAMPLES_H
 
 /* frequency levels for various tones */
+#define s 0.1f
 #define A4 440.00f
 #define B4 493.88f
 #define C5 523.25f
@@ -18,6 +19,7 @@
 #define F6 1396.91f
 #define Fs6 1479.98f
 #define G6 1567.98f
+#define Gs6 1661.22f
 #define A6 1760.00f
 #define B6 1975.53f
 #define C7 2093.00f
@@ -76,7 +78,7 @@
 #define A_h 251.43f
 
 /* tone sample arrays */
-#define default_sample_size 200
+#define default_sample_size 100
 
 volatile int A4_wave[default_sample_size];
 volatile int C5_wave[default_sample_size];
@@ -89,6 +91,7 @@ volatile int E6_wave[default_sample_size];
 volatile int F6_wave[default_sample_size];
 volatile int Fs6_wave[default_sample_size];
 volatile int G6_wave[default_sample_size];
+volatile int Gs6_wave[default_sample_size];
 volatile int A6_wave[default_sample_size];
 volatile int B6_wave[default_sample_size];
 volatile int C7_wave[default_sample_size];
@@ -115,10 +118,12 @@ volatile int G_square[default_sample_size];
 volatile int fm1_wave[default_sample_size];
 volatile int fm2_wave[default_sample_size];
 volatile int fm3_wave[default_sample_size];
-volatile int silence[1] = {0};
+volatile int silence_wave[1] = {0};
 
 
-#define Fs 46875.0
+#define Fs 46875.0f		// = 12M/256
+//#define Fs 23437.5f		// = (12M/2)/256
+//#define Fs 11718.75f		// = (12M/4)/256
 
 /* tone lengths (seconds) */
 #define S 0.02			// 1/50
@@ -140,9 +145,11 @@ volatile int silence[1] = {0};
 #define fm_scale_length 3
 #define chords_length 8
 #define harmonics_length 4
-#define test_sound_length 12
+#define test_sound_length 16
+#define tetris_intro_length 15
+#define tetris_length 40
 
-int *tone_wave_pointers[scale_length] = { A4_wave, C5_wave, G5_wave, A5_wave, B5_wave, C6_wave, D6_wave, E6_wave, F6_wave, Fs6_wave, G6_wave, A6_wave, B6_wave, C7_wave };
+int *tone_wave_pointers[scale_length] = { A4_wave, C5_wave, G5_wave, A5_wave, B5_wave, C6_wave, D6_wave, E6_wave, F6_wave, Fs6_wave, G6_wave, Gs6_wave, A6_wave, B6_wave, C7_wave };
 int *chords_wave_pointers[chords_scale_length] = { C_chord, D_chord, Em_chord };
 int *sawtooth_wave_pointers[sawtooth_scale_length] = { C_sawtooth, D_sawtooth, E_sawtooth, F_sawtooth, G_sawtooth };
 int *square_wave_pointers[square_scale_length] = { C_square, D_square, E_square, F_square, G_square };
@@ -172,13 +179,22 @@ float fm_scale[fm_scale_length][3] = { f_1, f_2, f_3 };
 float sirene[sirene_length] = { C6, D6, E6, F6, E6, D6, C6, D6, E6, F6, E6, D6, C6, D6, E6, F6, E6, D6, C6 };
 float sirene_tone_length[sirene_length] = { QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ };
 
-float test_sound[test_sound_length] = { F6, E_s, E6, D6, C_sq, D_sq, C, C7, B6, A6, G6, F_s };
-float test_sound_tone_length[test_sound_length] = { Q, H, Q, Q, H, Q, E, QQ, QQ, QQ, QQ, H };
+float test_sound[test_sound_length] = { C7, F_t, B6, F_t, A6, F_t, G6, F_t, F6, F_t, E6, F_t, D6, F_t, C6, F_t };
+float test_sound_tone_length[test_sound_length] = { QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ };
+
+float tetris_intro[tetris_intro_length] = { E6, C6, D6, B5, C6, A5, B5, E6, C6, D6, B5, C6, E6, A6, Gs6 };
+float tetris_intro_tone_length[tetris_intro_length] = { Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q };
+
+float tetris[tetris_length] = { E6, B5, C6, D6, C6, B5, A5, A5, C6, E6, D6, C6, B5, B5, C6, D6, E6, C6, A5, A5,/* */ D6, D6, F6, A6, G6, F6, E6, E6, C6, E6, D6, C6, B5, B5, C6, D6, E6, C6, A5, A5 };
+float tetris_tone_length[tetris_length] = { Q, E, E, Q, E, E, Q, E, E, Q, E, E, Q, E, E, Q, Q, Q, Q, H,/* */ Q, E, E, Q, E, E, Q, E, E, Q, E, E, Q, E, E, Q, Q, Q, Q, Q };
 
 float chords[chords_length] = { Em, C, D, Em, Em, C, D, Em };
 float chords_tone_length[chords_length] = { H, H, H, H, H, H, H, H };
 
 float fm_sound[fm_scale_length] = { fm_1, fm_2, fm_3 };
 float fm_sound_tone_length[fm_scale_length] = { F, F, F };
+
+float silence[1] = { s };
+float silence_length[1] = { F };
 
 #endif
