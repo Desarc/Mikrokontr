@@ -226,6 +226,8 @@ void abdac_isr(void) {
 		if (sound_counter >= sound_length-1) {
 			playing_sound = 0;
 			dac->sdr = 0;
+			dac->CR.en = 0; // Reset DAC to avoid noise
+			dac->CR.en = 1;
 			return;
 		}
 		/* reset counters and get next tone + duration */
