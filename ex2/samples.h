@@ -69,4 +69,14 @@ float scale_tone_length[scale_length] = {S, S, S, S, S, S, S, S, S, S};
 float sirene[sirene_length] = {C6, D6, E6, F6, E6, D6, C6, D6, E6, F6, E6, D6, C6, D6, E6, F6, E6, D6, C6 };
 float sirene_tone_length[sirene_length] = {QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ };
 
+struct sound {
+        float key;
+        float dur;
+};
+
+struct sound jump[] = {{G5,S},{A5,S},{B5,S},{C6,S},{D6,S},{E6,S},{F6,S},{G6,S},{A6,S},{B6,S},{C7,S}};
+struct sound siren[] = {{C6,QQ},{D6,QQ},{E6,QQ},{F6,QQ},{E6,QQ},{D6,QQ},{C6,QQ},{D6,QQ},{E6,QQ},{F6,QQ},{E6,QQ},{D6,QQ},{C6,QQ},{D6,QQ},{E6,QQ},{F6,QQ},{E6,QQ},{D6,QQ},{C6,QQ}};
+struct sound lisa[] = {{C6,Q},{D6,Q},{E6,Q},{F6,Q},{G6,H},{G6,H},{A6,Q},{A6,Q},{A6,Q},{A6,Q},{G6,F},{F6,Q},{F6,Q},{F6,Q},{F6,Q},{E6,H},{E6,H},{D6,Q},{D6,Q},{D6,Q},{D6,Q},{C6,F}};
+
+
 #endif
