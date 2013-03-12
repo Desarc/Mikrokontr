@@ -17,9 +17,11 @@
 #define ABDAC_INT_LEVEL 0
 #define BUTTONS_INT_LEVEL 0
 
-const int SET_ALL = 0xff;
 
-/* button masks */
+const int SET_ALL = 0xff;
+volatile int LED_VECTOR = 0x0;
+
+/* Button masks */
 const int BUTTON7 = 0xffff3f7f;
 const int BUTTON6 = 0xffff3fbf;
 const int BUTTON5 = 0xffff3fdf;
@@ -39,30 +41,19 @@ const int LED2 = 0x04;
 const int LED1 = 0x02;
 const int LED0 = 0x01;
 
-/* sound identifiers */
-const int SOUND0 = 0;
-const int SOUND1 = 1;
-const int SOUND2 = 2;
-const int SOUND3 = 3;
-const int SOUND4 = 4;
-const int SOUND5 = 5;
-const int SOUND6 = 6;
-const int SOUND7 = 7;
-
+/* Various pointers */
 volatile avr32_pio_t *piob = &AVR32_PIOB;
 volatile avr32_pio_t *pioc = &AVR32_PIOC;
 volatile avr32_pm_t *pm = &AVR32_PM;
 volatile avr32_abdac_t *dac = &AVR32_ABDAC;
 
-
-/* prototypes */
+/* Prototypes */
 int main (int argc, char *argv[]);
 static void initIntc(void);
 static void initButtons(void);
 static void initLeds(void);
 static void initAudio(void);
 static void initHardware (void);
-
 static void button_isr(void);
 static void abdac_isr(void);
 static void debounce(void);

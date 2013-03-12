@@ -1,14 +1,10 @@
-/*****************************************************************************
- * 
- * Øving 2 UCSysDes
- *
- *****************************************************************************/
+/******************************************************************************************
+* TDT4258: Exercise 2 by group 9, Stian Habbestad, Øyvin Richardsen and Sandor Zeestraten *
+******************************************************************************************/
 
 #include "oeving2.h"
 #include "samples.h"
 
-const int A = 1500;
-volatile int LED_VECTOR = 0x0;
 volatile int sample_size;
 volatile int sample_counter;
 volatile int repeat_counter;
@@ -23,7 +19,7 @@ volatile float *current_sound_tl_ptr;
 
 int main (int argc, char *argv[]) {
 	int i;
-	/* pre-generating tone sample vectors */
+	/* Pre-generating tone sample vectors */
 	for (i = 0; i < scale_length; i++) {
 		current_wave_ptr = wave_pointers[i];
 		generate_tone(scale[i]);
@@ -32,7 +28,6 @@ int main (int argc, char *argv[]) {
  	while(1);
   	return 0;
 }
-
 
 void initHardware (void) {
  	initIntc();
@@ -48,6 +43,7 @@ void initIntc(void) {
 }
 
 void initButtons(void) {
+	/* Set up buttons */
 	pioc->per = SET_ALL;
 	pioc->puer = SET_ALL;
 	pioc->ier = SET_ALL;
@@ -58,35 +54,39 @@ void initButtons(void) {
 }
 
 void clearLeds(void) {
+	/* Clear all LEDs */
 	piob->codr = SET_ALL;
 	return;
 }
 
-void setLeds(void) {
-	piob->sodr = LED_VECTOR;
-	return;
-}
-
 void initLeds(void) {
+	/* Enable IO for LEDs */
   	piob->per = SET_ALL;
 	piob->oer = SET_ALL;
 	clearLeds();
 	return;
 }
 
+void setLeds(void) {
+	/* Set selected LED on */
+	piob->sodr = LED_VECTOR;
+	return;
+}
+
 void initAudio(void) {
+	/* Set up ABDAC */
 	register_interrupt( abdac_isr, AVR32_ABDAC_IRQ/32, AVR32_ABDAC_IRQ%32, ABDAC_INT_LEVEL);
-	pm->gcctrl[6] = 0x5;  //using OSC1
+	pm->gcctrl[6] = 0x5; // Set to use OSC1, 12 MHz
 	piob->PDR.p20 = 1;
 	piob->PDR.p21 = 1;
 	piob->ASR.p20 = 1;
 	piob->ASR.p21 = 1;
 	dac->CR.en = 1;
-	dac->IER.tx_ready = 1;
+	dac->IER.tx_ready = 1; // Interrupt Enable Register
 	return;
 }
 
-/* generate the sample vector for ~one period of a pure sine */
+/* Generate the sample vector for ~one period of a pure sine */
 void generate_tone(float f) {
 	set_sample_size(f);
 	int j;
@@ -97,54 +97,45 @@ void generate_tone(float f) {
 }
 
 void button_isr(void) {
-	pioc->isr;
-	int buttons = pioc->pdsr;
-	clearLeds();
+	pioc->isr; // Read Interrupt Status Register to allow new for new interrupts
+	int buttons = pioc->pdsr; // Set which button was pressed
+	clearLeds(); // Clear LEDs for new button press
+
+	/* Check which button was pressed, and set pointers accordingly for the specified sound */
 	if (buttons == BUTTON7) {
 		current_sound_ptr = song_tone;
 		current_sound_tl_ptr = song_tone_length;
 		sound_length = song_length;
 		LED_VECTOR = LED7;
-	}
-	else if (buttons == BUTTON6) {
+	} else if (buttons == BUTTON6) {
 		current_sound_ptr = scale;
 		current_sound_tl_ptr = scale_tone_length;
 		sound_length = scale_length;
 		LED_VECTOR = LED6;
-	}
-	else if (buttons == BUTTON5) {
+	} else if (buttons == BUTTON5) {
 		current_sound_ptr = sirene;
 		current_sound_tl_ptr = sirene_tone_length;
 		sound_length = sirene_length;
 		LED_VECTOR = LED5;
-	}
-	else if (buttons == BUTTON4) {
-		//playSound(SOUND4);
+	} else if (buttons == BUTTON4) {
 		LED_VECTOR = LED4;
-	}
-	else if (buttons == BUTTON3) {
-		//playSound(SOUND3);
+	} else if (buttons == BUTTON3) {
 		LED_VECTOR = LED3;
-	}
-	else if (buttons == BUTTON2) {
-		//playSound(SOUND2);
+	} else if (buttons == BUTTON2) {
 		LED_VECTOR = LED2;
-	}
-	else if (buttons == BUTTON1) {
-		//playSound(SOUND1);
+	} else if (buttons == BUTTON1) {
 		LED_VECTOR = LED1;
-	}
-	else if (buttons == BUTTON0) {
-		//playSound(SOUND0);
+	} else if (buttons == BUTTON0) {
 		LED_VECTOR = LED0;
 	}
-	init_sound();				//start playing the sound
-	setLeds();
-	debounce();
+
+	init_sound(); // Start playing the sound
+	setLeds(); // Set LED for the pressed button
+	debounce(); // Debounce for button
 	return;
 }
 
-/* initialize counters and pointers */
+/* Initialize counters and pointers */
 void init_sound(void) {
 	sound_counter = 0;
 	sample_counter = 0;
@@ -154,12 +145,13 @@ void init_sound(void) {
 	set_tone(tone);
 	float length = *current_sound_tl_ptr;
 	set_tone_length(tone, length);
-	dac->sdr = *current_wave_ptr;
+	dac->SDR.channel0 = (short) *current_wave_ptr;
+	dac->SDR.channel1 = (short) *current_wave_ptr;
 	current_wave_ptr++;
 	sample_counter++;
 }
 
-/* set the size of the sample vector, depending on the frequency of the tone */
+/* Set the size of the sample vector, depending on the frequency of the tone */
 void set_sample_size(float tone) {
 	sample_size = (int)ceil(Fs/tone);
 	if (sample_size > default_sample_size) {
@@ -167,42 +159,20 @@ void set_sample_size(float tone) {
 	}
 }
 
-/* make current_wave_ptr point to the first sample (e.g. C6_wave[0]) of the desired tone */
+/* Make current_wave_ptr point to the first sample (e.g. C6_wave[0]) of the desired tone */
 void set_tone(float tone) {
 	set_sample_size(tone);
-	if (tone == G5f) {
-		current_wave_ptr = G5_wave;
-	}
-	else if (tone == A5f) {
-		current_wave_ptr = A5_wave;
-	}	
-	else if (tone == B5f) {
-		current_wave_ptr = B5_wave;
-	}	
-	else if (tone == C6f) {
-		current_wave_ptr = C6_wave;
-	}
-	else if (tone == D6f) {
-		current_wave_ptr = D6_wave;
-	}
-	else if (tone == E6f) {
-		current_wave_ptr = E6_wave;
-	}
-	else if (tone == F6f) {
-		current_wave_ptr = F6_wave;	
-	}
-	else if (tone == G6f) {
-		current_wave_ptr = G6_wave;
-	}
-	else if (tone == A6f) {
-		current_wave_ptr = A6_wave;
-	}
-	else if (tone == B6f) {
-		current_wave_ptr = B6_wave;
-	}
-	else if (tone == C7f) {
-		current_wave_ptr = C7_wave;
-	}
+	if (tone == G5) {current_wave_ptr = G5_wave;}
+	else if (tone == A5) {current_wave_ptr = A5_wave;}	
+	else if (tone == B5) {current_wave_ptr = B5_wave;}	
+	else if (tone == C6) {current_wave_ptr = C6_wave;}
+	else if (tone == D6) {current_wave_ptr = D6_wave;}
+	else if (tone == E6) {current_wave_ptr = E6_wave;}
+	else if (tone == F6) {current_wave_ptr = F6_wave;}
+	else if (tone == G6) {current_wave_ptr = G6_wave;}
+	else if (tone == A6) {current_wave_ptr = A6_wave;}
+	else if (tone == B6) {current_wave_ptr = B6_wave;}
+	else if (tone == C7) {current_wave_ptr = C7_wave;}
 	else {
 		current_wave_ptr = silence;
 		sample_size = 1;
@@ -247,7 +217,8 @@ void abdac_isr(void) {
 		repeat_counter++;
 		set_tone(*current_sound_ptr);
 	}
-	dac->sdr = *current_wave_ptr;
+	dac->SDR.channel0 = (short) *current_wave_ptr;
+	dac->SDR.channel1 = (short) *current_wave_ptr;
 	sample_counter++;
 	current_wave_ptr++;
 	return;
