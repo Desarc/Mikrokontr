@@ -249,6 +249,8 @@ void abdac_isr(void) {
 			playing_sound = 0;
 			dac->SDR.channel0 = 0;
 			dac->SDR.channel1 = 0;
+			dac->CR.en = 0; // Reset DAC to avoid noise after sound
+			dac->CR.en = 1;
 			return;
 		}
 		/* reset counters and get next tone + duration */
@@ -277,7 +279,7 @@ void abdac_isr(void) {
 
 void debounce(void) {
 	int n = 0x0;
-	while (n < 0x2ffff) {
+	while (n < 0xffff) {
 		n++;
 	}
 	return;
