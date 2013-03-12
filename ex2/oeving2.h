@@ -39,16 +39,6 @@ const int LED2 = 0x04;
 const int LED1 = 0x02;
 const int LED0 = 0x01;
 
-/* sound identifiers */
-const int SOUND0 = 0;
-const int SOUND1 = 1;
-const int SOUND2 = 2;
-const int SOUND3 = 3;
-const int SOUND4 = 4;
-const int SOUND5 = 5;
-const int SOUND6 = 6;
-const int SOUND7 = 7;
-
 volatile avr32_pio_t *piob = &AVR32_PIOB;
 volatile avr32_pio_t *pioc = &AVR32_PIOC;
 volatile avr32_pm_t *pm = &AVR32_PM;
@@ -68,6 +58,8 @@ static void abdac_isr(void);
 static void debounce(void);
 static void generate_tone(float f);
 static void generate_sawtooth(float f);
+static void generate_square(float f);
+static void generate_triangle(float f);
 static void generate_harmonics(float f1, float f2, float f3);
 static void init_sound(void);
 static void set_tone(float tone);

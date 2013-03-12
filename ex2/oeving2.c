@@ -7,7 +7,7 @@
 #include "oeving2.h"
 #include "samples.h"
 
-const int A = 1500;
+const int A = 2000;
 volatile int LED_VECTOR = 0x0;
 volatile int sample_size;
 volatile int sample_counter;
@@ -40,6 +40,14 @@ int main (int argc, char *argv[]) {
 	for (i = 0; i < sawtooth_scale_length; i++) {
 		current_wave_ptr = sawtooth_wave_pointers[i];
 		generate_sawtooth(sawtooth_scale[i]);
+	}
+	for (i = 0; i < square_scale_length; i++) {
+		current_wave_ptr = square_wave_pointers[i];
+		generate_square(square_scale[i]);
+	}
+	for (i = 0; i < triangle_scale_length; i++) {
+		current_wave_ptr = triangle_wave_pointers[i];
+		generate_triangle(triangle_scale[i]);
 	}
 	initHardware();
  	while(1);
@@ -102,9 +110,9 @@ void initAudio(void) {
 /* generate the sample vector for ~one period of a pure sine */
 void generate_tone(float f) {
 	set_sample_size(f);
-	int j;
-	for (j = 0; j < sample_size; j++) {
-		*current_wave_ptr = (int)floor(A*sin(f*(2*M_PI)*j/Fs));
+	int i;
+	for (i = 0; i < sample_size; i++) {
+		*current_wave_ptr = (int)floor(A*sin(f*(2*M_PI)*i/Fs));
 		current_wave_ptr++;
 	}
 }
@@ -112,11 +120,39 @@ void generate_tone(float f) {
 void generate_sawtooth(float f) {
 	set_sample_size(f);
 	int i;
-	int j;
+	int k;
 	for (i = 0; i < sample_size; i++) {
 		float sample;
-		for (j = 1; j < 20; j++) {
-			sample += (A/j)*sin(f*j*(2*M_PI)*j/Fs);
+		for (k = 1; k < 10; k++) {
+			sample += (A/k)*sin(f*k*(2*M_PI)*i/Fs);
+		}
+		*current_wave_ptr = (int)sample;
+		current_wave_ptr++;
+	}
+}
+
+void generate_square(float f) {
+	set_sample_size(f);
+	int i;
+	for (i = 0; i < sample_size; i++) {
+		if (i < sample_size/2) {
+			*current_wave_ptr = 0;
+		}
+		else {
+			*current_wave_ptr = A;
+		}
+		current_wave_ptr++;
+	}
+}
+
+void generate_triangle(float f) {
+	set_sample_size(f);
+	int i;
+	int k;
+	for (i = 0; i < sample_size; i++) {
+		float sample = 0;
+		for (k = 0; k < 10; k++) {
+                  sample += ((A*(3.0/4.0)*8)/pow(M_PI,2.0))*((pow(-1,k)*sin((2*k+1)*2.0*M_PI*f*(i/Fs))/pow(2*k+1,2.0))+1);
 		}
 		*current_wave_ptr = (int)sample;
 		current_wave_ptr++;
@@ -164,26 +200,26 @@ void button_isr(void) {
 		LED_VECTOR = LED4;
 	}
 	else if (buttons == BUTTON3) {
-		current_sound_ptr = chords;
-		current_sound_tl_ptr = chords_tone_length;
-		sound_length = chords_length;
+		current_sound_ptr = square_scale;
+		current_sound_tl_ptr = square_scale_tone_length;
+		sound_length = square_scale_length;
 		LED_VECTOR = LED3;
 	}
 	else if (buttons == BUTTON2) {
-		current_sound_ptr = chords_comp;
-		current_sound_tl_ptr = chords_comp_tone_length;
-		sound_length = chords_length;
+		current_sound_ptr = triangle_scale;
+		current_sound_tl_ptr = triangle_scale_tone_length;
+		sound_length = triangle_scale_length;
 		LED_VECTOR = LED2;
 	}
 	else if (buttons == BUTTON1) {
-		current_sound_ptr = harmonics;
-		current_sound_tl_ptr = harmonics_tone_length;
-		sound_length = harmonics_length;
+		current_sound_ptr = test_sound;
+		current_sound_tl_ptr = test_sound_tone_length;
+		sound_length = test_sound_length;
 		LED_VECTOR = LED1;
 	}
 	else if (buttons == BUTTON0) {
-		current_sound_ptr = harmonics_comp;
-		current_sound_tl_ptr = harmonics_comp_tone_length;
+		current_sound_ptr = harmonics;
+		current_sound_tl_ptr = harmonics_tone_length;
 		sound_length = harmonics_length;
 		LED_VECTOR = LED0;
 	}
@@ -221,69 +257,37 @@ void set_sample_size(float tone) {
 /* make current_wave_ptr point to the first sample (e.g. C6_wave[0]) of the desired tone */
 void set_tone(float tone) {
 	set_sample_size(tone);
-	if (tone == G5f) {
-		current_wave_ptr = G5_wave;
-	}
-	else if (tone == A5f) {
-		current_wave_ptr = A5_wave;
-	}	
-	else if (tone == B5f) {
-		current_wave_ptr = B5_wave;
-	}	
-	else if (tone == C6f) {
-		current_wave_ptr = C6_wave;
-	}
-	else if (tone == D6f) {
-		current_wave_ptr = D6_wave;
-	}
-	else if (tone == E6f) {
-		current_wave_ptr = E6_wave;
-	}
-	else if (tone == F6f) {
-		current_wave_ptr = F6_wave;	
-	}
-	else if (tone == G6f) {
-		current_wave_ptr = G6_wave;
-	}
-	else if (tone == A6f) {
-		current_wave_ptr = A6_wave;
-	}
-	else if (tone == B6f) {
-		current_wave_ptr = B6_wave;
-	}
-	else if (tone == C7f) {
-		current_wave_ptr = C7_wave;
-	}
-	else if (tone == Cf) {
-		current_wave_ptr = C_chord;
-	}
-	else if (tone == Df) {
-		current_wave_ptr = D_chord;
-	}
-	else if (tone == Emf) {
-		current_wave_ptr = Em_chord;
-	}
-	else if (tone == C_hf) {
-		current_wave_ptr = C_harmonic;
-	}
-	else if (tone == A_hf) {
-		current_wave_ptr = A_harmonic;
-	}
-	else if (tone == C6_sf) {
-		current_wave_ptr = C6_sawtooth;
-	}
-	else if (tone == D6_sf) {
-		current_wave_ptr = D6_sawtooth;
-	}
-	else if (tone == E6_sf) {
-		current_wave_ptr = E6_sawtooth;
-	}
-	else if (tone == F6_sf) {
-		current_wave_ptr = F6_sawtooth;
-	}
-	else if (tone == G6_sf) {
-		current_wave_ptr = G6_sawtooth;
-	}
+	if (tone == G5) current_wave_ptr = G5_wave;
+	else if (tone == A5) current_wave_ptr = A5_wave;
+	else if (tone == B5) current_wave_ptr = B5_wave;
+	else if (tone == C6) current_wave_ptr = C6_wave;
+	else if (tone == D6) current_wave_ptr = D6_wave;
+	else if (tone == E6) current_wave_ptr = E6_wave;
+	else if (tone == F6) current_wave_ptr = F6_wave;	
+	else if (tone == G6) current_wave_ptr = G6_wave;
+	else if (tone == A6) current_wave_ptr = A6_wave;
+	else if (tone == B6) current_wave_ptr = B6_wave;
+	else if (tone == C7) current_wave_ptr = C7_wave;
+	else if (tone == C) current_wave_ptr = C_chord;
+	else if (tone == D) current_wave_ptr = D_chord;
+	else if (tone == Em) current_wave_ptr = Em_chord;
+	else if (tone == C_h) current_wave_ptr = C_harmonic;
+	else if (tone == A_h) current_wave_ptr = A_harmonic;
+	else if (tone == C_s) current_wave_ptr = C_sawtooth;
+	else if (tone == D_s) current_wave_ptr = D_sawtooth;
+	else if (tone == E_s) current_wave_ptr = E_sawtooth;
+	else if (tone == F_s) current_wave_ptr = F_sawtooth;
+	else if (tone == G_s) current_wave_ptr = G_sawtooth;
+	else if (tone == C_sq) current_wave_ptr = C_square;
+	else if (tone == D_sq) current_wave_ptr = D_square;
+	else if (tone == E_sq) current_wave_ptr = E_square;
+	else if (tone == F_sq) current_wave_ptr = F_square;
+	else if (tone == G_sq) current_wave_ptr = G_square;
+	else if (tone == C_t) current_wave_ptr = C_triangle;
+	else if (tone == D_t) current_wave_ptr = D_triangle;
+	else if (tone == E_t) current_wave_ptr = E_triangle;
+	else if (tone == F_t) current_wave_ptr = F_triangle;
+	else if (tone == G_t) current_wave_ptr = G_triangle;
 	else {
 		current_wave_ptr = silence;
 		sample_size = 1;
