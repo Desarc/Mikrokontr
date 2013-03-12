@@ -28,26 +28,36 @@ int main (int argc, char *argv[]) {
 		current_wave_ptr = tone_wave_pointers[i];
 		generate_tone(scale[i]);
 	}
-	/* pre-generating harmonics */
-	for (i = 0; i < harmonics_scale_length; i++) {
-		current_wave_ptr = harmonics_wave_pointers[i];
-		float tone1 = harmonics_scale[i][0];
-		float tone2 = harmonics_scale[i][1];
-		float tone3 = harmonics_scale[i][2];
-		generate_harmonics(tone1, tone2, tone3);
+	/* pre-generating chord sample vectors */
+	for (i = 0; i < chords_scale_length; i++) {
+		current_wave_ptr = chords_wave_pointers[i];
+		float tone1 = chords_scale[i][0];
+		float tone2 = chords_scale[i][1];
+		float tone3 = chords_scale[i][2];
+		generate_chord(tone1, tone2, tone3);
 	}
-	/* pre-generating sawteeth */
+	/* pre-generating sawtooth sample vectors */
 	for (i = 0; i < sawtooth_scale_length; i++) {
 		current_wave_ptr = sawtooth_wave_pointers[i];
 		generate_sawtooth(sawtooth_scale[i]);
 	}
+	/* pre-generating square sample vectors */
 	for (i = 0; i < square_scale_length; i++) {
 		current_wave_ptr = square_wave_pointers[i];
 		generate_square(square_scale[i]);
 	}
+	/* pre-generating triangle sample vectors */
 	for (i = 0; i < triangle_scale_length; i++) {
 		current_wave_ptr = triangle_wave_pointers[i];
 		generate_triangle(triangle_scale[i]);
+	}
+	/* pre-generating fm sample vectors */
+	for (i = 0; i < fm_scale_length; i++) {
+		current_wave_ptr = fm_wave_pointers[i];
+		float fc = fm_scale[i][0];
+		float fm = fm_scale[i][1];
+		float I = fm_scale[i][2];
+		generate_fm(fc, fm, I);
 	}
 	initHardware();
  	while(1);
@@ -117,6 +127,7 @@ void generate_tone(float f) {
 	}
 }
 
+/* generate the sample vector for ~one period of a sawtooth */
 void generate_sawtooth(float f) {
 	set_sample_size(f);
 	int i;
@@ -131,6 +142,7 @@ void generate_sawtooth(float f) {
 	}
 }
 
+/* generate the sample vector for ~one period of a square */
 void generate_square(float f) {
 	set_sample_size(f);
 	int i;
@@ -145,6 +157,7 @@ void generate_square(float f) {
 	}
 }
 
+/* generate the sample vector for ~one period of a triangle */
 void generate_triangle(float f) {
 	set_sample_size(f);
 	int i;
@@ -152,21 +165,33 @@ void generate_triangle(float f) {
 	for (i = 0; i < sample_size; i++) {
 		float sample = 0;
 		for (k = 0; k < 10; k++) {
-                  sample += ((A*(3.0/4.0)*8)/pow(M_PI,2.0))*((pow(-1,k)*sin((2*k+1)*2.0*M_PI*f*(i/Fs))/pow(2*k+1,2.0))+1);
+                	sample += ((A*(3.0/4.0)*8)/pow(M_PI,2.0))*((pow(-1,k)*sin((2*k+1)*2.0*M_PI*f*(i/Fs))/pow(2*k+1,2.0))+1);
 		}
 		*current_wave_ptr = (int)sample;
 		current_wave_ptr++;
 	}
 }
 
-void generate_harmonics(float f1, float f2, float f3){
+/* generate the sample vector for ~one period of an fm-signal */
+void generate_fm(float fc, float fm, float I) {
+	set_sample_size(fc);
+	//float I = abs(fc-fm)/fm;
+	int i;
+	for (i = 0; i < sample_size; i++) {
+                *current_wave_ptr = A*sin((2*M_PI*fc/Fs)+I*sin(2*M_PI*i*fm/Fs));
+		current_wave_ptr++;
+	}
+}
+
+/* generate the sample vector for 3 tones added together */
+void generate_chord(float f1, float f2, float f3){
 	set_sample_size(1/(1/f1+1/f2+1/f3));
 	int j;
 	for (j = 0; j < sample_size; j++) {
 		int p1 = (int)floor(A*sin(f1*(2*M_PI)*j/Fs));
 		int p2 = (int)floor(A*sin(f2*(2*M_PI)*j/Fs));
 		int p3 = (int)floor(A*sin(f3*(2*M_PI)*j/Fs));
-		*current_wave_ptr = p1+p2+p3;
+		*current_wave_ptr = (p1+p2+p3)/3;
 		current_wave_ptr++;
 	}
 }
@@ -175,6 +200,7 @@ void button_isr(void) {
 	pioc->isr;
 	int buttons = pioc->pdsr;
 	clearLeds();
+	/* select sound vector and length */
 	if (buttons == BUTTON7) {
 		current_sound_ptr = song_tone;
 		current_sound_tl_ptr = song_tone_length;
@@ -218,9 +244,9 @@ void button_isr(void) {
 		LED_VECTOR = LED1;
 	}
 	else if (buttons == BUTTON0) {
-		current_sound_ptr = harmonics;
-		current_sound_tl_ptr = harmonics_tone_length;
-		sound_length = harmonics_length;
+		current_sound_ptr = fm_sound;
+		current_sound_tl_ptr = fm_sound_tone_length;
+		sound_length = fm_scale_length;
 		LED_VECTOR = LED0;
 	}
 	init_sound();				//start playing the sound
@@ -229,7 +255,7 @@ void button_isr(void) {
 	return;
 }
 
-/* initialize counters and pointers */
+/* initialize sound counters and pointers */
 void init_sound(void) {
 	sound_counter = 0;
 	sample_counter = 0;
@@ -241,7 +267,6 @@ void init_sound(void) {
 	set_tone_length(tone, length);
 	dac->SDR.channel0 = (short)*current_wave_ptr;
 	dac->SDR.channel1 = (short)*current_wave_ptr;	
-	//dac->sdr = *current_wave_ptr;
 	current_wave_ptr++;
 	sample_counter++;
 }
@@ -271,8 +296,8 @@ void set_tone(float tone) {
 	else if (tone == C) current_wave_ptr = C_chord;
 	else if (tone == D) current_wave_ptr = D_chord;
 	else if (tone == Em) current_wave_ptr = Em_chord;
-	else if (tone == C_h) current_wave_ptr = C_harmonic;
-	else if (tone == A_h) current_wave_ptr = A_harmonic;
+	//else if (tone == C_h) current_wave_ptr = C_harmonic;
+	//else if (tone == A_h) current_wave_ptr = A_harmonic;
 	else if (tone == C_s) current_wave_ptr = C_sawtooth;
 	else if (tone == D_s) current_wave_ptr = D_sawtooth;
 	else if (tone == E_s) current_wave_ptr = E_sawtooth;
@@ -288,6 +313,9 @@ void set_tone(float tone) {
 	else if (tone == E_t) current_wave_ptr = E_triangle;
 	else if (tone == F_t) current_wave_ptr = F_triangle;
 	else if (tone == G_t) current_wave_ptr = G_triangle;
+	else if (tone == fm_1) current_wave_ptr = fm1_wave;
+	else if (tone == fm_3) current_wave_ptr = fm2_wave;
+	else if (tone == fm_3) current_wave_ptr = fm3_wave;
 	else {
 		current_wave_ptr = silence;
 		sample_size = 1;
@@ -295,7 +323,7 @@ void set_tone(float tone) {
 	return;
 }
 
-/* set number of sample vector repeats according to frequency and desired length */
+/* set number of sample vector repeats according to frequency and desired tone length */
 void set_tone_length(float tone, float length) {
 	tone_length = (int)(tone * length);
 }
@@ -334,7 +362,6 @@ void abdac_isr(void) {
 	}
 	dac->SDR.channel0 = (short)*current_wave_ptr;
 	dac->SDR.channel1 = (short)*current_wave_ptr;
-	//dac->sdr = *current_wave_ptr;
 	sample_counter++;
 	current_wave_ptr++;
 	return;

@@ -48,6 +48,20 @@
 #define F_t 698.45f
 #define G_t 783.98f
 
+/* fm frequencies */
+#define fc_1 220.0f
+#define fI_1 5.0f
+#define fm_1 330.0f
+#define fI_2 10.0f
+#define fm_2 441.0f
+#define fI_3 15.0f
+#define fm_3 555.0f
+
+#define f_1 { fc_1, fm_1, fI_1 }
+#define f_2 { fc_1, fm_2, fI_2 }
+#define f_3 { fc_1, fm_3, fI_3 }
+
+
 /* some chords/harmonics */
 #define C_c { C6, E6, G6 }
 #define D_c { D6, Fs6, A6 }
@@ -81,8 +95,8 @@ volatile int C7_wave[default_sample_size];
 volatile int C_chord[default_sample_size];
 volatile int D_chord[default_sample_size];
 volatile int Em_chord[default_sample_size];
-volatile int C_harmonic[default_sample_size];
-volatile int A_harmonic[default_sample_size];
+//volatile int C_harmonic[default_sample_size];
+//volatile int A_harmonic[default_sample_size];
 volatile int C_sawtooth[default_sample_size];
 volatile int D_sawtooth[default_sample_size];
 volatile int E_sawtooth[default_sample_size];
@@ -98,6 +112,9 @@ volatile int D_square[default_sample_size];
 volatile int E_square[default_sample_size];
 volatile int F_square[default_sample_size];
 volatile int G_square[default_sample_size];
+volatile int fm1_wave[default_sample_size];
+volatile int fm2_wave[default_sample_size];
+volatile int fm3_wave[default_sample_size];
 volatile int silence[1] = {0};
 
 
@@ -111,23 +128,26 @@ volatile int silence[1] = {0};
 #define H 0.5			// 1/2
 #define F 1
 #define L 5
+#define VL 10
 
 #define song_length 22
 #define scale_length 14
-#define harmonics_scale_length 5
+#define chords_scale_length 3
 #define sirene_length 19
 #define sawtooth_scale_length 5
 #define square_scale_length 5
 #define triangle_scale_length 5
+#define fm_scale_length 3
 #define chords_length 8
 #define harmonics_length 4
 #define test_sound_length 12
 
 int *tone_wave_pointers[scale_length] = { A4_wave, C5_wave, G5_wave, A5_wave, B5_wave, C6_wave, D6_wave, E6_wave, F6_wave, Fs6_wave, G6_wave, A6_wave, B6_wave, C7_wave };
-int *harmonics_wave_pointers[harmonics_scale_length] = { C_chord, D_chord, Em_chord, C_harmonic, A_harmonic };
+int *chords_wave_pointers[chords_scale_length] = { C_chord, D_chord, Em_chord };
 int *sawtooth_wave_pointers[sawtooth_scale_length] = { C_sawtooth, D_sawtooth, E_sawtooth, F_sawtooth, G_sawtooth };
 int *square_wave_pointers[square_scale_length] = { C_square, D_square, E_square, F_square, G_square };
 int *triangle_wave_pointers[triangle_scale_length] = { C_triangle, D_triangle, E_triangle, F_triangle, G_triangle };
+int *fm_wave_pointers[fm_scale_length] = { fm1_wave, fm2_wave, fm3_wave };
 
 /* sound vectors */
 float song_tone[song_length] = { C6, D6, E6, F6, G6, G6, A6, A6, A6, A6, G6, F6, F6, F6, F6, E6, E6, D6, D6, D6, D6, C6 };
@@ -145,8 +165,9 @@ float square_scale_tone_length[square_scale_length] = { H, H, H, H, H };
 float triangle_scale[triangle_scale_length] = { C_t, D_t, E_t, F_t, G_t };
 float triangle_scale_tone_length[triangle_scale_length] = { H, H, H, H, H };
 
-float harmonics_scale[harmonics_scale_length][3] = { C_c, D_c, Em_c, C_harm, A_harm };
-float harmonics_scale_tone_length[harmonics_scale_length] = { H, H, H, H, H };
+float chords_scale[chords_scale_length][3] = { C_c, D_c, Em_c };
+
+float fm_scale[fm_scale_length][3] = { f_1, f_2, f_3 };
 
 float sirene[sirene_length] = { C6, D6, E6, F6, E6, D6, C6, D6, E6, F6, E6, D6, C6, D6, E6, F6, E6, D6, C6 };
 float sirene_tone_length[sirene_length] = { QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ };
@@ -157,14 +178,7 @@ float test_sound_tone_length[test_sound_length] = { Q, H, Q, Q, H, Q, E, QQ, QQ,
 float chords[chords_length] = { Em, C, D, Em, Em, C, D, Em };
 float chords_tone_length[chords_length] = { H, H, H, H, H, H, H, H };
 
-float chords_comp[chords_length] = { E6, C6, D6, E6, E6, C6, D6, E6 };
-float chords_comp_tone_length[chords_length] = { H, H, H, H, H, H, H, H };
-
-float harmonics[harmonics_length] = { C_h, A_h, C_h, A_h };
-float harmonics_tone_length[harmonics_length] = { F, F, F, F };
-
-float harmonics_comp[harmonics_length] = { C6, A5, C6, A5 };
-float harmonics_comp_tone_length[harmonics_length] = { F, F, F, F };
-
+float fm_sound[fm_scale_length] = { fm_1, fm_2, fm_3 };
+float fm_sound_tone_length[fm_scale_length] = { F, F, F };
 
 #endif
