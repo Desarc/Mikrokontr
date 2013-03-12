@@ -7,7 +7,7 @@
 #include "oeving2.h"
 #include "samples.h"
 
-const int A = 2000;
+const float A = 2000.0;
 volatile int LED_VECTOR = 0x0;
 volatile int sample_size;
 volatile int sample_counter;
@@ -109,64 +109,10 @@ void generate_sawtooth(float f) {
 	int k;
 	for (i = 0; i < sample_size; i++) {
 		float sample;
-		for (k = 1; k < 10; k++) {
-			sample += (A/k)*sin(f*k*(2*M_PI)*i/Fs);
+		for (k = 1; k < 20; k++) {
+			sample += (A/k)*sin(f*k*(2.0*M_PI)*i/Fs);
 		}
 		*current_wave_ptr = (int)sample;
-		current_wave_ptr++;
-	}
-}
-
-/* generate the sample vector for ~one period of a square */
-void generate_square(float f) {
-	set_sample_size(f);
-	int i;
-	for (i = 0; i < sample_size; i++) {
-		if (i < sample_size/2) {
-			*current_wave_ptr = 0;
-		}
-		else {
-			*current_wave_ptr = A;
-		}
-		current_wave_ptr++;
-	}
-}
-
-/* generate the sample vector for ~one period of a triangle */
-void generate_triangle(float f) {
-	set_sample_size(f);
-	int i;
-	int k;
-	for (i = 0; i < sample_size; i++) {
-		float sample = 0;
-		for (k = 0; k < 10; k++) {
-                	sample += ((A*(3.0/4.0)*8)/pow(M_PI,2.0))*((pow(-1,k)*sin((2*k+1)*2.0*M_PI*f*(i/Fs))/pow(2*k+1,2.0))+1);
-		}
-		*current_wave_ptr = (int)sample;
-		current_wave_ptr++;
-	}
-}
-
-/* generate the sample vector for ~one period of an fm-signal */
-void generate_fm(float fc, float fm, float I) {
-	set_sample_size(fc);
-	//float I = abs(fc-fm)/fm;
-	int i;
-	for (i = 0; i < sample_size; i++) {
-                *current_wave_ptr = A*sin((2*M_PI*fc/Fs)+I*sin(2*M_PI*i*fm/Fs));
-		current_wave_ptr++;
-	}
-}
-
-/* generate the sample vector for 3 tones added together */
-void generate_chord(float f1, float f2, float f3){
-	set_sample_size(1/(1/f1+1/f2+1/f3));
-	int j;
-	for (j = 0; j < sample_size; j++) {
-		int p1 = (int)floor(A*sin(f1*(2*M_PI)*j/Fs));
-		int p2 = (int)floor(A*sin(f2*(2*M_PI)*j/Fs));
-		int p3 = (int)floor(A*sin(f3*(2*M_PI)*j/Fs));
-		*current_wave_ptr = (p1+p2+p3)/3;
 		current_wave_ptr++;
 	}
 }
@@ -207,9 +153,9 @@ void button_isr(void) {
 		LED_VECTOR = LED3;
 	}
 	else if (buttons == BUTTON2) {
-		current_sound_ptr = silence;
-		current_sound_tl_ptr = silence_length;
-		sound_length = 1;
+		current_sound_ptr = sawtooth_scale;
+		current_sound_tl_ptr = sawtooth_scale_tone_length;
+		sound_length = sawtooth_scale_length;
 		LED_VECTOR = LED2;
 	}
 	else if (buttons == BUTTON1) {
