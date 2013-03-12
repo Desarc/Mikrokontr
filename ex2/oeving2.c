@@ -12,7 +12,7 @@ volatile int LED_VECTOR = 0x0;
 volatile int sample_size;
 volatile int sample_counter;
 volatile int repeat_counter;
-volatile int sound_counter;
+volatile int tone_counter;
 volatile int tone_length;
 volatile int sound_length;
 volatile int playing_sound = 0;
@@ -81,8 +81,9 @@ void initLeds(void) {
 
 void initAudio(void) {
 	register_interrupt( abdac_isr, AVR32_ABDAC_IRQ/32, AVR32_ABDAC_IRQ%32, ABDAC_INT_LEVEL);
-	pm->gcctrl[6] = 0x15;  //using OSC1 divided by 2 (6MHz)
-	//pm->gcctrl[6] = 0x5;  //using OSC1 undivided
+	//pm->gcctrl[6] = 0x115;  //using OSC1 divided by 4 (6MHz)
+	//pm->gcctrl[6] = 0x15;  //using OSC1 divided by 2 (6MHz)
+	pm->gcctrl[6] = 0x5;  //using OSC1 undivided
 	piob->PDR.p20 = 1;
 	piob->PDR.p21 = 1;
 	piob->ASR.p20 = 1;
@@ -147,15 +148,15 @@ void button_isr(void) {
 		LED_VECTOR = LED4;
 	}
 	else if (buttons == BUTTON3) {
-		current_sound_ptr = test_sound;
-		current_sound_tl_ptr = test_sound_tone_length;
-		sound_length = test_sound_length;
-		LED_VECTOR = LED3;
-	}
-	else if (buttons == BUTTON2) {
 		current_sound_ptr = triangle_scale;
 		current_sound_tl_ptr = triangle_scale_tone_length;
 		sound_length = triangle_scale_length;
+		LED_VECTOR = LED3;
+	}
+	else if (buttons == BUTTON2) {
+		current_sound_ptr = silence;
+		current_sound_tl_ptr = silence_length;
+		sound_length = 1;
 		LED_VECTOR = LED2;
 	}
 	else if (buttons == BUTTON1) {
@@ -183,7 +184,7 @@ void button_isr(void) {
 
 /* initialize sound counters and pointers */
 void init_sound(void) {
-	sound_counter = 0;
+	tone_counter = 0;
 	sample_counter = 0;
 	repeat_counter = 0;
 	playing_sound = 1;
@@ -224,10 +225,7 @@ void set_tone(float tone) {
 	else if (tone == E_s) current_wave_ptr = E_triangle;
 	else if (tone == F_s) current_wave_ptr = F_triangle;
 	else if (tone == G_s) current_wave_ptr = G_triangle;
-	else if (tone == s) {
-		current_wave_ptr = silence_wave;
-		sample_size = 1;
-	} else {
+	else {
 		current_wave_ptr = silence_wave;
 		sample_size = 1;
 	}
@@ -236,7 +234,7 @@ void set_tone(float tone) {
 
 /* set number of sample vector repeats according to frequency and desired tone length */
 void set_tone_length(float tone, float length) {
-	tone_length = (int)(tone * length);
+	tone_length = (int)round(tone*length);
 }
 
 void abdac_isr(void) {
@@ -247,17 +245,16 @@ void abdac_isr(void) {
 	/* check if tone has completed its duration */
 	if (repeat_counter >= tone_length) {
 		/* if last tone in song, stop playing */
-		if (sound_counter >= sound_length-1) {
+		if (tone_counter >= sound_length) {
 			playing_sound = 0;
-			dac->sdr = 0;
-			dac->CR.en = 0; // Reset DAC to avoid noise
-			dac->CR.en = 1;
+			dac->SDR.channel0 = 0;
+			dac->SDR.channel1 = 0;
 			return;
 		}
 		/* reset counters and get next tone + duration */
 		sample_counter = 0;
 		repeat_counter = 0;
-		sound_counter++;
+		tone_counter++;
 		current_sound_ptr++;
 		current_sound_tl_ptr++;
 		float tone = *current_sound_ptr;

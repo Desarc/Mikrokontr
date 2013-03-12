@@ -21,11 +21,6 @@
 #define A6 1760.00f
 #define B6 1975.53f
 #define C7 2093.00f
-#define D7 2349.32f
-#define E7 2637.02f
-#define F7 2793.83f
-#define G7 3135.96f
-#define A7 3520.00f
 
 /* triangle frequencies */
 #define C_s 523.26f
@@ -58,8 +53,8 @@ volatile int G_triangle[default_sample_size];
 volatile int silence_wave[1] = {0};
 
 
-//#define Fs 46875.0f		// = 12M/256
-#define Fs 23437.5f		// = (12M/2)/256
+#define Fs 46875.0f		// = 12M/256
+//#define Fs 23437.5f		// = (12M/2)/256
 //#define Fs 11718.75f		// = (12M/4)/256
 
 /* tone lengths (seconds) */
@@ -72,30 +67,29 @@ volatile int silence_wave[1] = {0};
 #define L 5
 #define VL 10
 
-#define scale_length 13
-#define sirene_length 19
-#define triangle_scale_length 5
-#define test_sound_length 16
-#define tetris_length 40
-
-int *tone_wave_pointers[scale_length] = { A4_wave, C5_wave, G5_wave, A5_wave, B5_wave, C6_wave, D6_wave, E6_wave, F6_wave, G6_wave, A6_wave, B6_wave, C7_wave };
-int *triangle_wave_pointers[triangle_scale_length] = { C_triangle, D_triangle, E_triangle, F_triangle, G_triangle };
+int *tone_wave_pointers[] = { A4_wave, C5_wave, G5_wave, A5_wave, B5_wave, C6_wave, D6_wave, E6_wave, F6_wave, G6_wave, A6_wave, B6_wave, C7_wave };
+int *triangle_wave_pointers[] = { C_triangle, D_triangle, E_triangle, F_triangle, G_triangle };
 
 /* sound vectors */
-float scale[scale_length] = { A4, C5, G5, A5, B5, C6, D6, E6, F6, G6, A6, B6, C7 };
-float scale_tone_length[scale_length] = { S, S, S, S, S, S, S, S, S, S, S, S, S };
+float scale[] = { A4, C5, G5, A5, B5, C6, D6, E6, F6, G6, A6, B6, C7 };
+float scale_tone_length[] = { S, S, S, S, S, S, S, S, S, S, S, S, S };
+int scale_length = sizeof(scale)/sizeof(*(scale));
 
-float triangle_scale[triangle_scale_length] = { C_s, D_s, E_s, F_s, G_s };
-float triangle_scale_tone_length[triangle_scale_length] = { H, H, H, H, H };
+float triangle_scale[] = { C_s, D_s, E_s, F_s, G_s };
+float triangle_scale_tone_length[] = { H, H, H, H, H };
+int triangle_scale_length = sizeof(triangle_scale)/sizeof(*(triangle_scale));
 
-float sirene[sirene_length] = { C6, D6, E6, F6, E6, D6, C6, D6, E6, F6, E6, D6, C6, D6, E6, F6, E6, D6, C6 };
-float sirene_tone_length[sirene_length] = { QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ };
+float sirene[] = { C6, D6, E6, F6, E6, D6, C6, D6, E6, F6, E6, D6, C6, D6, E6, F6, E6, D6, C6 };
+float sirene_tone_length[] = { QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ };
+int sirene_length = sizeof(sirene)/sizeof(*(sirene));
 
-float test_sound[test_sound_length] = { C7, F_s, B6, F_s, A6, F_s, G6, F_s, F6, F_s, E6, F_s, D6, F_s, C6, F_s };
-float test_sound_tone_length[test_sound_length] = { QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ };
+float test_sound[] = { C7, F_s, B6, F_s, A6, F_s, G6, F_s, F6, F_s, E6, F_s, D6, F_s, C6, F_s, s };
+float test_sound_tone_length[] = { QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, VL };
+int test_sound_length = sizeof(test_sound)/sizeof(*(test_sound));
 
-float tetris[tetris_length] = { E6, B5, C6, D6, C6, B5, A5, A5, C6, E6, D6, C6, B5, B5, C6, D6, E6, C6, A5, A5,/* */ D6, D6, F6, A6, G6, F6, E6, E6, C6, E6, D6, C6, B5, B5, C6, D6, E6, C6, A5, A5 };
-float tetris_tone_length[tetris_length] = { Q, E, E, Q, E, E, Q, E, E, Q, E, E, Q, E, E, Q, Q, Q, Q, H,/* */ Q, E, E, Q, E, E, Q, E, E, Q, E, E, Q, E, E, Q, Q, Q, Q, Q };
+float tetris[] = { E6, B5, C6, D6, C6, B5, A5, A5, C6, E6, D6, C6, B5, B5, C6, D6, E6, C6, A5, A5,/* */ D6, D6, F6, A6, G6, F6, E6, E6, C6, E6, D6, C6, B5, B5, C6, D6, E6, C6, A5, A5 };
+float tetris_tone_length[] = { Q, E, E, Q, E, E, Q, E, E, Q, E, E, Q, E, E, Q, Q, Q, Q, H,/* */ Q, E, E, Q, E, E, Q, E, E, Q, E, E, Q, E, E, Q, Q, Q, Q, Q };
+int tetris_length = sizeof(tetris)/sizeof(*(tetris));
 
 float silence[1] = { s };
 float silence_length[1] = { F };
