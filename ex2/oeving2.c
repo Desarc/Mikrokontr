@@ -19,22 +19,11 @@ volatile float *current_sound_ptr;
 volatile float *current_sound_tl_ptr;
 
 int main (int argc, char *argv[]) {
-	int i;
-	/* Pre-generating tone sample vectors */
-	for (i = 0; i < scale_length; i++) {
-		current_wave_ptr = tone_wave_pointers[i];
-		generate_tone(scale[i]);
-	}
-	/* Pre-generating triangle sample vectors */
-	for (i = 0; i < triangle_scale_length; i++) {
-		current_wave_ptr = triangle_wave_pointers[i];
-		generate_triangle(triangle_scale[i]);
-	}
+	pregenerateTones();
 	initHardware();
  	while(1);
   	return 0;
 }
-
 
 void initHardware (void) {
  	initIntc();
@@ -54,6 +43,13 @@ void initButtons(void) {
   	register_interrupt(button_isr, AVR32_PIOC_IRQ/32, AVR32_PIOC_IRQ % 32, BUTTONS_INT_LEVEL);
 	pioc->isr;	
 	init_interrupts();
+}
+
+void debounce(void) {
+	int n = 0x0;
+	while (n < 0xffff) {
+		n++;
+	}
 }
 
 void clearLeds(void) {
@@ -83,8 +79,23 @@ void initAudio(void) {
 	dac->IER.tx_ready = 1;
 }
 
+/* Pre-generate sinus and triangle tones */
+void pregenerateTones(void) {
+	int i;
+	/* Pre-generating sinus sample vectors */
+	for (i = 0; i < scale_length; i++) {
+		current_wave_ptr = tone_wave_pointers[i];
+		generateSine(scale[i]);
+	}
+	/* Pre-generating triangle sample vectors */
+	for (i = 0; i < triangle_scale_length; i++) {
+		current_wave_ptr = triangle_wave_pointers[i];
+		generateTriangle(triangle_scale[i]);
+	}
+}
+
 /* Generate the sample vector for ~one period of a pure sine */
-void generate_tone(float f) {
+void generateSine(float f) {
 	set_sample_size(f);
 	int i;
 	for (i = 0; i < sample_size; i++) {
@@ -94,7 +105,7 @@ void generate_tone(float f) {
 }
 
 /* Generate the sample vector for ~one period of a triangle */
-void generate_triangle(float f) {
+void generateTriangle(float f) {
 	set_sample_size(f);
 	int i;
 	int k;
@@ -265,9 +276,3 @@ void abdac_isr(void) {
 	current_wave_ptr++;
 }
 
-void debounce(void) {
-	int n = 0x0;
-	while (n < 0xffff) {
-		n++;
-	}
-}
