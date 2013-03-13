@@ -30,7 +30,6 @@
 
 /* Tone sample arrays */
 #define default_sample_size 100
-
 volatile int A4_wave[default_sample_size];
 volatile int C5_wave[default_sample_size];
 volatile int G5_wave[default_sample_size];
@@ -51,8 +50,10 @@ volatile int F_triangle[default_sample_size];
 volatile int G_triangle[default_sample_size];
 volatile int silence_wave[1] = {0};
 
-/* Amplitude and Frequency sampling */
-#define A = 2000; 
+/* Amplitude */
+const int A = 2000;
+
+/* Frequency sampling */
 #define Fs 46875.0f		// = 12M/256
 //#define Fs 23437.5f		// = (12M/2)/256
 //#define Fs 11718.75f		// = (12M/4)/256
