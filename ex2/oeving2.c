@@ -1,14 +1,10 @@
-/*****************************************************************************
- * 
- * Øving 2 UCSysDes
- *
- *****************************************************************************/
+/******************************************************************************************
+* TDT4258: Exercise 2 by group 9, Stian Habbestad, Øyvin Richardsen and Sandor Zeestraten *
+******************************************************************************************/
 
 #include "oeving2.h"
-#include "samples.h"
+#include "audio.h"
 
-const float A = 2000.0;
-volatile int LED_VECTOR = 0x0;
 volatile int sample_size;
 volatile int sample_counter;
 volatile int repeat_counter;
@@ -16,6 +12,7 @@ volatile int tone_counter;
 volatile int tone_length;
 volatile int sound_length;
 volatile int playing_sound = 0;
+volatile int prev_button = 0;
 
 volatile int *current_wave_ptr;
 volatile float *current_sound_ptr;
@@ -23,12 +20,12 @@ volatile float *current_sound_tl_ptr;
 
 int main (int argc, char *argv[]) {
 	int i;
-	/* pre-generating tone sample vectors */
+	/* Pre-generating tone sample vectors */
 	for (i = 0; i < scale_length; i++) {
 		current_wave_ptr = tone_wave_pointers[i];
 		generate_tone(scale[i]);
 	}
-	/* pre-generating triangle sample vectors */
+	/* Pre-generating triangle sample vectors */
 	for (i = 0; i < triangle_scale_length; i++) {
 		current_wave_ptr = triangle_wave_pointers[i];
 		generate_triangle(triangle_scale[i]);
@@ -44,12 +41,10 @@ void initHardware (void) {
 	initLeds();
  	initButtons();
  	initAudio();
-	return;
 }
 
 void initIntc(void) {
 	set_interrupts_base((void *)AVR32_INTC_ADDRESS);
-	return;
 }
 
 void initButtons(void) {
@@ -59,24 +54,20 @@ void initButtons(void) {
   	register_interrupt(button_isr, AVR32_PIOC_IRQ/32, AVR32_PIOC_IRQ % 32, BUTTONS_INT_LEVEL);
 	pioc->isr;	
 	init_interrupts();
-	return;
 }
 
 void clearLeds(void) {
 	piob->codr = SET_ALL;
-	return;
 }
 
 void setLeds(void) {
 	piob->sodr = LED_VECTOR;
-	return;
 }
 
 void initLeds(void) {
   	piob->per = SET_ALL;
 	piob->oer = SET_ALL;
 	clearLeds();
-	return;
 }
 
 void initAudio(void) {
@@ -90,10 +81,9 @@ void initAudio(void) {
 	piob->ASR.p21 = 1;
 	dac->CR.en = 1;
 	dac->IER.tx_ready = 1;
-	return;
 }
 
-/* generate the sample vector for ~one period of a pure sine */
+/* Generate the sample vector for ~one period of a pure sine */
 void generate_tone(float f) {
 	set_sample_size(f);
 	int i;
@@ -103,7 +93,7 @@ void generate_tone(float f) {
 	}
 }
 
-/* generate the sample vector for ~one period of a triangle */
+/* Generate the sample vector for ~one period of a triangle */
 void generate_triangle(float f) {
 	set_sample_size(f);
 	int i;
@@ -119,10 +109,14 @@ void generate_triangle(float f) {
 }
 
 void button_isr(void) {
-	pioc->isr;
-	int buttons = pioc->pdsr;
-	clearLeds();
-	/* select sound vector and length */
+	pioc->isr; // Set Input Status Register to PIOC
+	int buttons = pioc->pdsr; // Get the pressed button
+
+	/* Avoid new interrupt for button release */
+	if (prev_button == buttons) { return; }
+	prev_button = buttons;
+
+	/* Select sound vector and length */
 	if (buttons == BUTTON7) {
 		current_sound_ptr = test_sound;
 		current_sound_tl_ptr = test_sound_tone_length;
@@ -171,18 +165,14 @@ void button_isr(void) {
 		sound_length = 1;
 		LED_VECTOR = LED0;
 	}
-	else {
-		setLeds();
-		debounce();
-		return;
-	}
-	init_sound();				//start playing the sound
-	setLeds();
-	debounce();
-	return;
+
+	init_sound(); // Start playing the sound
+	clearLeds(); // Clear previous LEDs
+	setLeds(); // Set new LEDs
+	debounce(); // Avoid debouncing
 }
 
-/* initialize sound counters and pointers */
+/* Initialize sound counters and pointers */
 void init_sound(void) {
 	tone_counter = 0;
 	sample_counter = 0;
@@ -198,7 +188,7 @@ void init_sound(void) {
 	sample_counter++;
 }
 
-/* set the size of the sample vector, depending on the frequency of the tone */
+/* Set the size of the sample vector, depending on the frequency of the tone */
 void set_sample_size(float tone) {
 	sample_size = (int)ceil(Fs/tone);
 	if (sample_size > default_sample_size) {
@@ -206,7 +196,7 @@ void set_sample_size(float tone) {
 	}
 }
 
-/* make current_wave_ptr point to the first sample (e.g. C6_wave[0]) of the desired tone */
+/* Make current_wave_ptr point to the first sample (e.g. C6_wave[0]) of the desired tone */
 void set_tone(float tone) {
 	set_sample_size(tone);
 	if (tone == G5) current_wave_ptr = G5_wave;
@@ -229,22 +219,21 @@ void set_tone(float tone) {
 		current_wave_ptr = silence_wave;
 		sample_size = 1;
 	}
-	return;
 }
 
-/* set number of sample vector repeats according to frequency and desired tone length */
+/* Set number of sample vector repeats according to frequency and desired tone length */
 void set_tone_length(float tone, float length) {
 	tone_length = (int)round(tone*length);
 }
 
 void abdac_isr(void) {
-	/* check if the interrupts comes when we actually want to play a sound, to avoid crash */
+	/* Check if the interrupts comes when we actually want to play a sound, to avoid crash */
 	if (playing_sound == 0) {
 		return;
 	}
-	/* check if tone has completed its duration */
+	/* Check if tone has completed its duration */
 	if (repeat_counter >= tone_length) {
-		/* if last tone in song, stop playing */
+		/* If last tone in song, stop playing */
 		if (tone_counter >= sound_length) {
 			playing_sound = 0;
 			dac->SDR.channel0 = 0;
@@ -253,7 +242,7 @@ void abdac_isr(void) {
 			dac->CR.en = 1;
 			return;
 		}
-		/* reset counters and get next tone + duration */
+		/* Reset counters and get next tone + duration */
 		sample_counter = 0;
 		repeat_counter = 0;
 		tone_counter++;
@@ -264,7 +253,7 @@ void abdac_isr(void) {
 		float length = *current_sound_tl_ptr;
 		set_tone_length(tone, length);
 	}
-	/* repeat sample vector if last sample played */
+	/* Repeat sample vector if last sample played */
 	if (sample_counter >= sample_size) {
 		sample_counter = 0;
 		repeat_counter++;
@@ -274,7 +263,6 @@ void abdac_isr(void) {
 	dac->SDR.channel1 = (short)*current_wave_ptr;
 	sample_counter++;
 	current_wave_ptr++;
-	return;
 }
 
 void debounce(void) {
@@ -282,6 +270,4 @@ void debounce(void) {
 	while (n < 0xffff) {
 		n++;
 	}
-	return;
 }
-

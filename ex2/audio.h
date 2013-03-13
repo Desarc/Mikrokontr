@@ -1,8 +1,7 @@
-
 #ifndef SAMPLES_H
 #define SAMPLES_H
 
-/* frequency levels for various tones */
+/* Frequency levels for various tones */
 #define s 0.1f
 #define A4 440.00f
 #define B4 493.88f
@@ -22,14 +21,14 @@
 #define B6 1975.53f
 #define C7 2093.00f
 
-/* triangle frequencies */
+/* Triangle frequencies */
 #define C_s 523.26f
 #define D_s 587.34f
 #define E_s 659.27f
 #define F_s 698.47f
 #define G_s 784.00f
 
-/* tone sample arrays */
+/* Tone sample arrays */
 #define default_sample_size 100
 
 volatile int A4_wave[default_sample_size];
@@ -52,12 +51,13 @@ volatile int F_triangle[default_sample_size];
 volatile int G_triangle[default_sample_size];
 volatile int silence_wave[1] = {0};
 
-
+/* Amplitude and Frequency sampling */
+#define A = 2000; 
 #define Fs 46875.0f		// = 12M/256
 //#define Fs 23437.5f		// = (12M/2)/256
 //#define Fs 11718.75f		// = (12M/4)/256
 
-/* tone lengths (seconds) */
+/* Tone lengths (seconds) */
 #define S 0.02			// 1/50
 #define QQ 0.0625		// 1/16
 #define E 0.125			// 1/8
@@ -70,7 +70,7 @@ volatile int silence_wave[1] = {0};
 int *tone_wave_pointers[] = { A4_wave, C5_wave, G5_wave, A5_wave, B5_wave, C6_wave, D6_wave, E6_wave, F6_wave, G6_wave, A6_wave, B6_wave, C7_wave };
 int *triangle_wave_pointers[] = { C_triangle, D_triangle, E_triangle, F_triangle, G_triangle };
 
-/* sound vectors */
+/* Sound vectors */
 float scale[] = { A4, C5, G5, A5, B5, C6, D6, E6, F6, G6, A6, B6, C7 };
 float scale_tone_length[] = { S, S, S, S, S, S, S, S, S, S, S, S, S };
 int scale_length = sizeof(scale)/sizeof(*(scale));
