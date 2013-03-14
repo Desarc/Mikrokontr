@@ -48,8 +48,7 @@ Here is a screenshot showing us debugging our \emph{generateTriangle} function w
 \end{center}
 
 \section{Results}
-
-
+The result of the exercise is that we coded a single program in C which generates and plays four different sounds when different switches (\emph{SW7} to \emph{SW4}) are pressed. At the start of the program it generates tones (\emph{A4} to \emph{C7}) based on the sine and triangle waves. Then once it gets an interrupt from a switch it plays the first sample of that switch whereafter the ABDAC generates an interrupt which plays the next sample until it is finished.
 
 \section{Tests}
 \paragraph{Description}
@@ -59,7 +58,6 @@ The setup of the board:
 The headset was connected to the minijack on the development board, the jumper 4 and 5 was set to ''INT. DAC''.
 Switches were connected to port C on the parallel I/O, and LED's on port B. 
 Both the STK1000 and JTAGICE MKII debugger were connected and powered on. The tests were conducted by a person interacting with the switches wearing a headset, and another person logging the results.
-
 
 \paragraph{Results}
 Below is a table of the different tests we ran, the preconditions and the results.
