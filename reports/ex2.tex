@@ -34,6 +34,8 @@ In this assignment we write C code for an AVR microcontroller on a development b
 
 \section{Introduction}
 
+In this exercise we programmed the STK1000 development board to play sounds. We set up the buttons to trigger an interrupt routine that starts by selecting which sample vector to use and then writes the first sample to the ABDAC. We then receive interrupts from the ABDAC to a different interrupt routine, that retrieves the next sample from memory and writes it to the ABDAC. We chose to synthesize our own sounds based on different frequencies using mathematical expressions. 
+
 
 \section{Description and methodology}
 We started out by implementing the previous assignment that we had coded in assembly, only this time in C. This was an easy start for implementing an interrupt routine based on a program we already had good knowledge of. When we got this to work we were ready to enable and set up the ABDAC. First out we started with simply generating some noise, so as to easily check that we were able to make audible sound. Now we set out to make some sine waves as a first step of a synthesizer. We then used those sine waves to generate tones in a ''audio.h'' header file. This made the basis for simple synthesizing which we used to make simple sounds, and even the melody tetris. 
