@@ -1,5 +1,5 @@
-#ifndef SAMPLES_H
-#define SAMPLES_H
+#ifndef AUDIO_H
+#define AUDIO_H
 
 /* Frequency levels for various tones */
 #define s 0.1f
