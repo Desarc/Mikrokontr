@@ -14,6 +14,7 @@ morecomment=[l]{/*},
 backgroundcolor=\color{light-gray}, 
 xleftmargin=.10in,
 xrightmargin=.10in,
+language=C
 }
 
 \title{\textbf{Report: Assignment 2}}
@@ -33,9 +34,7 @@ In this assignment we write C code for an AVR microcontroller on a development b
 \newpage
 
 \section{Introduction}
-
 In this exercise we programmed the STK1000 development board to play sounds. We set up the buttons to trigger an interrupt routine that starts by selecting which sample vector to use and then writes the first sample to the ABDAC. We then receive interrupts from the ABDAC to a different interrupt routine, that retrieves the next sample from memory and writes it to the ABDAC. We chose to synthesize our own sounds based on different frequencies using mathematical expressions. 
-
 
 \section{Description and methodology}
 We started out by implementing the previous assignment that we had coded in assembly, only this time in C. This was an easy start for implementing an interrupt routine in C based on a program we had already designed. The primary challenge was making the buttons work with interrupts. Once we had a functional program with buttons and LEDs, we were ready to start working on the ABDAC. We started by simply trying to enable the ABDAC while still retaining the rest of the functionality. This proved troublesome at first, because interrupts from the buttons stopped working as soon as we enabled interrupts from the ABDAC. We decided to work around this by having the buttons and the ABDAC connected to different PIOs, which solved our problem. The next step was generating random noise and sending samples to the ABDAC. This proved to be rather trivial, we simply wrote the first sample to the ABDAC from the button interrupt routine, and then used interrupts from the ABDAC to retrieve the next sample (random in this case) and write it to the ABDAC. Then we started working on the specific sounds we wanted our program to play. We wrote a function for mathematical generation of sine wave samples, and created sample vectors based on frequency levels of musical tones. 
@@ -88,34 +87,38 @@ Switches were connected to port C on the parallel I/O, and LED's on port B.
 Both the STK1000 and JTAGICE MKII debugger were connected and powered on. The tests were conducted by a person interacting with the switches wearing a headset, and another person logging the results.
 
 \paragraph{Results}
-Below is a table of the different tests we ran, the preconditions and the results.
-\linebreak
+Below is a table of the different tests we ran, the preconditions and the results. We did not pass the \emph{Bouncing} test. Here we checked whether a sound would play without any interruptions during a switch press (both up and down). 
 
-\renewcommand{\arraystretch}{1.25} %vertical cell padding
-\begin{tabular}[pos]{|m{70pt}|m{90pt}|m{90pt}|m{100pt}|m{60pt}|}
-\hline
-\textbf{Name} 				& \textbf{Preconditions}				& \textbf{Description} 					& \textbf{Expected result} 													& \textbf{Test result} 		\\ \hline
+\begin{center}
+\renewcommand{\arraystretch}{1.1} %vertical cell padding
+\begin{tabular}[pos]{|m{45pt}|m{80pt}|m{90pt}|m{105pt}|m{60pt}|}
+\hline  \textbf{Name} & \textbf{Description} & \textbf{Conditions} & \textbf{Expected} & \textbf{Results} \\ 
 
-Steady-state test			& Power is on, and the board is connected & Upload program to card, push reset switch 	& The board is powered and LED 7 should be on 									& Passed 				\\ \hline
+\hline Steady-state test & Power is on and the main program is running & The board has been programmed and powered on & The board is powered and no LEDs or sounds should be on & Passed \\
 
-Move LED right test			& Program is active, only LED 7 is on 		& Push switch 6						 	& LED 7 should be turned off and LED 6 should be turned on 							& Passed 				\\ \hline
+\hline SFX1 & The first SFX plays & The main program is running & \emph{SFX1} plays once after \emph{SW7} is pressed. \emph{LED7} should be turned on & Passed \\
 
-Move LED left test			& Program is active, only LED 6 is on 		& Push switch 7						 	& LED 6 should be turned off and LED 7 should be turned on 							& Passed 				\\ \hline
+\hline SFX2 & The first SFX plays & The main program is running & \emph{SFX2} plays once after \emph{SW6} is pressed. \emph{LED6} should be turned on & Passed \\
 
-Left LED wrap-around test		& Program is active, only LED 7 is on 		& Push switch 67					 	& LED 7 should be turned off and LED 0 should be turned on 							& Passed 				\\ \hline
+\hline SFX3 & The first SFX plays & The main program is running & \emph{SFX3} plays once after \emph{SW5} is pressed. \emph{LED5} should be turned on & Passed \\ 
 
-Right LED wrap-around test	& Program is active, only LED 0 is on 		& Push switch 6						 	& LED 0 should be turned off and LED 7 should be turned on 							& Passed 				\\ \hline
+\hline Intro theme & The intro theme plays & The main program is running & The intro theme plays once after \emph{SW4} is pressed. \emph{LED4} should be turned on & Passed \\
 
-Long push test				& Program is active, only LED 7 is on 		& Push and hold switch 6 for a few seconds 	& LED 7 should be turned off and LED 6 should be turned on as soon as the switch is pushed 	& Passed 				\\ \hline
-\end{tabular}
+\hline Bouncing & Any sound should only be played once per press of switch & Press down any switch from \emph{SW7} to \emph{SW4} and let it go & The sound should finish playing without any interruptions & Failed. The sounds is interrupted before finishing. \\
+
+\hline Song change & Play a sound while another sound is already playing & A switch has been pressed and a sound is playing. While playing another switch has been pressed. & The sound of the newly pressed switched should be playing & Passed. \\ 
+
+\hline Stop & Stop playing sounds when pressing any switch from \emph{SW3} to \emph{SW0} & Press any switch from \emph{SW3} to \emph{SW0} while sound is playing & The sound should stop playing & Passed \\ 
+
+\hline 
+\end{tabular} 
+\end{center}
 
 \section{Evaluation of assignment}
 This assignment was more demanding yet also more fun than the first assignment. The learning curve was a bit harder as not all of us had coded much in C before, but it was a nice opportunity to learn.
 
 \section{Conclusion}
 We learned how to generate and play different sounds in C. This will be helpful when we start coding the next assignment. In the end we have four different sounds. Three short sound effects and one melody. 
-
-\section{Appendix}
 
 \footnotesize{  % This makes the Reference items print in footnotesize fonts
 \begin{thebibliography}{N}
