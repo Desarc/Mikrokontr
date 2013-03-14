@@ -32,12 +32,20 @@ In this assignment we write C code for an AVR microcontroller on a development b
 \tableofcontents
 \newpage
 
-\section{Introduction} 
+\section{Introduction}
 
 
 \section{Description and methodology}
 We started out by implementing the previous assignment that we had coded in assembly, only this time in C. This was an easy start for implementing an interrupt routine based on a program we already had good knowledge of. When we got this to work we were ready to enable and set up the ABDAC. First out we started with simply generating some noise, so as to easily check that we were able to make audible sound. Now we set out to make some sine waves as a first step of a synthesizer. We then used those sine waves to generate tones in a ''audio.h'' header file. This made the basis for simple synthesizing which we used to make simple sounds, and even the melody tetris. 
-We spent some time trying to get rid of the random noise and tones we ended up with after playing our sounds. After tweaking the debounce delay properly and resetting the ABDAC this worked out nicely. 
+We spent some time trying to get rid of the random noise and tones we ended up with after playing our sounds. After tweaking the debounce delay properly and resetting the ABDAC this worked out nicely.
+
+\newpage
+
+\subsection*{Debugging}
+Here is a screenshot showing us debugging our \emph{generateTriangle} function which generates triangle sound waves. 
+\begin{center}
+\includegraphics[scale=1]{images/debugsmall.png}
+\end{center}
 
 \section{Results}
 
@@ -54,7 +62,6 @@ Both the STK1000 and JTAGICE MKII debugger were connected and powered on. The te
 
 
 \paragraph{Results}
-\addcontentsline{toc}{subsection}{Results}
 Below is a table of the different tests we ran, the preconditions and the results.
 \linebreak
 
@@ -80,7 +87,7 @@ Long push test				& Program is active, only LED 7 is on 		& Push and hold switch
 This assignment was more demanding yet also more fun than the first assignment. The learning curve was a bit harder as not all of us had coded much in C before, but it was a nice opportunity to learn.
 
 \section{Conclusion}
-We learned how to generate and play different sounds in C. This will be helpful when we start coding the next assignment. 
+We learned how to generate and play different sounds in C. This will be helpful when we start coding the next assignment. In the end we have four different sounds. Three short sound effects and one longer intro sound.
 
 \section{Appendix}
 
