@@ -37,7 +37,20 @@ In this assignment we write C code for an AVR microcontroller on a development b
 In this exercise we programmed the STK1000 development board to play sounds. We set up the buttons to trigger an interrupt routine that starts by selecting which sample vector to use and then writes the first sample to the ABDAC. We then receive interrupts from the ABDAC to a different interrupt routine, that retrieves the next sample from memory and writes it to the ABDAC. We chose to synthesize our own sounds based on different frequencies using mathematical expressions. 
 
 \section{Description and methodology}
-We started out by implementing the previous assignment that we had coded in assembly, only this time in C. This was an easy start for implementing an interrupt routine in C based on a program we had already designed. The primary challenge was making the buttons work with interrupts. Once we had a functional program with buttons and LEDs, we were ready to start working on the ABDAC. We started by simply trying to enable the ABDAC while still retaining the rest of the functionality. This proved troublesome at first, because interrupts from the buttons stopped working as soon as we enabled interrupts from the ABDAC. We decided to work around this by having the buttons and the ABDAC connected to different PIOs, which solved our problem. The next step was generating random noise and sending samples to the ABDAC. This proved to be rather trivial, we simply wrote the first sample to the ABDAC from the button interrupt routine, and then used interrupts from the ABDAC to retrieve the next sample (random in this case) and write it to the ABDAC. Then we started working on the specific sounds we wanted our program to play. We wrote a function for mathematical generation of sine wave samples, and created sample vectors based on frequency levels of musical tones. 
+We started out by implementing the previous assignment that we had coded in assembly, only this time in C. This was an easy start for implementing an interrupt routine in C based on a program we had already designed. The primary challenge was making the buttons work with interrupts. Once we had a functional program with buttons and LEDs, we were ready to start working on the ABDAC. We started by simply trying to enable the ABDAC while still retaining the rest of the functionality. This proved troublesome at first, because interrupts from the buttons stopped working as soon as we enabled interrupts from the ABDAC. We decided to work around this by having the buttons and the ABDAC connected to different PIOs, which solved our problem. The next step was generating random noise and sending samples to the ABDAC. This proved to be rather trivial, we simply wrote the first sample to the ABDAC from the button interrupt routine, and then used interrupts from the ABDAC to retrieve the next sample (random in this case) and write it to the ABDAC.
+
+\begin{lstlisting}
+void abdac_isr(void) {
+	(...)
+	/* Send sample to ABDAC */
+	dac->SDR.channel0 = (short) *current_wave_ptr;
+	dac->SDR.channel1 = (short) *current_wave_ptr;
+	sample_counter++;
+	current_wave_ptr++;
+}
+\end{lstlisting}
+
+Then we started working on the specific sounds we wanted our program to play. We wrote a function for mathematical generation of sine wave samples, and created sample vectors based on frequency levels of musical tones. 
 
 \begin{lstlisting}
 /* Generate the sample vector for ~one period of a pure sine wave */
@@ -50,7 +63,32 @@ void generateSine(float f) {
 	}
 \end{lstlisting}
 
-We then added sample vectors together to create longer sounds, and tested this by writing samples to the ABDAC in the same way as with random noise. Through this we were able to play simple musical melodies. Because of our choice to play musical tones (up to a frequency of 2093Hz), we used the undivided clock frequency of OSC1 for the ABDAC in order to get the best possible sound quality (attempts to use the divided frequency screwed up our sounds). This meant the sampling frequency \textit{Fs} for our program would be 12MHz/256 ~ 47KHz. We also experimented with generating sawtooth, square, triangle and frequency modulated waves (also mathematically) to increase the diversity of our possible sounds, but ended up with only implementing the triangle waves in addition to pure sine. Finally we added tones with appropriate lengths together to make the microcontroller play the well known melody of "Tetris". 
+We then added sample vectors together to create longer sounds, and tested this by writing samples to the ABDAC in the same way as with random noise.
+\begin{lstlisting}
+void button_isr(void) {
+	(...)
+	if (buttons == BUTTON7) {
+		current_sound_ptr = test_sound;
+		current_sound_tl_ptr = test_sound_tone_length;
+		sound_length = test_sound_length;
+		LED_VECTOR = LED7;
+	}
+	(...)
+	init_sound(); // Start playing the sound
+	(...)
+}
+/* Initialize sound counters and pointers, and send first sample to ABDAC */
+void init_sound(void) {
+	(...)
+	set_tone(*current_sound_ptr);
+	set_tone_length(*current_sound_ptr, *current_sound_tl_ptr);
+	dac->SDR.channel0 = (short) *current_wave_ptr;
+	dac->SDR.channel1 = (short) *current_wave_ptr;	
+	(...)
+}
+\end{lstlisting}
+
+Through this we were able to play simple musical melodies. Because of our choice to play musical tones (up to a frequency of 2093Hz), we used the undivided clock frequency of OSC1 for the ABDAC in order to get the best possible sound quality (attempts to use the divided frequency screwed up our sounds). This meant the sampling frequency \textit{Fs} for our program would be 12MHz/256 ~ 47KHz. We also experimented with generating sawtooth, square, triangle and frequency modulated waves (also mathematically) to increase the diversity of our possible sounds, but ended up with only implementing the triangle waves in addition to pure sine. Finally we added tones with appropriate lengths together to make the microcontroller play the well known melody of "Tetris". 
 
 \begin{lstlisting}
 /* Frequency levels for various tones */
@@ -63,7 +101,16 @@ We then added sample vectors together to create longer sounds, and tested this b
 volatile int C6_wave[default_sample_size];
 volatile int D6_wave[default_sample_size];
 volatile int E6_wave[default_sample_size];
+
+/* Tone lengths (seconds) */
+#define E 0.125			// 1/8
+#define Q 0.25			// 1/4
+
+float tetris[] = { E6, B5, C6, D6, C6, B5, A5, A5, C6, E6, D6, C6, B5, (...) };
+float tetris_tone_length[] = { Q, E, E, Q, E, E, Q, E, E, Q, E, E, Q,  (...) };
+int tetris_length = sizeof(tetris)/sizeof(*(tetris));
 \end{lstlisting}
+
 As an extra touch, we spent some time trying to get rid of the random noise we ended up with after playing our sounds. By tweaking the debounce delay properly and resetting the ABDAC after the final sample was played, all unwanted noise disappeared.
 
 \newpage
@@ -87,7 +134,7 @@ Switches were connected to port C on the parallel I/O, and LED's on port B.
 Both the STK1000 and JTAGICE MKII debugger were connected and powered on. The tests were conducted by a person interacting with the switches wearing a headset, and another person logging the results.
 
 \paragraph{Results}
-Below is a table of the different tests we ran, the preconditions and the results. We did not pass the \emph{Bouncing} test. Here we checked whether a sound would play without any interruptions during a switch press (both up and down). 
+Below is a table of the different tests we ran, the preconditions and the results. We did not pass the \emph{Bouncing} test. Here we checked whether a sound would play without any interruptions during a switch press (both up and down). Releasing the button provides a new interrupt, which calls the button interrupt routine of our program, which further delays the waiting sound sample, causing a noticeable effect on the sound.
 
 \begin{center}
 \renewcommand{\arraystretch}{1.1} %vertical cell padding
@@ -104,7 +151,7 @@ Below is a table of the different tests we ran, the preconditions and the result
 
 \hline Intro theme & The intro theme plays & The main program is running & The intro theme plays once after \emph{SW4} is pressed. \emph{LED4} should be turned on & Passed \\
 
-\hline Bouncing & Any sound should only be played once per press of switch & Press down any switch from \emph{SW7} to \emph{SW4} and let it go & The sound should finish playing without any interruptions & Failed. The sounds is interrupted before finishing. \\
+\hline Bouncing & Any sound should only be played once per press of switch & Press down any switch from \emph{SW7} to \emph{SW4} and let it go & The sound should finish playing without any interruptions & Failed. \\
 
 \hline Song change & Play a sound while another sound is already playing & A switch has been pressed and a sound is playing. While playing another switch has been pressed. & The sound of the newly pressed switched should be playing & Passed. \\ 
 
