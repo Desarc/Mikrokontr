@@ -5,17 +5,27 @@
 #include "oeving2.h"
 #include "audio.h"
 
+/* Size of the current sample vector */
 volatile int sample_size;
+/* Counter to keep track of how many samples of the current vector have been played */
 volatile int sample_counter;
-volatile int repeat_counter;
-volatile int tone_counter;
+/* Length of current tone (number of times the sample vector should be repeated) */
 volatile int tone_length;
+/* Counter to keep track of how many times the sample vector has been repeated */
+volatile int repeat_counter;
+/* Number of tones in the sound */
 volatile int sound_length;
+/* Counter to keep track of how many tones of the sound have been played */
+volatile int tone_counter;
+
 volatile int playing_sound = 0;
 volatile int prev_button = 0;
 
+/* Pointer to the next sample value */
 volatile int *current_wave_ptr;
+/* Pointer to the frequency value of the next tone */
 volatile float *current_sound_ptr;
+/* Pointer to the length value (in seconds) of the next tone */
 volatile float *current_sound_tl_ptr;
 
 int main (int argc, char *argv[]) {
@@ -38,6 +48,7 @@ void initIntc(void) {
 }
 
 void initButtons(void) {
+	/* enable all buttons */
 	pioc->per = SET_ALL;
 	pioc->puer = SET_ALL;
 	pioc->ier = SET_ALL;
@@ -69,9 +80,9 @@ void initLeds(void) {
 
 void initAudio(void) {
 	register_interrupt( abdac_isr, AVR32_ABDAC_IRQ/32, AVR32_ABDAC_IRQ%32, ABDAC_INT_LEVEL);
-	//pm->gcctrl[6] = 0x115;  //using OSC1 divided by 4 (6MHz)
+	//pm->gcctrl[6] = 0x115;  //using OSC1 divided by 4 (3MHz)
 	//pm->gcctrl[6] = 0x15;  //using OSC1 divided by 2 (6MHz)
-	pm->gcctrl[6] = 0x5;  //using OSC1 undivided
+	pm->gcctrl[6] = 0x5;  //using OSC1 undivided (12MHz)
 	piob->PDR.p20 = 1;
 	piob->PDR.p21 = 1;
 	piob->ASR.p20 = 1;
@@ -80,10 +91,10 @@ void initAudio(void) {
 	dac->IER.tx_ready = 1;
 }
 
-/* Pre-generate sinus and triangle tones */
+/* Pre-generate sine and triangle tones */
 void pregenerateTones(void) {
 	int i;
-	/* Pre-generating sinus sample vectors */
+	/* Pre-generating sine sample vectors */
 	for (i = 0; i < scale_length; i++) {
 		current_wave_ptr = tone_wave_pointers[i];
 		generateSine(scale[i]);
@@ -95,7 +106,7 @@ void pregenerateTones(void) {
 	}
 }
 
-/* Generate the sample vector for ~one period of a pure sine */
+/* Generate the sample vector for ~one period of a pure sine wave */
 void generateSine(float f) {
 	set_sample_size(f);
 	int i;
@@ -105,7 +116,7 @@ void generateSine(float f) {
 	}
 }
 
-/* Generate the sample vector for ~one period of a triangle */
+/* Generate the sample vector for ~one period of a triangle wave */
 void generateTriangle(float f) {
 	set_sample_size(f);
 	int i;
@@ -121,14 +132,16 @@ void generateTriangle(float f) {
 }
 
 void button_isr(void) {
-	pioc->isr; // Set Input Status Register to PIOC
-	int buttons = pioc->pdsr; // Get the pressed button
+	/* Read Interrupt Status Register of PIOC to enable new interrupts */
+	pioc->isr;
+	/* Read button status register of PIOC */
+	int buttons = pioc->pdsr;
 
 	/* Avoid new interrupt for button release */
 	if (prev_button == buttons) { return; }
 	prev_button = buttons;
 
-	/* Select sound vector and length */
+	/* Select sound and tone length vectors, and set sound length */
 	if (buttons == BUTTON7) {
 		current_sound_ptr = test_sound;
 		current_sound_tl_ptr = test_sound_tone_length;
@@ -179,12 +192,12 @@ void button_isr(void) {
 	}
 
 	init_sound(); // Start playing the sound
-	clearLeds(); // Clear previous LEDs
-	setLeds(); // Set new LEDs
-	debounce(); // Avoid debouncing
+	clearLeds(); // Clear any active LEDs
+	setLeds(); // Set LEDs to indicate which sound is playing
+	debounce(); // Avoid bouncing effect
 }
 
-/* Initialize sound counters and pointers */
+/* Initialize sound counters and pointers, and send first sample to ABDAC */
 void init_sound(void) {
 	tone_counter = 0;
 	sample_counter = 0;
@@ -206,7 +219,7 @@ void set_sample_size(float tone) {
 	}
 }
 
-/* Make current_wave_ptr point to the first sample (e.g. C6_wave[0]) of the desired tone */
+/* Make current_wave_ptr point to the first sample (e.g. C6_wave[0]) of the desired tone sample vector */
 void set_tone(float tone) {
 	set_sample_size(tone);
 	if (tone == G5) current_wave_ptr = G5_wave;
@@ -225,6 +238,7 @@ void set_tone(float tone) {
 	else if (tone == E_s) current_wave_ptr = E_triangle;
 	else if (tone == F_s) current_wave_ptr = F_triangle;
 	else if (tone == G_s) current_wave_ptr = G_triangle;
+	/* Default: don't play any sound */
 	else {
 		current_wave_ptr = silence_wave;
 		sample_size = 1;
@@ -237,20 +251,20 @@ void set_tone_length(float tone, float length) {
 }
 
 void abdac_isr(void) {
-	/* Check if the interrupts comes when we actually want to play a sound, to avoid crash */
+	/* Check if the interrupt comes when we actually want to play a sound, to avoid crash/failure */
 	if (playing_sound == 0) {
 		return;
 	}
 	/* Check if tone has completed its duration */
 	if (repeat_counter >= tone_length) {
-		/* If last tone in song, stop playing */
+		/* If current tone is last tone in song, stop playing */
 		if (tone_counter >= sound_length) {
 			playing_sound = 0;
 			dac->CR.en = 0; // Reset DAC to avoid noise after sound
 			dac->CR.en = 1;
 			return;
 		}
-		/* Reset counters and get next tone + duration */
+		/* Reset sample and repeat counters, and get next tone + duration */
 		sample_counter = 0;
 		repeat_counter = 0;
 		tone_counter++;
@@ -265,6 +279,7 @@ void abdac_isr(void) {
 		repeat_counter++;
 		set_tone(*current_sound_ptr);
 	}
+	/* Send sample to ABDAC */
 	dac->SDR.channel0 = (short) *current_wave_ptr;
 	dac->SDR.channel1 = (short) *current_wave_ptr;
 	sample_counter++;

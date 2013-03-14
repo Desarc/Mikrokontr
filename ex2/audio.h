@@ -50,7 +50,7 @@ volatile int F_triangle[default_sample_size];
 volatile int G_triangle[default_sample_size];
 volatile int silence_wave[1] = {0};
 
-/* Amplitude */
+/* Base amplitude */
 const int A = 2000;
 
 /* Frequency sampling */
