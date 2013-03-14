@@ -38,8 +38,34 @@ In this exercise we programmed the STK1000 development board to play sounds. We 
 
 
 \section{Description and methodology}
-We started out by implementing the previous assignment that we had coded in assembly, only this time in C. This was an easy start for implementing an interrupt routine based on a program we already had good knowledge of. When we got this to work we were ready to enable and set up the ABDAC. First out we started with simply generating some noise, so as to easily check that we were able to make audible sound. Now we set out to make some sine waves as a first step of a synthesizer. We then used those sine waves to generate tones in a ''audio.h'' header file. This made the basis for simple synthesizing which we used to make simple sounds, and even the melody tetris. 
-We spent some time trying to get rid of the random noise and tones we ended up with after playing our sounds. After tweaking the debounce delay properly and resetting the ABDAC this worked out nicely.
+We started out by implementing the previous assignment that we had coded in assembly, only this time in C. This was an easy start for implementing an interrupt routine in C based on a program we had already designed. The primary challenge was making the buttons work with interrupts. Once we had a functional program with buttons and LEDs, we were ready to start working on the ABDAC. We started by simply trying to enable the ABDAC while still retaining the rest of the functionality. This proved troublesome at first, because interrupts from the buttons stopped working as soon as we enabled interrupts from the ABDAC. We decided to work around this by having the buttons and the ABDAC connected to different PIOs, which solved our problem. The next step was generating random noise and sending samples to the ABDAC. This proved to be rather trivial, we simply wrote the first sample to the ABDAC from the button interrupt routine, and then used interrupts from the ABDAC to retrieve the next sample (random in this case) and write it to the ABDAC. Then we started working on the specific sounds we wanted our program to play. We wrote a function for mathematical generation of sine wave samples, and created sample vectors based on frequency levels of musical tones. 
+
+\begin{lstlisting}
+/* Generate the sample vector for ~one period of a pure sine wave */
+void generateSine(float f) {
+	set_sample_size(f);
+	int i;
+	for (i = 0; i < sample_size; i++) {
+		*current_wave_ptr = (int) floor(A*sin(f*(2*M_PI)*i/Fs));
+		current_wave_ptr++;
+	}
+\end{lstlisting}
+
+We then added sample vectors together to create longer sounds, and tested this by writing samples to the ABDAC in the same way as with random noise. Through this we were able to play simple musical melodies. Because of our choice to play musical tones (up to a frequency of 2093Hz), we used the undivided clock frequency of OSC1 for the ABDAC in order to get the best possible sound quality (attempts to use the divided frequency screwed up our sounds). This meant the sampling frequency \textit{Fs} for our program would be 12MHz/256 ~ 47KHz. We also experimented with generating sawtooth, square, triangle and frequency modulated waves (also mathematically) to increase the diversity of our possible sounds, but ended up with only implementing the triangle waves in addition to pure sine. Finally we added tones with appropriate lengths together to make the microcontroller play the well known melody of "Tetris". 
+
+\begin{lstlisting}
+/* Frequency levels for various tones */
+#define C6 1046.50f
+#define D6 1174.66f
+#define E6 1318.51f
+
+/* Tone sample arrays */
+#define default_sample_size 100
+volatile int C6_wave[default_sample_size];
+volatile int D6_wave[default_sample_size];
+volatile int E6_wave[default_sample_size];
+\end{lstlisting}
+As an extra touch, we spent some time trying to get rid of the random noise we ended up with after playing our sounds. By tweaking the debounce delay properly and resetting the ABDAC after the final sample was played, all unwanted noise disappeared.
 
 \newpage
 
@@ -54,7 +80,7 @@ The result of the exercise is that we coded a single program in C which generate
 
 \section{Tests}
 \paragraph{Description}
-We've created a few test scenarios in order to test different aspects and corner cases of our code. The main prerequisites were the STK1000 development board, JTAGICE MKII and a headset.
+We've created a few test scenarios in order to test different aspects and corner cases of our code. The main equipment were the STK1000 development board, JTAGICE MKII and a headset.
 
 The setup of the board: 
 The headset was connected to the minijack on the development board, the jumper 4 and 5 was set to ''INT. DAC''.
@@ -87,20 +113,20 @@ Long push test				& Program is active, only LED 7 is on 		& Push and hold switch
 This assignment was more demanding yet also more fun than the first assignment. The learning curve was a bit harder as not all of us had coded much in C before, but it was a nice opportunity to learn.
 
 \section{Conclusion}
-We learned how to generate and play different sounds in C. This will be helpful when we start coding the next assignment. In the end we have four different sounds. Three short sound effects and one longer intro sound.
+We learned how to generate and play different sounds in C. This will be helpful when we start coding the next assignment. In the end we have four different sounds. Three short sound effects and one melody. 
 
 \section{Appendix}
 
 \footnotesize{  % This makes the Reference items print in footnotesize fonts
 \begin{thebibliography}{N}
 
-\bibitem[1]{secure} AVR32 Architecture Document
+\bibitem[1]{avrdoc} AVR32 Architecture Document
 \url{http://www.atmel.com/images/doc32000.pdf}
 
-\bibitem[2]{secure} AT32AP7000 Datasheet
+\bibitem[2]{stkdoc} AT32AP7000 Datasheet
 \url{http://www.atmel.com/Images/doc32003.pdf}
 
-\bibitem[3]{secure} TDT4258 Compendium
+\bibitem[3]{komp} TDT4258 Compendium
 \url{http://www.idi.ntnu.no/emner/tdt4258/_media/kompendium.pdf}
 
 \end{thebibliography}  
