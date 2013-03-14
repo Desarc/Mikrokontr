@@ -9,7 +9,7 @@
 \definecolor{light-gray}{gray}{0.95}
 \usepackage{listings}
 \lstset{
-basicstyle=\footnotesize, 
+basicstyle=\scriptsize, 
 morecomment=[l]{/*},
 backgroundcolor=\color{light-gray}, 
 xleftmargin=.10in,
@@ -118,7 +118,7 @@ As an extra touch, we spent some time trying to get rid of the random noise we e
 \subsection*{Debugging}
 Here is a screenshot showing us debugging our \emph{generateTriangle} function which generates triangle sound wave samples. More specifically we check that the values we get from each part of our (complex) mathematical expression are valid. 
 \begin{center}
-\includegraphics[scale=1]{images/debugsmall.png}
+\includegraphics{images/debugsmall.png}
 \end{center}
 
 \section{Results}
@@ -126,12 +126,7 @@ The result of the exercise is that we coded a single program in C which generate
 
 \section{Tests}
 \paragraph{Description}
-We've created a few test scenarios in order to test different aspects and corner cases of our code. The main equipment were the STK1000 development board, JTAGICE MKII and a headset.
-
-The setup of the board: 
-The headset was connected to the minijack on the development board, the jumper 4 and 5 was set to ''INT. DAC''.
-Switches were connected to port C on the parallel I/O, and LED's on port B. 
-Both the STK1000 and JTAGICE MKII debugger were connected and powered on. The tests were conducted by a person interacting with the switches wearing a headset, and another person logging the results.
+We've created a few test scenarios in order to test different cases of our code for playing sounds. The tests were conducted by a person interacting with the switches wearing a headset, and another person logging the results. The main equipment was the STK1000 development board, JTAGICE MKII and a headset. The jumpers of the board were set as specified in the compendium (section 3.4.1) \cite{komp}. The GPIO was connected as following: Port B to the LEDs and Port C to the switches.
 
 \paragraph{Results}
 Below is a table of the different tests we ran, the preconditions and the results. We did not pass the \emph{Bouncing} test. Here we checked whether a sound would play without any interruptions during a switch press (both up and down). Releasing the button provides a new interrupt, which calls the button interrupt routine of our program, which further delays the waiting sound sample, causing a noticeable effect on the sound.
