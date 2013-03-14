@@ -68,6 +68,7 @@ const int A = 2000;
 #define L 5
 #define VL 10
 
+/* Tone wave pointers */
 int *tone_wave_pointers[] = { A4_wave, C5_wave, G5_wave, A5_wave, B5_wave, C6_wave, D6_wave, E6_wave, F6_wave, G6_wave, A6_wave, B6_wave, C7_wave };
 int *triangle_wave_pointers[] = { C_triangle, D_triangle, E_triangle, F_triangle, G_triangle };
 
