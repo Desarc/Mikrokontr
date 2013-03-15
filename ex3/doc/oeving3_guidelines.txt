@@ -1,0 +1,41 @@
+Follow this instructions to install linux on STK1000:
+
+Install bootloader:
+avr32program program -vef0,8MB /opt/atstk1002_bsp/images/u-boot.bin
+Install Linux distribution:
+1. Insert SD-card
+2. Partition the SD-card using cfdisk; cfdisk /dev/sdb. u-boot recognises MBR-partitions, as created by cfdisk.
+3. mkfs.ext2 /dev/sdb1
+4. e2label /dev/sdb1 avr32_root. (We do this for convenience.)
+5. Eject SD card, and insert it again
+6. The SD card should be mounted under /media/avr32_root (or whatever the volume label is).
+7. tar -C /media/avr32_root -xzf /opt/atstk1002_bsp/images/rootfs.tar.gz
+8. cp /opt/atstk1002_bsp/images/uImage /media/avr32_root/boot 9. Safely eject the SD card.
+
+The  STK1000 should boot from the SD card. If u-boot complains about not finding the kernel image, check the bootcmd. See that it starts with "mmc init", and that it tries to load from the correct uImage path. If the kernel panics while mounting the root filesystem, then you should check the bootargs variable in u-boot. Chances are that you have the wrong root, or that you have forgotten the rootwait-option.  
+The latter is not necessary with all kernels.
+
+The only issue is with step 7. If you have problems with the permissions, try to clone the SD image with something like dd if=/dev/sdb of=ATSTK1002_Linux_SD_Image.img bs=1M (ask to the student assistants for an SD card to clone from).
+
+Then you can "program"   the SD cards with:
+dd if=ATSTK1002_Linux_SD_Image.img of=/dev/sdb
+
+When using minicom, start it in the following way:
+minicom -D /dev/ttyS0
+And disable hardware flow control from within minicom (accessible through Ctrl+A, then Z).
+The D-option tells minicom what device to use (otherwise ttyS8 is the default)
+
+********************************************* ALSA MIXER *********************************************
+
+The installed version of ALSA comes with all channels muted by default. You will need to unmute the channels manually.
+In order to solve that, start alsamixer and unmute the sound pressing m, then increase the volume.
+
+********************************************* STK1000 BSP *********************************************
+
+The new 32-bit compiled version of STK1000 BSP is: atstk1002_bsp-v3.0.0_ubuntu11.10_i386_default_bin.tar.bz2
+extract atstk1002_bsp-v3.0.0_ubuntu11.10_i386_default_bin.tar.bz2 in /. 
+After doing this, the result of executing:
+file /opt/atstk1002_bsp/staging/usr/bin/avr32-unknown-linux-uclibc-gcc
+should state that it is an Intel 80386 executable.
+
+The SD card image that should be used is ATSTK1002_BSP_SD_image_3.0.0.tar.gz
