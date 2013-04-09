@@ -13,7 +13,7 @@ obj-m := ${MODULE}.o
 else
 
 # sti til linux-kildekoden
-KERNELDIR := ../kernel/linux/
+KERNELDIR := kernel/linux-2.6.16.11-avr32-20060626/
 
 default:
 	$(MAKE) -C $(KERNELDIR) M=$$PWD modules
