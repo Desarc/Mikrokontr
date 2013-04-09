@@ -2,6 +2,9 @@
 #include <linux/module.h>
 MODULE_LICENSE("Dual BSD/GPL");
 
+static int hello_init(void);
+static void hello_exit(void);
+
 static int hello_init(void)
 {
 	printk(KERN_ALERT "Hello world!\n");
@@ -14,4 +17,4 @@ static void hello_exit(void)
 }
 
 module_init(hello_init);
-module_exit(hello_exi);
+module_exit(hello_exit);

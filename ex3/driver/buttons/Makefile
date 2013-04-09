@@ -5,7 +5,7 @@
 ###############################################################################
 
 # navn på kjernemodul (navnet på C-fila men uten ".c")
-MODULE = hello
+MODULE = buttons
 
 ifneq ($(KERNELRELEASE),)
 obj-m := ${MODULE}.o
@@ -13,7 +13,7 @@ obj-m := ${MODULE}.o
 else
 
 # sti til linux-kildekoden
-KERNELDIR := kernel/linux-2.6.16.11-avr32-20060626/
+KERNELDIR := /opt/atstk1002_bsp/build/linux-2.6.35.4
 
 default:
 	$(MAKE) -C $(KERNELDIR) M=$$PWD modules
