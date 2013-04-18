@@ -60,14 +60,11 @@ static int __init leds_init (void) {
 	request_region(AVR32_PIOB_ADDRESS, AVR32_PIOB_IRQ, name);
   
 	/* initialisere PIO-maskinvaren (som i øving 2) */
-
+	piob->per = SET_ALL;
+	piob->oer = SET_ALL;
+	piob->codr = SET_ALL;
+	piob->sodr = 0x01
 	
-	/* I have no idea what I'm doing from this point */	
-	outw(SET_ALL, piob->per);
-	outw(SET_ALL, piob->oer);
-	outw(SET_ALL, piob->codr);
-	outw(0x01, piob->sodr);
-
 	/* registrere device i systemet (må gjøres når alt annet er initialisert) */
 	int success;
 	leds_cdev = cdev_alloc();
