@@ -25,14 +25,21 @@ static int leds_release (struct inode *inode, struct file *filp);
 static ssize_t leds_read (struct file *filp, char __user *buff, size_t count, loff_t *offp);
 static ssize_t leds_write (struct file *filp, const char __user *buff, size_t count, loff_t *offp);
 
-void set_leds(short mask);
+void set_leds();
+void set_led_on(int led);
+void set_led_off(int led);
 
 dev_t dev;
 int first_minor = 0, count = 1;
 const char name[] = "leds";
 const int SET_ALL = 0xffffffff;
 struct cdev *leds_cdev;
-char* led_status;
+volatile int led_status = 0;
+const int led0 = 0x100;
+const int led1 = 0x200;
+const int led2 = 0x400;
+const int led5 = 0x8000;
+
 
 volatile avr32_pio_t *piob = &AVR32_PIOB;
 
@@ -58,8 +65,8 @@ static int __init leds_init (void) {
 
   	/* be om tilgang til I/O-porter */
 
-	//request_region(AVR32_PIOB_ADDRESS, AVR32_PIOB_IRQ, name);
-	request_region(AVR32_PIOB_ADDRESS, 102400, name);
+	request_region(AVR32_PIOB_ADDRESS, AVR32_PIOB_IRQ, name);
+	//request_region(AVR32_PIOB_ADDRESS, 102400, name);
 
 	/* initialisere PIO-maskinvaren (som i øving 2) */
 
@@ -88,7 +95,9 @@ static int __init leds_init (void) {
 	//cdev_success = cdev_add(leds_cdev, dev, count);
 	//cdev_success = register_chrdev(dev, name, &leds_fops);
 	//printk("cdev_add success? %i \n", cdev_success);
-	set_leds(0x1);
+	set_led_on(led1);
+	set_led_off(led1);
+	set_led_on(led2);
 	//outw(SET_ALL, piob->codr);
 	//outw(0x01, piob->sodr);
 
@@ -97,10 +106,19 @@ static int __init leds_init (void) {
   	return 0;
 }
 
-void set_leds(short mask) {
+void set_led_on(int led) {
+	led_status += led;
+	set_leds();
+}
+
+void set_led_off(int led) {
+	led_status -= led;
+	set_leds();
+}
+
+void set_leds() {
 	piob->codr = SET_ALL;
-	int led_base = 0xff;
-	piob->sodr = led_base+mask;
+	piob->sodr = led_status;
 
 }
 
@@ -110,8 +128,8 @@ void set_leds(short mask) {
 static void __exit leds_exit (void) {
 
 	//cdev_del(leds_cdev);
-	
-	release_region(AVR32_PIOB_ADDRESS, 102400);
+	release_region(AVR32_PIOB_ADDRESS, AVR32_PIOB_IRQ);
+	//release_region(AVR32_PIOB_ADDRESS, 102400);
 
 	/* releasing minor and major numbers */
 	unregister_chrdev_region(dev, count);
