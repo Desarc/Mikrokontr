@@ -27,7 +27,7 @@ int moveTo(int fromX, int fromY, int toX, int toY) {
 	if (next == TARGET) {
 		setTile(toX, toY, MOVER_ON_TARGET);
 	}
-	if (next == MOVABLE || next == MOVABLE_ON_TARGET) {
+	else if (next == MOVABLE || next == MOVABLE_ON_TARGET) {
 		box = 1;
 		next = getGridTile(toX, toY);
 		if (next == BLANK) {
@@ -52,4 +52,33 @@ int moveTo(int fromX, int fromY, int toX, int toY) {
 		setTile(toX, toY, MOVER);
 	}
 	return box;
+}
+
+void undoBox(char dir) {
+	int dirX = 0, dirY = 0;
+	if (dir == 'R') {
+		dirX = 1;
+	}
+	else if (dir == 'L') {
+		dirX = -1;
+	}
+	else if (dir == 'D') {
+		dirY = 1;
+	}
+	else if (dir == 'U') {
+		dirY = -1;
+	}
+	int boxX = getX()+2*dirX;
+	int boxY = getY()+2*dirY;
+	if (getTile(boxX, boxY) == MOVABLE || getTile(boxX, boxY) == MOVABLE_ON_TARGET) {
+		int newX = getX()+dirX;
+		int newY = getY()+dirY;
+		setTile(boxX, boxY, getGridTile(boxX, boxY));
+		if (getGridTile(newX, newY) == TARGET) {
+			setTile(newX, newY, MOVABLE_ON_TARGET);
+		}
+		else {
+			setTile(newX, newY, MOVABLE);
+		}
+	}
 }

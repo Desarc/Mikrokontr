@@ -3,8 +3,12 @@
 
 #include "sokoban_headers.h"
 
+int main (int argc, char *argv[]);
+static void performAction(char cmd);
 void updateScreen(int x, int y, char tile);
-void paintLevel(volatile char *level_ptr);
+void printPath(void);
+void paintLevel(void);
+void displayWin(void);
 
 
 

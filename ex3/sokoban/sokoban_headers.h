@@ -7,4 +7,6 @@
 #include "sokoban_graphics.h"
 #include "sokoban_core.h"
 
+#include "stdio.h"
+
 #endif

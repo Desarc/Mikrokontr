@@ -27,7 +27,8 @@ void reset_grid_ptr(void) {
 char setTile(int x, int y, char tile) {
 	char old = getTile(x, y);
 	reset_level_ptr();
-	level_ptr += (y+1)*x;
+	int pos = (y*dimX)+x;
+	level_ptr += pos;
 	*level_ptr = tile;
 	if (tile == MOVER || tile == MOVER_ON_TARGET) {
 		posX = x;
@@ -39,13 +40,15 @@ char setTile(int x, int y, char tile) {
 
 char getTile(int x, int y) {
 	reset_level_ptr();
-	level_ptr += (y+1)*x;
+	int pos = (y*dimX)+x;
+	level_ptr += pos;
 	return *level_ptr;
 }
 
 char getGridTile(int x, int y) {
 	reset_grid_ptr();
-	grid_ptr += (y+1)*x;
+	int pos = (y*dimX)+x;
+	grid_ptr += pos;
 	return *grid_ptr;
 }
 
@@ -62,7 +65,8 @@ void decreaseRemaining(void) {
 }
 
 void loadLevel(int num) {
-	volatile char *load_ptr;
+	remaining = 0;
+	char *load_ptr;
 	if (num == 3) {
 		load_ptr = level3;
 		dimX = level3dimX;
@@ -70,9 +74,11 @@ void loadLevel(int num) {
 	}
 	reset_level_ptr();
 	reset_grid_ptr();
+	int tiles = dimX*dimY;
 	int i;
-	for (i=0;i<dimX*dimY;i++) {
+	for (i = 0;i < tiles; i++) {
 		char tile = *load_ptr;
+		load_ptr++;
 		*level_ptr = tile;
 		level_ptr++;
 		if (tile == MOVABLE || tile == MOVER) {
@@ -99,7 +105,8 @@ void loadLevel(int num) {
 		}
 	}
 	reset_level_ptr();
-	paintLevel(level_ptr);
+	reset_grid_ptr();
+	paintLevel();
 }
 
 int getX(void) {
@@ -116,8 +123,4 @@ int getDimX(void) {
 
 int getDimY(void) {
 	return dimY;
-}
-
-void reset(int num) {
-	loadLevel(num);
 }

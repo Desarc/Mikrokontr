@@ -17,7 +17,6 @@ int getX(void);
 int getY(void);
 int getDimX(void);
 int getDimY(void);
-void reset(int num);
 
 
 #endif
