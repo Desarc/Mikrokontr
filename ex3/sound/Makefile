@@ -10,12 +10,12 @@ ADDR = 129.241.103.248:/root
 
 
 default:
-	gcc ${MODULE}.c -o ${MODULE}
+	avr32-linux-gcc ${MODULE}.c -o ${MODULE} -lm
 
 	
 .PHONY : send
 send:
-	$(shell scp ${MODULE}.ko root@${ADDR})
+	$(shell scp ${MODULE} root@${ADDR})
 
 
 .PHONY : clean

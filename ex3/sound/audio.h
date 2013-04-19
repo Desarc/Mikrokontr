@@ -2,7 +2,7 @@
 #define AUDIO_H
 
 /* Frequency levels for various tones */
-#define s 0.1f
+#define SIL 0.1f
 #define A4 440.00f
 #define B4 493.88f
 #define C5 523.25f
@@ -69,31 +69,37 @@ const int A = 2000;
 #define VL 10
 
 /* Tone wave pointers */
-int *tone_wave_pointers[] = { A4_wave, C5_wave, G5_wave, A5_wave, B5_wave, C6_wave, D6_wave, E6_wave, F6_wave, G6_wave, A6_wave, B6_wave, C7_wave };
-int *triangle_wave_pointers[] = { C_triangle, D_triangle, E_triangle, F_triangle, G_triangle };
+volatile int *tone_wave_pointers[] = { A4_wave, C5_wave, G5_wave, A5_wave, B5_wave, C6_wave, D6_wave, E6_wave, F6_wave, G6_wave, A6_wave, B6_wave, C7_wave };
+volatile int *triangle_wave_pointers[] = { C_triangle, D_triangle, E_triangle, F_triangle, G_triangle };
 
 /* Sound vectors */
+#define SCALE 0
 float scale[] = { A4, C5, G5, A5, B5, C6, D6, E6, F6, G6, A6, B6, C7 };
 float scale_tone_length[] = { S, S, S, S, S, S, S, S, S, S, S, S, S };
 int scale_length = sizeof(scale)/sizeof(*(scale));
 
+#define TRIANGLE 1
 float triangle_scale[] = { C_s, D_s, E_s, F_s, G_s };
 float triangle_scale_tone_length[] = { H, H, H, H, H };
 int triangle_scale_length = sizeof(triangle_scale)/sizeof(*(triangle_scale));
 
+#define SIRENE 2
 float sirene[] = { C6, D6, E6, F6, E6, D6, C6, D6, E6, F6, E6, D6, C6, D6, E6, F6, E6, D6, C6 };
 float sirene_tone_length[] = { QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ };
 int sirene_length = sizeof(sirene)/sizeof(*(sirene));
 
-float test_sound[] = { C7, F_s, B6, F_s, A6, F_s, G6, F_s, F6, F_s, E6, F_s, D6, F_s, C6, F_s, s };
+#define TEST 3
+float test_sound[] = { C7, F_s, B6, F_s, A6, F_s, G6, F_s, F6, F_s, E6, F_s, D6, F_s, C6, F_s, SIL };
 float test_sound_tone_length[] = { QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, QQ, VL };
 int test_sound_length = sizeof(test_sound)/sizeof(*(test_sound));
 
+#define TETRIS 4
 float tetris[] = { E6, B5, C6, D6, C6, B5, A5, A5, C6, E6, D6, C6, B5, B5, C6, D6, E6, C6, A5, A5,/* */ D6, D6, F6, A6, G6, F6, E6, E6, C6, E6, D6, C6, B5, B5, C6, D6, E6, C6, A5, A5 };
 float tetris_tone_length[] = { Q, E, E, Q, E, E, Q, E, E, Q, E, E, Q, E, E, Q, Q, Q, Q, H,/* */ Q, E, E, Q, E, E, Q, E, E, Q, E, E, Q, E, E, Q, Q, Q, Q, Q };
 int tetris_length = sizeof(tetris)/sizeof(*(tetris));
 
-float silence[1] = { s };
+#define SILENCE 5
+float silence[1] = { SIL };
 float silence_length[1] = { F };
 
 #endif
