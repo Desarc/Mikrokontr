@@ -28,14 +28,14 @@ static ssize_t buttons_write (struct file *filp, const char __user *buff,
                       size_t count, loff_t *offp);
 
 
-dev_t first_major;
+dev_t dec;
 int first_minor = 0, count = 1;
 const char name[] = "buttons";
 struct resource;
 
 /* fops-struct */
 
-static struct file_operations driver_fops = {
+static struct file_operations buttons_fops = {
   .owner = THIS_MODULE,
   .read = buttons_read,
   .write = buttons_write,
@@ -49,10 +49,11 @@ static struct file_operations driver_fops = {
 static int __init buttons_init (void) {
 
 	/* allocating minor and major numbers */
-  	alloc_chrdev_region(&first_major, first_minor, count, name);
+	int alloc_success = -1;
+  	alloc_success = alloc_chrdev_region(&dev, first_minor, count, name);
+	printk("alloc success? %i \n", alloc_success);
 	
-	printk(KERN_ALERT "Hello world!\n");
-
+	request_region(AVR32_PIOB_ADDRESS, AVR32_PIOB_IRQ, name);
   	/* be om tilgang til I/O-porter */
 	//resource = *request_region();
   
@@ -68,10 +69,10 @@ static int __init buttons_init (void) {
 
 static void __exit buttons_exit (void) {
 
-	printk(KERN_ALERT "Goodbye, cruel world!\n");
+	
 
 	/* releasing minor and major numbers */
-	unregister_chrdev_region(first_major, count);
+	unregister_chrdev_region(dev, count);
 
 	//release_region();
 }

@@ -6,7 +6,7 @@
 
 # navn på kjernemodul (navnet på C-fila men uten ".c")
 MODULE = leds
-ADDR = 129.241.103.185:/root
+ADDR = 129.241.103.133:/root
 
 ifneq ($(KERNELRELEASE),)
 obj-m := ${MODULE}.o

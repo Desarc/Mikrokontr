@@ -41,27 +41,49 @@ int main (int argc, char *argv[]) {
 int open_driver(void) {
 	
 	int fd_dsp;
+	char *dsp_p = 0;
+	int sample_size = 8;
+
 	fd_dsp = open("/dev/dsp", O_RDWR);
+	
 	if (fd_dsp < 0) {
 		perror("open: ");
 		return 1;
 	}
-	printf("sound device opened");
+	printf("sound device opened, %i\n", fd_dsp);
 	//if (lseek(fd_dsp, 1, SEEK_SET) < 0) {
 		//perror("lseek: ");
 		//return 1;
 	//}
 
 	int dsp_rate = 8000;
-	ioctl(fd_dsp, SOUND_PCM_WRITE_RATE, &dsp_rate);
+	int dsprate_success = -1;
+	dsprate_success = ioctl(fd_dsp, SOUND_PCM_WRITE_RATE, &dsp_rate);
+	printf("success setting dsp rate? %i\n", dsprate_success);
+	
+	int sample_size_success = -1;
+	sample_size_success = ioctl(fd_dsp, SOUND_PCM_WRITE_BITS, &sample_size);
+	printf("set sample size success?: %i\n", sample_size_success);
 	
 	while(1) {
 		int sample = rand()%0xff;
-		if (write(fd_dsp, &sample, 4) < 0) {
+		printf("%i\n", sample);
+		int write_success = write(fd_dsp, &sample, 1);
+		printf("number of bytes written: %i\n", write_success);
+		if (write_success < 0) {
 		    perror("write: ");
 		    return 1;
 		}
 	}
+
+	/*dsp_p = (char *)mmap(NULL, sample_size, PROT_WRITE, MAP_SHARED, fd_dsp, 0);
+	
+	if ((int)dsp_p == -1) {
+    	    perror("Error: failed to map sound device to memory");
+        	exit(4);
+    	}
+	printf("The sound device was mapped to memory successfully.\n");*/
+	
 
 	
 	close(fd_dsp);

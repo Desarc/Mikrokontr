@@ -6,7 +6,7 @@
 
 # navn på kjernemodul (navnet på C-fila men uten ".c")
 MODULE = sound
-ADDR = 129.241.103.248:/root
+ADDR = 129.241.102.251:/root
 
 
 default:

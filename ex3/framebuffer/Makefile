@@ -5,17 +5,17 @@
 ###############################################################################
 
 # navn på kjernemodul (navnet på C-fila men uten ".c")
-MODULE = framebuffer
-ADDR = 129.241.103.248:/root
+MODULE = screen
+ADDR = 129.241.103.251:/root
 
 
 default:
-	gcc ${MODULE}.c -o ${MODULE}
+	avr32-linux-gcc ${MODULE}.c -o ${MODULE}
 
 	
 .PHONY : send
 send:
-	$(shell scp ${MODULE}.ko root@${ADDR})
+	$(shell scp ${MODULE} root@${ADDR})
 
 
 .PHONY : clean
