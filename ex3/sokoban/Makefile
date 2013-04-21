@@ -7,7 +7,8 @@ default:
 	avr32-linux-gcc -c sokoban_graphics.c -o sokoban_graphics.o
 	avr32-linux-gcc -c sokoban_core.c -o sokoban_core.o
 	avr32-linux-gcc -c ../framebuffer/screen.c -o screen.o
-	avr32-linux-gcc sokoban_move.o sokoban_graphics.o sokoban_level.o sokoban_core.o screen.o -o sokoban
+	avr32-linux-gcc -c ../leds/leds_control.c -o leds.o
+	avr32-linux-gcc sokoban_move.o sokoban_graphics.o sokoban_level.o sokoban_core.o screen.o leds.o -o sokoban
 
 .PHONY : send
 send:

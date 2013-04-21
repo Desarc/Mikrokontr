@@ -1,4 +1,5 @@
 #include "screen.h"
+#include "../sokoban/sokoban_tile.h"
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>

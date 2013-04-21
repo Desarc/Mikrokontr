@@ -1,14 +1,17 @@
 #include "sokoban_graphics.h"
 #include "../framebuffer/screen.h"
+#include "../leds/leds_control.h"
 
 volatile int completed = 0;
 
 int main (int argc, char *argv[]) {
 	
 	open_screen_driver();
+	open_led_driver();
 	load_sokoban_images();
 	clear_screen();
 	reset();
+		
 	printf("WELCOME TO SOKOBAN!\n\n");
 	while (!completed) {
 		paintLevel();
@@ -16,6 +19,7 @@ int main (int argc, char *argv[]) {
 		scanf("%c", &cmd);
 		performAction(cmd);
 	}
+	close_led_driver();
 	close_screen_driver();
 }
 
@@ -42,7 +46,8 @@ void performAction(char cmd) {
 		printPath();
 	}
 	else if (cmd == 'r') {
-		reset();
+		reset_leds();
+		reset();		
 	}
 	else if (cmd == 'x') {
 		completed = 1;

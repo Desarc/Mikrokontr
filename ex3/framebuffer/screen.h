@@ -1,14 +1,6 @@
 #ifndef SCREEN_H
 #define SCREEN_H
 
-#define WALL '#'
-#define BLANK ' '
-#define TARGET '.'
-#define PLAYER '@'
-#define BOX '$'
-#define PLAYER_ON_TARGET '+'
-#define BOX_ON_TARGET '*'
-
 void open_screen_driver(void);
 void close_screen_driver(void);
 void load_sokoban_images(void);
