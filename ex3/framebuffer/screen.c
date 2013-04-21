@@ -7,7 +7,10 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 
-#define IMAGE_SIZE 76800
+#define MAX_IMAGE_SIZE 76800
+#define TILE_SIZE_8 64
+#define TILE_SIZE_16 256
+#define TILE_SIZE_32 1024
 
 int fbfd = 0;
 struct fb_var_screeninfo vinfo;
@@ -16,72 +19,53 @@ long int screensize = 0;
 char *fbp = 0;
 
 int image[IMAGE_SIZE][3]; // first number here is 1024 pixels in my image, 3 is for RGB values
+int crate_image[TILE_SIZE_16][3];
+int player_image[TILE_SIZE_16][3];
+int wall_image[TILE_SIZE_16][3];
+
+volatile int *image_ptr;
+
 
 int main() {
-	open_driver();
+	open_screen_driver();
 	
-	read_image_data("gradient100x200.bmp");
+	load_sokoban_images();
 	//generate_random_image();
 
-	write_to_screen();
-
-
 	
-    	close_driver();	
+    write_to_screen(player_image, 100, 100, 16, 16);	
+
+    close_screen_driver();
     	
     return 0;
 }
 
-void read_image_data(char image_path[]) {
+void load_sokoban_images(void) {
+	//image_ptr = crate_image;
+	read_image_data("crate.bmp", crate_image, 16, 16);
+	image_ptr = player_image;
+	read_image_data("player.bmp", image_ptr, 16, 16);
+	image_ptr = wall_image;
+	read_image_data("wall.bmp", image_ptr, 16, 16);
+
+}
+
+void read_image_data(char image_path[], int *image_ptr, int height, int width) {
 	FILE *streamIn;
 	streamIn = fopen(image_path, "r");
 	if (streamIn == (FILE *)0){
 		printf("File opening error ocurred. Exiting program.\n");
 		exit(0);
 	}
-	
-	volatile int byte, width = 0, height = 0, size = 0, offset = 0, bpp = 0;
-	int count = 0;
+	int size = width*height;
 	int i;
-	fseek(streamIn, 2, SEEK_SET);
-	offset = getc(streamIn)+(getc(streamIn)+0xff);
-	fseek(streamIn, 18, SEEK_SET);
-	//int width1 = getc(streamIn)+0xff;
-	//int width2 = getc(streamIn);
-	width = getc(streamIn)+(getc(streamIn));
-	fseek(streamIn, 22, SEEK_SET);
-	//int height1 = getc(streamIn);
-	//int height2 = getc(streamIn)+0xff;
-	height = getc(streamIn)+(getc(streamIn));
-	fseek(streamIn, 28, SEEK_SET);
-	bpp = getc(streamIn);
-	fseek(streamIn, 34, SEEK_SET);
-	//int size1 = getc(streamIn)+0xff;
-	//int size2 = getc(streamIn);
-	size = (getc(streamIn)+(getc(streamIn)+0xff)+(getc(streamIn)+0xffff)+(getc(streamIn)+0xffffff))/(3*bpp);
-	/*for(i=0;i<27;i++) {
-		byte = getw(streamIn);  // strip out BMP header	
-		printf("%i: %i\n", (i*2)+1,byte);
-	}*/
-	//for(i=0;i<11;i++) byte = getc(streamIn);  //read DIB header to width field
-	/*fseek(streamIn, 18, SEEK_SET);
-	width = getw(streamIn);
-	height = getw(streamIn);
-	//byte = getw(streamIn);
-	
-	byte = getw(streamIn);
-	for(i=0;i<7;i++) byte = getc(streamIn);  //read DIB header to width field
-	byte = getw(streamIn);
-	size = getw(streamIn);*/
-	printf("height: %i, width: %i, size: %i, bpp: %i, offset: %i\n", height, width, size, bpp, offset);
-	//for(i=0;i<12;i++) byte = getc(streamIn);
-	fseek(streamIn, offset, SEEK_SET);
-	for(i=0;i<IMAGE_SIZE;i++){    // foreach pixel
-		image[i][0] = getc(streamIn);  // use BMP 24bit with no alpha channel
-		image[i][1] = getc(streamIn);  // BMP uses BGR but we want RGB, grab byte-by-byte
-		image[i][2] = getc(streamIn);  // reverse-order array indexing fixes RGB issue...
-		//byte = getc(streamIn);
-		//printf("pixel %d : [%d,%d,%d]\n",i+1,image[i][0],image[i][1],image[i][2]);
+	fseek(streamIn, 54, SEEK_SET);
+	for(i=0;i<size;i++){
+		*image_ptr[0] = getc(streamIn);
+		*image_ptr[1] = getc(streamIn);
+		*image_ptr[2] = getc(streamIn);
+		image_ptr++;
+		printf("pixel %d : [%d,%d,%d]\n",i+1,image_ptr[0],image_ptr[1],image_ptr[2]);
 	}
 	fclose(streamIn);
 }
@@ -112,23 +96,25 @@ void generate_random_image(void) {
 }
 
 
-void write_to_screen(void) {
+void write_to_screen(int *image_ptr, int posX, int posY, int height, int width) {
 	
-	int x = 0, y = 0, pixel_no = IMAGE_SIZE;
-	long int location = 0;
-	int i;
-	for (i = 0; i < IMAGE_SIZE; i++) {
-		*(fbp+location) = image[pixel_no][0]; //blue
-		location++;
-		*(fbp+location) = image[pixel_no][1]; //green
-		location++;
-		*(fbp+location) = image[pixel_no][2];; //red
-		location++;
-		pixel_no--; 			
+	//pixel_no = height*width;
+	long int location = (posY*width)+posX;
+	int i, j;
+	for (i = 0; i < height; i++) {
+		for (j = 0; j < width; j++) {
+			*(fbp+location) = *image_ptr[0]; //blue
+			location++;
+			*(fbp+location) = *image_ptr[1]; //green
+			location++;
+			*(fbp+location) = *image_ptr[2];; //red
+			location++;
+			image_ptr++; 			
+		}
 	}
 }
 
-void open_driver(void) {
+void open_screen_driver(void) {
 	// Open the file for reading and writing
 	fbfd = open("/dev/fb0", O_RDWR);
     	if (fbfd == -1) {
@@ -166,7 +152,7 @@ void open_driver(void) {
 }
 
 
-void close_driver(void) {
+void close_screen_driver(void) {
 	munmap(fbp, screensize);
     	close(fbfd);
 }
