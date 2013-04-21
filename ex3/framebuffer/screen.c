@@ -8,6 +8,8 @@
 #include <sys/ioctl.h>
 
 #define MAX_IMAGE_SIZE 76800
+#define MAX_HEIGHT 240
+#define MAX_WIDTH 320
 #define TILE_SIZE_8 64
 #define TILE_SIZE_16 256
 #define TILE_SIZE_32 1024
@@ -18,24 +20,28 @@ struct fb_fix_screeninfo finfo;
 long int screensize = 0;
 char *fbp = 0;
 
-int image[IMAGE_SIZE][3]; // first number here is 1024 pixels in my image, 3 is for RGB values
+int image[MAX_IMAGE_SIZE][3]; // first number here is 1024 pixels in my image, 3 is for RGB values
 int crate_image[TILE_SIZE_16][3];
 int player_image[TILE_SIZE_16][3];
 int wall_image[TILE_SIZE_16][3];
 
-volatile int *image_ptr;
+
+//volatile pixel *image_ptr;
 
 
 int main() {
 	open_screen_driver();
 	
 	load_sokoban_images();
-	//generate_random_image();
+	generate_random_image(image);
 
+	clear_screen();
 	
-    write_to_screen(player_image, 100, 100, 16, 16);	
+	display_tile(WALL, 5, 5, 16);
+    	//write_to_screen(player_image, 100, 100, 16, 16);
+	//write_to_screen(image, 0, 0, MAX_HEIGHT, MAX_WIDTH);	
 
-    close_screen_driver();
+    	close_screen_driver();
     	
     return 0;
 }
@@ -43,14 +49,14 @@ int main() {
 void load_sokoban_images(void) {
 	//image_ptr = crate_image;
 	read_image_data("crate.bmp", crate_image, 16, 16);
-	image_ptr = player_image;
-	read_image_data("player.bmp", image_ptr, 16, 16);
-	image_ptr = wall_image;
-	read_image_data("wall.bmp", image_ptr, 16, 16);
+	//image_ptr = player_image;
+	read_image_data("player.bmp", player_image, 16, 16);
+	//image_ptr = wall_image;
+	read_image_data("wall.bmp", wall_image, 16, 16);
 
 }
 
-void read_image_data(char image_path[], int *image_ptr, int height, int width) {
+void read_image_data(char image_path[], pixel *image_ptr, int height, int width) {
 	FILE *streamIn;
 	streamIn = fopen(image_path, "r");
 	if (streamIn == (FILE *)0){
@@ -65,52 +71,87 @@ void read_image_data(char image_path[], int *image_ptr, int height, int width) {
 		*image_ptr[1] = getc(streamIn);
 		*image_ptr[2] = getc(streamIn);
 		image_ptr++;
-		printf("pixel %d : [%d,%d,%d]\n",i+1,image_ptr[0],image_ptr[1],image_ptr[2]);
+		//printf("pixel %d : [%d,%d,%d]\n",i+1,*image_ptr[0],*image_ptr[1],*image_ptr[2]);
 	}
 	fclose(streamIn);
 }
 
-void generate_random_image(void) {
+void generate_random_image(pixel *image_ptr) {
 	int i;
-	for(i=0;i<IMAGE_SIZE/3;i++){    // foreach pixel
+	for(i=0;i<MAX_IMAGE_SIZE/3;i++){    // foreach pixel
 		
-		image[i][2] = 0xff;  // use BMP 24bit with no alpha channel
-		image[i][1] = 0x0;  // BMP uses BGR but we want RGB, grab byte-by-byte
-		image[i][0] = 0x0;  // reverse-order array indexing fixes RGB issue...
+		*image_ptr[2] = 0xff;  // use BMP 24bit with no alpha channel
+		*image_ptr[1] = 0x0;  // BMP uses BGR but we want RGB, grab byte-by-byte
+		*image_ptr[0] = 0x0;  // reverse-order array indexing fixes RGB issue...
+		image_ptr++;
 		//printf("pixel %d : [%d,%d,%d]\n",i+1,image[i][0],image[i][1],image[i][2]);
 	}
-	for(i;i<IMAGE_SIZE*2/3;i++){    // foreach pixel
+	for(i;i<MAX_IMAGE_SIZE*2/3;i++){    // foreach pixel
 		
-		image[i][2] = 0x0;  // use BMP 24bit with no alpha channel
-		image[i][1] = 0xff;  // BMP uses BGR but we want RGB, grab byte-by-byte
-		image[i][0] = 0x0;  // reverse-order array indexing fixes RGB issue...
+		*image_ptr[2] = 0x0;  // use BMP 24bit with no alpha channel
+		*image_ptr[1] = 0xff;  // BMP uses BGR but we want RGB, grab byte-by-byte
+		*image_ptr[0] = 0x0;  // reverse-order array indexing fixes RGB issue...
+		image_ptr++;
 		//printf("pixel %d : [%d,%d,%d]\n",i+1,image[i][0],image[i][1],image[i][2]);
 	}
-	for(i;i<IMAGE_SIZE;i++){    // foreach pixel
+	for(i;i<MAX_IMAGE_SIZE;i++){    // foreach pixel
 		
-		image[i][2] = 0x0;  // use BMP 24bit with no alpha channel
-		image[i][1] = 0x0;  // BMP uses BGR but we want RGB, grab byte-by-byte
-		image[i][0] = 0xff;  // reverse-order array indexing fixes RGB issue...
+		*image_ptr[2] = 0x0;  // use BMP 24bit with no alpha channel
+		*image_ptr[1] = 0x0;  // BMP uses BGR but we want RGB, grab byte-by-byte
+		*image_ptr[0] = 0xff;  // reverse-order array indexing fixes RGB issue...
+		image_ptr++;
 		//printf("pixel %d : [%d,%d,%d]\n",i+1,image[i][0],image[i][1],image[i][2]);
 	}
 }
 
+void display_tile(char image, int tilePosX, int tilePosY, int dim) {
+	pixel *image_ptr;
+	if (image == WALL) {
+		image_ptr = wall_image;
+	}
+	else if (image == MOVER) {
+		image_ptr = player_image;
+	}
+	else if (image == MOVABLE) {
+		image_ptr = crate_image;
+	}
+	int posX = tilePosX*dim, posY = tilePosY*dim;
+	write_to_screen(image_ptr, posX, posY, dim, dim);
+}
 
-void write_to_screen(int *image_ptr, int posX, int posY, int height, int width) {
+void write_to_screen(pixel *image_ptr, int posX, int posY, int height, int width) {
 	
 	//pixel_no = height*width;
-	long int location = (posY*width)+posX;
+	long int location;
 	int i, j;
 	for (i = 0; i < height; i++) {
+		location = ((posY+i)*MAX_WIDTH+(posX))*3;
 		for (j = 0; j < width; j++) {
-			*(fbp+location) = *image_ptr[0]; //blue
+			int blue = *image_ptr[0];
+			int green = *image_ptr[1];
+			int red = *image_ptr[2];
+			*(fbp+location) = blue; //blue
 			location++;
-			*(fbp+location) = *image_ptr[1]; //green
+			*(fbp+location) = green; //green
 			location++;
-			*(fbp+location) = *image_ptr[2];; //red
+			*(fbp+location) = red; //red
 			location++;
-			image_ptr++; 			
+			image_ptr++; 
+			printf("pixel %d : [%d,%d,%d]\n", i*width+j, blue, green, red);			
 		}
+	}
+}
+
+void clear_screen(void) {
+	int location = 0;
+	int i;
+	for (i = 0; i < MAX_IMAGE_SIZE; i++) {
+		*(fbp+location) = 0xff; //blue
+		location++;
+		*(fbp+location) = 0xff; //green
+		location++;
+		*(fbp+location) = 0xff; //red
+		location++;		
 	}
 }
 
