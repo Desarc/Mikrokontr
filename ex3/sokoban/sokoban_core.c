@@ -134,3 +134,4 @@ void redoMove(void) {
 int numberOfMoves() {
 	return path_length;
 }
+

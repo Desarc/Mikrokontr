@@ -30,7 +30,7 @@ char setTile(int x, int y, char tile) {
 	int pos = (y*dimX)+x;
 	level_ptr += pos;
 	*level_ptr = tile;
-	if (tile == MOVER || tile == MOVER_ON_TARGET) {
+	if (tile == PLAYER || tile == PLAYER_ON_TARGET) {
 		posX = x;
 		posY = y;
 	}
@@ -81,21 +81,21 @@ void loadLevel(int num) {
 		load_ptr++;
 		*level_ptr = tile;
 		level_ptr++;
-		if (tile == MOVABLE || tile == MOVER) {
+		if (tile == BOX || tile == PLAYER) {
 			*grid_ptr = BLANK;
 		}
-		else if (tile == MOVABLE_ON_TARGET || tile == MOVER_ON_TARGET) {
+		else if (tile == BOX_ON_TARGET || tile == PLAYER_ON_TARGET) {
 			*grid_ptr = TARGET;
 		}
 		else {
 			*grid_ptr = tile;
 		}
 		grid_ptr++;
-		if (tile == MOVER) {
+		if (tile == PLAYER) {
 			posX = i%dimY;
 			posY = (int)(i/dimY);
 		}
-		else if (tile == MOVER_ON_TARGET) {
+		else if (tile == PLAYER_ON_TARGET) {
 			posX = i%dimY;
 			posY = (int)(i/dimY);
 			increaseRemaining();
@@ -124,3 +124,4 @@ int getDimX(void) {
 int getDimY(void) {
 	return dimY;
 }
+

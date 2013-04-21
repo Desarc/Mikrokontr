@@ -17,6 +17,10 @@ default:
 send:
 	$(shell scp ${MODULE} root@${ADDR})
 
+.PHONY : sendimages
+sendimages:
+	$(shell scp *.bmp root@${ADDR})
+
 
 .PHONY : clean
 clean:

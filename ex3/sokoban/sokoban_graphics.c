@@ -1,16 +1,22 @@
 #include "sokoban_graphics.h"
+#include "../framebuffer/screen.h"
 
 volatile int completed = 0;
 
 int main (int argc, char *argv[]) {
-	printf("WELCOME TO SOKOBAN!\n\n");
+	
+	open_screen_driver();
+	load_sokoban_images();
+	clear_screen();
 	reset();
+	printf("WELCOME TO SOKOBAN!\n\n");
 	while (!completed) {
 		paintLevel();
 		char cmd;
 		scanf("%c", &cmd);
 		performAction(cmd);
 	}
+	close_screen_driver();
 }
 
 void performAction(char cmd) {
@@ -44,7 +50,7 @@ void performAction(char cmd) {
 }
 
 void updateScreen(int x, int y, char tile) {
-	
+	display_tile(tile, x, y, 16);
 }
 
 void printPath(void) {
@@ -66,7 +72,7 @@ void paintLevel(void) {
 	for (j = 0; j < dimY; j++) {
 		for (i = 0; i < dimX; i++) {
 			char tile = *level_ptr;
-			printf("%c", tile);
+			display_tile(tile, i, j, 16);
 			level_ptr++;
 		}
 		printf("\n");
@@ -77,3 +83,4 @@ void displayWin(void) {
 	completed = 1;
 	printf("\n\nLevel completed!\n\n");
 }
+

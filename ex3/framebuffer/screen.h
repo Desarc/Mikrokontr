@@ -4,21 +4,19 @@
 #define WALL '#'
 #define BLANK ' '
 #define TARGET '.'
-#define MOVER '@'
-#define MOVABLE '$'
-#define MOVER_ON_TARGET '+'
-#define MOVABLE_ON_TARGET '*'
-
-typedef int pixel[3];
+#define PLAYER '@'
+#define BOX '$'
+#define PLAYER_ON_TARGET '+'
+#define BOX_ON_TARGET '*'
 
 void open_screen_driver(void);
 void close_screen_driver(void);
 void load_sokoban_images(void);
-static void clear_screen(void);
-static void read_image_data(char image_path[], pixel *image_ptr, int height, int width);
-static void generate_random_image(pixel *image_ptr);
+void clear_screen(void);
+static void read_image_data(char image_path[], char *pixel_ptr, int height, int width);
+static void generate_random_image(char *pixel_ptr);
 void display_tile(char image, int tilePosX, int tilePosY, int dim);
-static void write_to_screen(pixel *image_ptr, int posX, int posY, int height, int width);
+static void write_to_screen(char *pixel_ptr, int posX, int posY, int height, int width);
 
 
 #endif

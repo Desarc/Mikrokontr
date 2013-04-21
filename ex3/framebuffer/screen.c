@@ -20,43 +20,46 @@ struct fb_fix_screeninfo finfo;
 long int screensize = 0;
 char *fbp = 0;
 
-int image[MAX_IMAGE_SIZE][3]; // first number here is 1024 pixels in my image, 3 is for RGB values
-int crate_image[TILE_SIZE_16][3];
-int player_image[TILE_SIZE_16][3];
-int wall_image[TILE_SIZE_16][3];
+char image_array[MAX_IMAGE_SIZE][3];
 
+char box_image[TILE_SIZE_16][3];
+char player_image[TILE_SIZE_16][3];
+char wall_image[TILE_SIZE_16][3];
+char blank_image[TILE_SIZE_16][3];
+char target_image[TILE_SIZE_16][3];
+char player_on_target_image[TILE_SIZE_16][3];
+char box_on_target_image[TILE_SIZE_16][3];
 
-//volatile pixel *image_ptr;
-
-
-int main() {
+/*int main() {
+	//test1(test);
+	//test2(test);
 	open_screen_driver();
 	
 	load_sokoban_images();
-	generate_random_image(image);
-
+	generate_random_image(&image_array[0][0]);
+	//read_image_data("24bit_flip_row_order.bmp", image_array, MAX_HEIGHT, MAX_WIDTH);
 	clear_screen();
 	
-	display_tile(WALL, 5, 5, 16);
+	display_tile(PLAYER, 5, 5, 16);
     	//write_to_screen(player_image, 100, 100, 16, 16);
-	//write_to_screen(image, 0, 0, MAX_HEIGHT, MAX_WIDTH);	
+	//write_to_screen(&image_array[0][0], 0, 0, MAX_HEIGHT, MAX_WIDTH);	
 
     	close_screen_driver();
     	
     return 0;
-}
+}*/
 
 void load_sokoban_images(void) {
-	//image_ptr = crate_image;
-	read_image_data("crate.bmp", crate_image, 16, 16);
-	//image_ptr = player_image;
-	read_image_data("player.bmp", player_image, 16, 16);
-	//image_ptr = wall_image;
-	read_image_data("wall.bmp", wall_image, 16, 16);
-
+	read_image_data("crate.bmp", &box_image[0][0], 16, 16);
+	read_image_data("player.bmp", &player_image[0][0], 16, 16);
+	read_image_data("wall.bmp", &wall_image[0][0], 16, 16);
+	read_image_data("blank.bmp", &blank_image[0][0], 16, 16);
+	read_image_data("target.bmp", &target_image[0][0], 16, 16);
+	read_image_data("playertarget.bmp", &player_on_target_image[0][0], 16, 16);
+	read_image_data("cratetarget.bmp", &box_on_target_image[0][0], 16, 16);
 }
 
-void read_image_data(char image_path[], pixel *image_ptr, int height, int width) {
+void read_image_data(char image_path[], char *pixel_ptr, int height, int width) {
 	FILE *streamIn;
 	streamIn = fopen(image_path, "r");
 	if (streamIn == (FILE *)0){
@@ -65,92 +68,95 @@ void read_image_data(char image_path[], pixel *image_ptr, int height, int width)
 	}
 	int size = width*height;
 	int i;
-	fseek(streamIn, 54, SEEK_SET);
+	fseek(streamIn, 55, SEEK_SET);
 	for(i=0;i<size;i++){
-		*image_ptr[0] = getc(streamIn);
-		*image_ptr[1] = getc(streamIn);
-		*image_ptr[2] = getc(streamIn);
-		image_ptr++;
-		//printf("pixel %d : [%d,%d,%d]\n",i+1,*image_ptr[0],*image_ptr[1],*image_ptr[2]);
+		*pixel_ptr = getc(streamIn);
+		pixel_ptr++;
+		*pixel_ptr = getc(streamIn);
+		pixel_ptr++;
+		*pixel_ptr = getc(streamIn);
+		pixel_ptr++;
 	}
 	fclose(streamIn);
 }
 
-void generate_random_image(pixel *image_ptr) {
+void generate_random_image(char *pixel_ptr) {
 	int i;
-	for(i=0;i<MAX_IMAGE_SIZE/3;i++){    // foreach pixel
-		
-		*image_ptr[2] = 0xff;  // use BMP 24bit with no alpha channel
-		*image_ptr[1] = 0x0;  // BMP uses BGR but we want RGB, grab byte-by-byte
-		*image_ptr[0] = 0x0;  // reverse-order array indexing fixes RGB issue...
-		image_ptr++;
-		//printf("pixel %d : [%d,%d,%d]\n",i+1,image[i][0],image[i][1],image[i][2]);
-	}
-	for(i;i<MAX_IMAGE_SIZE*2/3;i++){    // foreach pixel
-		
-		*image_ptr[2] = 0x0;  // use BMP 24bit with no alpha channel
-		*image_ptr[1] = 0xff;  // BMP uses BGR but we want RGB, grab byte-by-byte
-		*image_ptr[0] = 0x0;  // reverse-order array indexing fixes RGB issue...
-		image_ptr++;
-		//printf("pixel %d : [%d,%d,%d]\n",i+1,image[i][0],image[i][1],image[i][2]);
-	}
-	for(i;i<MAX_IMAGE_SIZE;i++){    // foreach pixel
-		
-		*image_ptr[2] = 0x0;  // use BMP 24bit with no alpha channel
-		*image_ptr[1] = 0x0;  // BMP uses BGR but we want RGB, grab byte-by-byte
-		*image_ptr[0] = 0xff;  // reverse-order array indexing fixes RGB issue...
-		image_ptr++;
-		//printf("pixel %d : [%d,%d,%d]\n",i+1,image[i][0],image[i][1],image[i][2]);
+	char blue = 0xff, green = 0x0, red = 0x0;
+	for(i=0;i<MAX_IMAGE_SIZE;i++) {    // foreach pixel
+		*pixel_ptr = blue;
+		pixel_ptr++;
+		*pixel_ptr = green;
+		pixel_ptr++;
+		*pixel_ptr = red;
+		pixel_ptr++;
+		if (i > MAX_IMAGE_SIZE*2/3) {
+			green = 0x0;
+			red = 0xff;
+		}
+		else if (i > MAX_IMAGE_SIZE/3) {
+			blue = 0x0;
+			green = 0xff;
+		}
 	}
 }
 
 void display_tile(char image, int tilePosX, int tilePosY, int dim) {
-	pixel *image_ptr;
+	char *image_ptr;
 	if (image == WALL) {
-		image_ptr = wall_image;
+		image_ptr = &wall_image[0][0];
 	}
-	else if (image == MOVER) {
-		image_ptr = player_image;
+	else if (image == PLAYER) {
+		image_ptr = &player_image[0][0];
 	}
-	else if (image == MOVABLE) {
-		image_ptr = crate_image;
+	else if (image == BOX) {
+		image_ptr = &box_image[0][0];
+	}
+	else if (image == BLANK) {
+		image_ptr = &blank_image[0][0];
+	}
+	else if (image == TARGET) {
+		image_ptr = &target_image[0][0];
+	}
+	else if (image == PLAYER_ON_TARGET) {
+		image_ptr = &player_on_target_image[0][0];
+	}
+	else if (image == BOX_ON_TARGET) {
+		image_ptr = &box_on_target_image[0][0];
 	}
 	int posX = tilePosX*dim, posY = tilePosY*dim;
 	write_to_screen(image_ptr, posX, posY, dim, dim);
 }
 
-void write_to_screen(pixel *image_ptr, int posX, int posY, int height, int width) {
-	
-	//pixel_no = height*width;
+void write_to_screen(char *pixel_ptr, int posX, int posY, int height, int width) {
 	long int location;
 	int i, j;
 	for (i = 0; i < height; i++) {
 		location = ((posY+i)*MAX_WIDTH+(posX))*3;
 		for (j = 0; j < width; j++) {
-			int blue = *image_ptr[0];
-			int green = *image_ptr[1];
-			int red = *image_ptr[2];
-			*(fbp+location) = blue; //blue
+			*(fbp+location) = *pixel_ptr; //blue
 			location++;
-			*(fbp+location) = green; //green
+			pixel_ptr++;
+			*(fbp+location) = *pixel_ptr; //green
 			location++;
-			*(fbp+location) = red; //red
+			pixel_ptr++;
+			*(fbp+location) = *pixel_ptr; //red
 			location++;
-			image_ptr++; 
-			printf("pixel %d : [%d,%d,%d]\n", i*width+j, blue, green, red);			
+			pixel_ptr++;
 		}
 	}
 }
 
 void clear_screen(void) {
+	/* paint the whole screen white */
 	int location = 0;
 	int i;
 	for (i = 0; i < MAX_IMAGE_SIZE; i++) {
-		*(fbp+location) = 0xff; //blue
+		*(fbp+location) = 0xff;
 		location++;
-		*(fbp+location) = 0xff; //green
+		*(fbp+location) = 0xff;
 		location++;
-		*(fbp+location) = 0xff; //red
+		*(fbp+location) = 0xff;
 		location++;		
 	}
 }
