@@ -65,32 +65,19 @@ void read_button_status(void) {
 static int __init buttons_init (void) {
 
 	/* allocating minor and major numbers */
-	
   	status = alloc_chrdev_region(&dev, first_minor, count, name);
 	printk("alloc success? %i\n", status);
 	
-	
   	/* be om tilgang til I/O-porter */
-	
-	//status = check_region(AVR32_PIOB_ADDRESS+PORT_OFFSET, PORT_RANGE);
-	//printk("region available? %i\n", status);
-  	request_region(AVR32_PIOB_ADDRESS+AVR32_PIO_PER, PORT_RANGE, name);
-	request_region(AVR32_PIOB_ADDRESS+AVR32_PIO_PUER, PORT_RANGE, name);
-	request_region(AVR32_PIOB_ADDRESS+AVR32_PIO_IER, PORT_RANGE, name);
-	request_region(AVR32_PIOB_ADDRESS+AVR32_PIO_PDSR, PORT_RANGE, name);
+  	request_region(AVR32_PIOB_ADDRESS+PORT_OFFSET, PORT_RANGE, name);
   	
 	/* initialisere PIO-maskinvaren (som i øving 2) */
-
 	piob->per = SET_ALL_BUTTONS;
 	piob->puer = SET_ALL_BUTTONS;
 	piob->ier = SET_ALL_BUTTONS;
-  	//register_interrupt(button_isr, AVR32_PIOC_IRQ/32, AVR32_PIOC_IRQ % 32, BUTTONS_INT_LEVEL);
 	piob->isr;	
-	//init_interrupts();
  
   	/* registrere device i systemet (må gjøres når alt annet er initialisert) */
-
-	
 	buttons_cdev = cdev_alloc();
 	buttons_cdev->ops = &buttons_fops;
 	cdev_init(buttons_cdev, &buttons_fops);
@@ -109,11 +96,7 @@ static int __init buttons_init (void) {
 static void __exit buttons_exit (void) {
 
 	cdev_del(buttons_cdev);
-
-	release_region(AVR32_PIOB_ADDRESS+AVR32_PIO_PER, PORT_RANGE);
-	release_region(AVR32_PIOB_ADDRESS+AVR32_PIO_PUER, PORT_RANGE);
-	release_region(AVR32_PIOB_ADDRESS+AVR32_PIO_IER, PORT_RANGE);
-	release_region(AVR32_PIOB_ADDRESS+AVR32_PIO_PDSR, PORT_RANGE);
+	release_region(AVR32_PIOB_ADDRESS+PORT_OFFSET, PORT_RANGE);
 
 	/* releasing minor and major numbers */
 	unregister_chrdev_region(dev, count);

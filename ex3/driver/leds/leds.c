@@ -69,15 +69,9 @@ static int __init leds_init (void) {
 	printk("alloc success? %i \n", alloc_success);
 
   	/* be om tilgang til I/O-porter */
-	//int available = check_region(AVR32_PIOB_ADDRESS+PORT_OFFSET, PORT_RANGE);
-	//printk("region available? %i\n", available);
-	request_region(AVR32_PIOB_ADDRESS+AVR32_PIO_PER+PORT_OFFSET, PORT_RANGE, name);
-	request_region(AVR32_PIOB_ADDRESS+AVR32_PIO_OER+PORT_OFFSET, PORT_RANGE, name);
-	request_region(AVR32_PIOB_ADDRESS+AVR32_PIO_CODR+PORT_OFFSET, PORT_RANGE, name);
-	request_region(AVR32_PIOB_ADDRESS+AVR32_PIO_SODR+PORT_OFFSET, PORT_RANGE, name);
+	request_region(AVR32_PIOB_ADDRESS+PORT_OFFSET, PORT_RANGE, name);
 
 	/* initialisere PIO-maskinvaren (som i øving 2) */
-	
 	piob->per = SET_ALL_LEDS;
 	piob->oer = SET_ALL_LEDS;
 	piob->codr = SET_ALL_LEDS;
@@ -102,10 +96,7 @@ static int __init leds_init (void) {
 static void __exit leds_exit (void) {
 
 	cdev_del(leds_cdev);
-	release_region(AVR32_PIOB_ADDRESS+AVR32_PIO_PER+PORT_OFFSET, PORT_RANGE);
-	release_region(AVR32_PIOB_ADDRESS+AVR32_PIO_OER+PORT_OFFSET, PORT_RANGE);
-	release_region(AVR32_PIOB_ADDRESS+AVR32_PIO_CODR+PORT_OFFSET, PORT_RANGE);
-	release_region(AVR32_PIOB_ADDRESS+AVR32_PIO_SODR+PORT_OFFSET, PORT_RANGE);
+	release_region(AVR32_PIOB_ADDRESS+PORT_OFFSET, PORT_RANGE);
 
 	/* releasing minor and major numbers */
 	unregister_chrdev_region(dev, count);
