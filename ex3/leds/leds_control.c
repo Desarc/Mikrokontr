@@ -10,6 +10,8 @@ volatile long led_vector = 0x0;
 volatile int n_of_leds = 0;
 int fd_leds = 0;
 
+/* increase the number of active LEDs */
+/* this number represents the number of empty targets remaining, up to a maximum of 8 */
 void increment_leds(void) {
 	if (n_of_leds == 0) set_led_on(LED0);
 	else if (n_of_leds == 1) set_led_on(LED1);
@@ -22,6 +24,7 @@ void increment_leds(void) {
 	if (n_of_leds < 8) n_of_leds++;
 }
 
+/* decrease the number of active LEDs */
 void decrement_leds(void) {
 	if (n_of_leds == 1) set_led_off(LED0);
 	else if (n_of_leds == 2) set_led_off(LED1);
@@ -34,7 +37,10 @@ void decrement_leds(void) {
 	if (n_of_leds > 0) n_of_leds--;
 }
 
+/* blink the LEDs to indicate the game is won */
 void blink_leds(void) {
+
+	/* fork process to avoid blocking */
 	pid_t childPID = fork();
 	
 	if (childPID == 0) {
@@ -57,22 +63,26 @@ int get_led_status(void) {
 	return led_vector;
 }
 
+/* turn all LEDs off */
 void reset_leds(void) {
 	led_vector = 0x0;
 	n_of_leds = 0;
 	write_to_led_driver();
 }
 
+/* turn the selected LED on */
 void set_led_on(int led) {
 	led_vector += led;
 	write_to_led_driver();
 }
 
+/* turn the selected LED off */
 void set_led_off(int led) {
 	led_vector -= led;
 	write_to_led_driver();
 }
 
+/* write data to the led driver */
 void write_to_led_driver(void) {
 	char status[4];
 	status[0] = led_vector >> 16;
@@ -86,7 +96,7 @@ void write_to_led_driver(void) {
 }
 
 void open_led_driver(void) {
-	// Open the file for reading and writing
+	/* open the driver file for reading and writing */
 	fd_leds = open("/dev/leds", O_RDWR);
     	if (fd_leds == -1) {
         	perror("Error: cannot open LED device\n");

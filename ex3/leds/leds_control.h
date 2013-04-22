@@ -1,7 +1,7 @@
 #ifndef LEDS_CONTROL_H
 #define LEDS_CONTROL_H
 
-#define LED7 0x400000 //not working
+#define LED7 0x400000
 #define LED6 0x0100
 #define LED5 0x0080
 #define LED4 0x0040

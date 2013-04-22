@@ -1,6 +1,7 @@
 #include "sokoban_move.h"
 #include "../sound/sound.h"
 
+/* check if a move is valid */
 int validMove(int fromX, int fromY, int toX, int toY) {
 	int dimX = getDimX(), dimY = getDimY();
 	if (toX >= dimX || toY >= dimY || toY < 0 || toX < 0) {
@@ -21,6 +22,7 @@ int validMove(int fromX, int fromY, int toX, int toY) {
 	return 1;
 }
 
+/* move player (and box) from one position to another on the board */
 int moveTo(int fromX, int fromY, int toX, int toY) {
 	int box = 0;
 	setTile(fromX, fromY, getGridTile(fromX, fromY));
@@ -57,6 +59,7 @@ int moveTo(int fromX, int fromY, int toX, int toY) {
 	return box;
 }
 
+/* undo a box push */
 void undoBox(char dir) {
 	int dirX = 0, dirY = 0;
 	if (dir == 'R' || dir == 'r') {

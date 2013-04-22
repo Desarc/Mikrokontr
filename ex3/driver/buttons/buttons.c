@@ -1,9 +1,3 @@
-/*****************************************************************************
- *
- * Øving 3 uCSysDes, driverkoden
- *
- *****************************************************************************/
-
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/moduleparam.h>
@@ -29,8 +23,6 @@ static int buttons_release (struct inode *inode, struct file *filp);
 static ssize_t buttons_read (struct file *filp, char __user *buff, size_t count, loff_t *offp);
 static ssize_t buttons_write (struct file *filp, const char __user *buff, size_t count, loff_t *offp);
 
-void button_isr(void);
-
 dev_t dev;
 int first_minor = 0, count = 1;
 const char name[] = "buttons";
@@ -52,9 +44,7 @@ static struct file_operations buttons_fops = {
   .release = buttons_release
 };
 
-/*****************************************************************************/
-/* init-funksjon (kalles når modul lastes) */
-
+/* read data from button status register */
 void read_button_status(void) {
 	piob->isr;
 	int status = piob->pdsr;
@@ -68,16 +58,15 @@ static int __init buttons_init (void) {
   	status = alloc_chrdev_region(&dev, first_minor, count, name);
 	printk("alloc success? %i\n", status);
 	
-  	/* be om tilgang til I/O-porter */
+  	/* request access to ports */
   	request_region(AVR32_PIOB_ADDRESS+PORT_OFFSET, PORT_RANGE, name);
   	
 	/* initialisere PIO-maskinvaren (som i øving 2) */
 	piob->per = SET_ALL_BUTTONS;
 	piob->puer = SET_ALL_BUTTONS;
 	piob->ier = SET_ALL_BUTTONS;
-	piob->isr;	
  
-  	/* registrere device i systemet (må gjøres når alt annet er initialisert) */
+  	/* registering device in the system */
 	buttons_cdev = cdev_alloc();
 	buttons_cdev->ops = &buttons_fops;
 	cdev_init(buttons_cdev, &buttons_fops);
@@ -90,11 +79,9 @@ static int __init buttons_init (void) {
   return 0;
 }
 
-/*****************************************************************************/
-/* exit-funksjon (kalles når modul fjernes fra systemet) */
-
 static void __exit buttons_exit (void) {
 
+	/* unregister and release ports */
 	cdev_del(buttons_cdev);
 	release_region(AVR32_PIOB_ADDRESS+PORT_OFFSET, PORT_RANGE);
 
@@ -103,9 +90,6 @@ static void __exit buttons_exit (void) {
 
 	printk(KERN_ALERT "Buttons module disabled.\n");
 }
-
-/*****************************************************************************/
-/* fops-funksjoner */
 
 static int buttons_open (struct inode *inode, struct file *filp) {
   return 0;
@@ -122,6 +106,7 @@ static int buttons_release (struct inode *inode, struct file *filp) {
 static ssize_t buttons_read (struct file *filp, char __user *buff,
               size_t count, loff_t *offp) {
 
+	/* read data from buttons and copy to user space */
 	read_button_status();
 	copy_to_user(buff, &button_status, count);
 	return 0;

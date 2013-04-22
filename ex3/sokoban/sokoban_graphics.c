@@ -20,7 +20,7 @@ int main (int argc, char *argv[]) {
 
 	/* initialize game and screen */
 	clear_screen();
-	reset();
+	reset(argc);
 	printf("\nWELCOME TO SOKOBAN!\n\n");
 	play_sound(WELCOME);
 

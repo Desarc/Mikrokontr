@@ -43,7 +43,7 @@ void play_sound(int code) {
 
 void load_sokoban_sounds(void) {
 	
-	/* load all sounds */
+	/* load all sokoban sounds from file */
 	welcome_size = load_sound_from_file("dudu.wav", welcome);
 	one_less_size = load_sound_from_file("on.wav", one_less);
 	one_more_size = load_sound_from_file("off.wav", one_more);
@@ -53,7 +53,7 @@ void load_sokoban_sounds(void) {
 
 }
 
-
+/* load sound samples from a file to an array */
 int load_sound_from_file(char file_path[], char *sound_array_ptr) {
 	
 	FILE *streamIn;
@@ -77,6 +77,7 @@ int load_sound_from_file(char file_path[], char *sound_array_ptr) {
 	return size;
 }
 
+/* write sound samples to sound device */
 void write_sound_to_device(char *sound_array_ptr, int size) {
 
 	int write_success = write(fd_dsp, sound_array_ptr, size);
@@ -91,6 +92,8 @@ void write_sound_to_device(char *sound_array_ptr, int size) {
 }
 
 int open_sound_driver(void) {
+
+	/* open driver file */
 	fd_dsp = open("/dev/dsp", O_RDWR);
 	
 	if (fd_dsp < 0) {
@@ -99,6 +102,7 @@ int open_sound_driver(void) {
 	}
 	printf("The sound device was opened successfully.\n");
 
+	/* set number of channels, sample size and sampling rate */
 	int dsp_rate = 8000;
 	int channels = 1;
 	int sample_size = 8;
