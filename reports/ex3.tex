@@ -17,7 +17,7 @@ xrightmargin=.10in,
 language=C
 }
 
-\title{\textbf{Report: Assignment 2}}
+\title{\textbf{Report: Assignment 3}}
 \author{Group 9: \O yvin Richardsen, Sandor Zeestraten, Stian Habbestad}
 \date{{Norwegian University of Science and Technology \\
 TDT4258 Energy Efficient Computer Design \\}
@@ -27,7 +27,9 @@ TDT4258 Energy Efficient Computer Design \\}
 \maketitle
 
 \begin{abstract}
-In this assignment we write C code for an AVR microcontroller on a development board. Through this assignment we aim to become more familiar with C coding for AVR32 and learn how to generate and play sounds. Our approach was to first replicate the features of the previous assignment, then to start with the audio part. At the end we have four different sounds which will be used in the next assignment.
+
+
+In this assignment we write C code for an AVR microcontroller on linux. Through this assignment we aim to become more familiar with C coding for AVR32, linux and how to write a driver for linux. Our approach was to first replicate the features of the previous assignment, then we ..................
 \end{abstract}
 
 \bigskip
@@ -35,10 +37,22 @@ In this assignment we write C code for an AVR microcontroller on a development b
 \newpage
 
 \section{Introduction}
-In this exercise we programmed the STK1000 development board to play sounds. We set up the buttons to trigger an interrupt routine that starts by selecting which sample vector to use and then writes the first sample to the ABDAC. We then receive interrupts from the ABDAC to a different interrupt routine, that retrieves the next sample from memory and writes it to the ABDAC. We chose to synthesize our own sounds based on different frequencies using mathematical expressions. 
+
+In this exercise we write a game in C, which is executed on top of linux on a STK1000 development board. We have written a pair of drivers to handle leds and buttons...................
 
 \section{Description and methodology}
+
+First off we started out with trying to install linux on the STK1000 development board. This turned out to be a tricky affair. We had a step by step guide for compiling linux that we followed, but with no luck. Luckily there was mentioned an image of a precompiled linux that we could extract to the SD card. After some mixing back and forth with environment variables from the other u-boot.bin file(from itslearning) into the one we were using we finally started to get somewhere. (d e bare å korrigera osv). 
+Once we had linux up and running we started out with a simple "Hello world" program to verify things were working. 
+
+linux compiling, image to sd, previous assignment, driver(led and button), framebuffer, porting of sokoban to C, sound, generated sounds, 
+
+
+
 We started out by implementing the previous assignment that we had coded in assembly, only this time in C. This was an easy start for implementing an interrupt routine in C based on a program we had already designed. The primary challenge was making the buttons work with interrupts. Once we had a functional program with buttons and LEDs, we were ready to start working on the ABDAC. We started by simply trying to enable the ABDAC while still retaining the rest of the functionality. This proved troublesome at first, because interrupts from the buttons stopped working as soon as we enabled interrupts from the ABDAC. We decided to work around this by having the buttons and the ABDAC connected to different PIOs, which solved our problem. The next step was generating random noise and sending samples to the ABDAC. This proved to be rather trivial, we simply wrote the first sample to the ABDAC from the button interrupt routine, and then used interrupts from the ABDAC to retrieve the next sample (random in this case) and write it to the ABDAC.
+
+
+
 
 \begin{lstlisting}
 void abdac_isr(void) {
