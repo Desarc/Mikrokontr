@@ -11,8 +11,6 @@
 
 #define MAX_SOUND_SAMPLES 112000
 #define SAMPLES 16000
-//char sound[MAX_SOUND_SAMPLES];
-//int sound_size;
 
 char welcome[SAMPLES];
 int welcome_size;
@@ -30,6 +28,7 @@ int fd_dsp;
 
 void play_sound(int code) {
 
+	/* forking process to avoid blocking while sound is playing */
 	pid_t childPID = fork();
 	
 	if (childPID == 0) {
@@ -44,6 +43,7 @@ void play_sound(int code) {
 
 void load_sokoban_sounds(void) {
 	
+	/* load all sounds */
 	welcome_size = load_sound_from_file("dudu.wav", welcome);
 	one_less_size = load_sound_from_file("on.wav", one_less);
 	one_more_size = load_sound_from_file("off.wav", one_more);

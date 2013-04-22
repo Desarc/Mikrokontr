@@ -5,7 +5,7 @@
 
 int main (int argc, char *argv[]);
 static void performAction(int cmd);
-void updateScreen(int x, int y, char tile);
+//void updateScreen(int x, int y, char tile);
 void printPath(void);
 void paintLevel(void);
 void displayWin(void);

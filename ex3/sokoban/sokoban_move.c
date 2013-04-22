@@ -59,30 +59,37 @@ int moveTo(int fromX, int fromY, int toX, int toY) {
 
 void undoBox(char dir) {
 	int dirX = 0, dirY = 0;
-	if (dir == 'R') {
-		dirX = 1;
-	}
-	else if (dir == 'L') {
+	if (dir == 'R' || dir == 'r') {
 		dirX = -1;
 	}
-	else if (dir == 'D') {
-		dirY = 1;
+	else if (dir == 'L' || dir == 'l') {
+		dirX = 1;
 	}
-	else if (dir == 'U') {
+	else if (dir == 'D' || dir == 'd') {
 		dirY = -1;
+	}
+	else if (dir == 'U' || dir == 'u') {
+		dirY = 1;
 	}
 	int boxX = getX()+2*dirX;
 	int boxY = getY()+2*dirY;
 	if (getTile(boxX, boxY) == BOX || getTile(boxX, boxY) == BOX_ON_TARGET) {
 		int newX = getX()+dirX;
 		int newY = getY()+dirY;
+		if (getTile(boxX, boxY) == BOX_ON_TARGET) {
+			increaseRemaining();
+			play_sound(ONE_MORE);
+		}
 		setTile(boxX, boxY, getGridTile(boxX, boxY));
 		if (getGridTile(newX, newY) == TARGET) {
+			decreaseRemaining();
+			play_sound(ONE_LESS);
 			setTile(newX, newY, BOX_ON_TARGET);
 		}
 		else {
 			setTile(newX, newY, BOX);
 		}
+		
 	}
 }
 

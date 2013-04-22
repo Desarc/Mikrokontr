@@ -8,25 +8,42 @@ volatile int completed = 0;
 
 int main (int argc, char *argv[]) {
 	
+	/* open all drivers */
 	open_screen_driver();
 	open_led_driver();
 	open_buttons_driver();
 	open_sound_driver();
+
+	/* load images and sounds */
 	load_sokoban_images();
 	load_sokoban_sounds();
+
+	/* initialize game and screen */
 	clear_screen();
 	reset();
 	printf("\nWELCOME TO SOKOBAN!\n\n");
-	play_sound(WELCOME);	
+	play_sound(WELCOME);
+
+	/* busy waiting until a button is pushed */	
 	while (!completed) {
 		paintLevel();
 		int cmd = read_button_status();
-		//printf("cmd: %i", cmd);
 		if (cmd != NONE) {
 			performAction(cmd);
 			debounce();
 		}
 	}
+
+	/* press any button to exit program */
+	/* (safeguard to avoid forked processes writing to drivers after they close) */
+	int exit = 1;
+	while (!exit) {
+		int cmd = read_button_status();
+		if (cmd != NONE) {
+			exit = 0;
+		}
+	}
+	/* close all drivers */
 	close_sound_driver();
 	close_buttons_driver();
 	close_led_driver();
@@ -47,15 +64,15 @@ void performAction(int cmd) {
 	else if (cmd == BUTTON0) {
 		displayWin();
 	}
-	//printf("action performed");
 }
 
-void updateScreen(int x, int y, char tile) {
+/*void updateScreen(int x, int y, char tile) {
 	display_tile(tile, x, y, 16);
-}
+}*/
 
 
 void paintLevel(void) {
+	/* paint level on screen */
 	volatile char *level_ptr = getLevel();
 	int dimX = getDimX(), dimY = getDimY();
 	int i, j;
@@ -65,7 +82,6 @@ void paintLevel(void) {
 			display_tile(tile, i, j, 16);
 			level_ptr++;
 		}
-		//printf("\n");
 	}
 }
 
