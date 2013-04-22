@@ -24,6 +24,8 @@ int read_button_status(void) {
 	int read_success;
 	read_success = read(fd_buttons, test_ptr, 2);
 	button_status = (test[0] << 8)+test[1];
+	int led_status = get_led_status();
+	button_status -= led_status << 8;
 	//printf("Read success? %i\n", read_success);
 	//printf("Button vector: %i\n", button_status);
 	return button_status;

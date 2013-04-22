@@ -16,6 +16,10 @@
 
 #include "ap7000.h"
 
+
+#define PORT_RANGE 8
+#define PORT_OFFSET 0
+
 /* prototyper */
 
 static int __init buttons_init(void);
@@ -68,9 +72,12 @@ static int __init buttons_init (void) {
 	
   	/* be om tilgang til I/O-porter */
 	
-	status = check_region(AVR32_PIOB_ADDRESS, AVR32_PIOB_IRQ);
-	printk("region available? %i\n", status);
-  	request_region(AVR32_PIOB_ADDRESS, AVR32_PIOB_IRQ, name);
+	//status = check_region(AVR32_PIOB_ADDRESS+PORT_OFFSET, PORT_RANGE);
+	//printk("region available? %i\n", status);
+  	request_region(AVR32_PIOB_ADDRESS+AVR32_PIO_PER, PORT_RANGE, name);
+	request_region(AVR32_PIOB_ADDRESS+AVR32_PIO_PUER, PORT_RANGE, name);
+	request_region(AVR32_PIOB_ADDRESS+AVR32_PIO_IER, PORT_RANGE, name);
+	request_region(AVR32_PIOB_ADDRESS+AVR32_PIO_PDSR, PORT_RANGE, name);
   	
 	/* initialisere PIO-maskinvaren (som i øving 2) */
 
@@ -103,7 +110,10 @@ static void __exit buttons_exit (void) {
 
 	cdev_del(buttons_cdev);
 
-	release_region(AVR32_PIOB_ADDRESS, AVR32_PIOB_IRQ);
+	release_region(AVR32_PIOB_ADDRESS+AVR32_PIO_PER, PORT_RANGE);
+	release_region(AVR32_PIOB_ADDRESS+AVR32_PIO_PUER, PORT_RANGE);
+	release_region(AVR32_PIOB_ADDRESS+AVR32_PIO_IER, PORT_RANGE);
+	release_region(AVR32_PIOB_ADDRESS+AVR32_PIO_PDSR, PORT_RANGE);
 
 	/* releasing minor and major numbers */
 	unregister_chrdev_region(dev, count);

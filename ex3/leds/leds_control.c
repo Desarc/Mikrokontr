@@ -10,19 +10,6 @@ volatile int led_vector = 0x0;
 volatile int n_of_leds = 0;
 int fd_leds = 0;
 
-/*int main (int argc, char *argv[]) {
-	led_vector = 0;
-	open_led_driver();
-	set_led_on(LED0);
-	set_led_on(LED1);
-	set_led_on(LED2);
-	set_led_on(LED3);
-	set_led_on(LED4);
-	set_led_on(LED5);
-	set_led_on(LED6);
-	close_led_driver();
-}*/
-
 void increment_leds(void) {
 	if (n_of_leds == 0) set_led_on(LED0);
 	else if (n_of_leds == 1) set_led_on(LED1);
@@ -47,6 +34,10 @@ void decrement_leds(void) {
 	if (n_of_leds > 0) n_of_leds--;
 }
 
+int get_led_status(void) {
+	return led_vector;
+}
+
 void reset_leds(void) {
 	led_vector = 0x0;
 	n_of_leds = 0;
@@ -65,7 +56,10 @@ void set_led_off(int led) {
 
 void write_to_led_driver(void) {
 	int write_success = -1;
-	write_success = write(fd_leds, &led_vector, 4);
+	char status[2];
+	status[0] = led_vector >> 8;
+	status[1] = led_vector;
+	write_success = write(fd_leds, status, 2);
 	if (write_success == -1) {
         	perror("Error: cannot write to LED device\n");
         	exit(1);

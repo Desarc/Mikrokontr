@@ -16,6 +16,9 @@
 
 #include "ap7000.h"
 
+#define PORT_RANGE 24
+#define PORT_OFFSET 8
+
 /* prototyper */
 
 static int __init leds_init(void);
@@ -33,7 +36,7 @@ const char name[] = "leds";
 struct cdev *leds_cdev;
 
 const int SET_ALL_LEDS = 0xffffff00;
-volatile long led_status = 0;
+volatile char led_status[3];
 
 
 volatile avr32_pio_t *piob = &AVR32_PIOB;
@@ -49,10 +52,10 @@ static struct file_operations leds_fops = {
 };
 
 void set_leds(void) {
-	//printk("Writing %i to LED driver.\n", led_status);
+	led_status[2] = 0x0;
 	piob->codr = SET_ALL_LEDS;
-	piob->sodr = led_status;
-
+	long vector = (led_status[0] << 16)+(led_status[1] << 8)+led_status[2];
+	piob->sodr = vector;
 }
 
 /*****************************************************************************/
@@ -66,9 +69,12 @@ static int __init leds_init (void) {
 	printk("alloc success? %i \n", alloc_success);
 
   	/* be om tilgang til I/O-porter */
-	int available = check_region(AVR32_PIOB_ADDRESS, AVR32_PIOB_IRQ);
-	printk("region available? %i\n", available);
-	request_region(AVR32_PIOB_ADDRESS, AVR32_PIOB_IRQ, name);
+	//int available = check_region(AVR32_PIOB_ADDRESS+PORT_OFFSET, PORT_RANGE);
+	//printk("region available? %i\n", available);
+	request_region(AVR32_PIOB_ADDRESS+AVR32_PIO_PER+PORT_OFFSET, PORT_RANGE, name);
+	request_region(AVR32_PIOB_ADDRESS+AVR32_PIO_OER+PORT_OFFSET, PORT_RANGE, name);
+	request_region(AVR32_PIOB_ADDRESS+AVR32_PIO_CODR+PORT_OFFSET, PORT_RANGE, name);
+	request_region(AVR32_PIOB_ADDRESS+AVR32_PIO_SODR+PORT_OFFSET, PORT_RANGE, name);
 
 	/* initialisere PIO-maskinvaren (som i øving 2) */
 	
@@ -96,8 +102,10 @@ static int __init leds_init (void) {
 static void __exit leds_exit (void) {
 
 	cdev_del(leds_cdev);
-
-	release_region(AVR32_PIOB_ADDRESS, AVR32_PIOB_IRQ);
+	release_region(AVR32_PIOB_ADDRESS+AVR32_PIO_PER+PORT_OFFSET, PORT_RANGE);
+	release_region(AVR32_PIOB_ADDRESS+AVR32_PIO_OER+PORT_OFFSET, PORT_RANGE);
+	release_region(AVR32_PIOB_ADDRESS+AVR32_PIO_CODR+PORT_OFFSET, PORT_RANGE);
+	release_region(AVR32_PIOB_ADDRESS+AVR32_PIO_SODR+PORT_OFFSET, PORT_RANGE);
 
 	/* releasing minor and major numbers */
 	unregister_chrdev_region(dev, count);
@@ -131,16 +139,8 @@ static ssize_t leds_read (struct file *filp, char __user *buff,
 
 static ssize_t leds_write (struct file *filp, const char __user *buff,
                size_t count, loff_t *offp) {
-	long num;
-	buff++;
-	num = *buff;
-	led_status = num << 32;
-	buff++;
-	num = *buff;
-	led_status = num << 16;
-	buff++;
-	num = *buff;
-	led_status += num << 8;
+	//char status[2];
+	copy_from_user(led_status, buff, count);
 	set_leds();
 
 	return 0;

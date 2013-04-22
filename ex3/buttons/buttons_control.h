@@ -1,15 +1,15 @@
 #ifndef BUTTONS_CONTROL_H
 #define BUTTONS_CONTROL_H
 
-#define BUTTON7 1919
-#define BUTTON6 1983
-#define BUTTON5 2015
-#define BUTTON4 2031
-#define BUTTON3 2039
-#define BUTTON2 2043
-#define BUTTON1 2045
-#define BUTTON0 2046
-#define NONE 2047
+#define BUTTON7 127
+#define BUTTON6 191
+#define BUTTON5 223
+#define BUTTON4 239
+#define BUTTON3 247
+#define BUTTON2 251
+#define BUTTON1 253
+#define BUTTON0 254
+#define NONE 255
 
 //int main (int argc, char *argv[]);
 

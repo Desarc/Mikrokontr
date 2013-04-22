@@ -70,7 +70,7 @@ void read_image_data(char image_path[], char *pixel_ptr, int height, int width) 
 	}
 	int size = width*height;
 	int i;
-	fseek(streamIn, 55, SEEK_SET);
+	fseek(streamIn, 54, SEEK_SET);
 	for(i=0;i<size;i++){
 		*pixel_ptr = getc(streamIn);
 		pixel_ptr++;
@@ -141,7 +141,7 @@ void display_tile(char image, int tilePosX, int tilePosY, int dim) {
 void write_to_screen(char *pixel_ptr, int posX, int posY, int height, int width) {
 	long int location;
 	int i, j;
-	for (i = 0; i < height; i++) {
+	for (i = height; i >= 0; i--) {
 		location = ((posY+i)*MAX_WIDTH+(posX))*3;
 		for (j = 0; j < width; j++) {
 			*(fbp+location) = *pixel_ptr; //blue

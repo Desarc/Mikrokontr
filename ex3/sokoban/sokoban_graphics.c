@@ -8,7 +8,7 @@ volatile int completed = 0;
 int main (int argc, char *argv[]) {
 	
 	open_screen_driver();
-	//open_led_driver();
+	open_led_driver();
 	open_buttons_driver();
 	load_sokoban_images();
 	clear_screen();
@@ -17,13 +17,14 @@ int main (int argc, char *argv[]) {
 	while (!completed) {
 		paintLevel();
 		int cmd = read_button_status();
+		//printf("cmd: %i", cmd);
 		if (cmd != NONE) {
 			performAction(cmd);
 			debounce();
 		}
 	}
 	close_buttons_driver();
-	//close_led_driver();
+	close_led_driver();
 	close_screen_driver();
 }
 
@@ -39,8 +40,9 @@ void performAction(int cmd) {
 		reset();		
 	}
 	else if (cmd == BUTTON0) {
-		completed = 1;
+		displayWin();
 	}
+	//printf("action performed");
 }
 
 void updateScreen(int x, int y, char tile) {
@@ -58,12 +60,12 @@ void paintLevel(void) {
 			display_tile(tile, i, j, 16);
 			level_ptr++;
 		}
-		printf("\n");
+		//printf("\n");
 	}
 }
 
 void displayWin(void) {
 	completed = 1;
-	display_image(WIN, 0, 0);
+	display_image(WIN);
 }
 
