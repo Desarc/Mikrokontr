@@ -4,7 +4,7 @@
 
 volatile char path[100];
 volatile char undone_moves[100];
-volatile int current_level = 3;
+volatile int current_level;
 
 volatile int path_length = 0;
 volatile int undone_length = 0;
@@ -51,6 +51,7 @@ void move(char dir, int undo, int redo) {
 		if (!undo && !replaying) {
 			updatePath(dirX, dirY, box);
 		}
+		paintLevel();
 	}
 	else play_sound(HIT_WALL);
 	if (getRemaining() == 0) {
@@ -131,8 +132,8 @@ void undoLastMove(void) {
 	else if (dir == 'u' || dir == 'U') {
 		dir = 'd';
 	}
-	move(dir, 1, 0);
 	undoBox(dir);
+	move(dir, 1, 0);
 }
 	
 /* redo the last undone move */

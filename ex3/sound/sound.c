@@ -79,6 +79,11 @@ int load_sound_from_file(char file_path[], char *sound_array_ptr) {
 
 /* write sound samples to sound device */
 void write_sound_to_device(char *sound_array_ptr, int size) {
+	
+	int ready = -1;
+	while (!ready) {
+		ready = ioctl(fd_dsp, SOUND_PCM_SYNC, 0);
+	}
 
 	int write_success = write(fd_dsp, sound_array_ptr, size);
 	if (write_success < 0) {

@@ -71,6 +71,7 @@ void decreaseRemaining(void) {
 
 /* select level, load it to the array, and initialize fields */
 void loadLevel(int num) {
+	printf("Loading level %i.\n", num);
 	remaining = 0;
 	char *load_ptr;
 	if (num == 1) {

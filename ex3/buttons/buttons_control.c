@@ -22,7 +22,7 @@ int read_button_status(void) {
 
 /* debounce to avoid repeat of button push */
 void debounce(void) {
-	long wait = 0x5ff000;
+	long wait = 0x400000;
 	while (wait > 0) {
 		wait--;
 	}

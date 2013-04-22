@@ -55,6 +55,7 @@ void blink_leds(void) {
 				wait--;
 			}
 		}
+		write_to_led_driver();
 		exit(1);
 	}
 }

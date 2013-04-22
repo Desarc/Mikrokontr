@@ -1,0 +1,5 @@
+
+1. fix framebuffer (images are painted slightly wrong)
+2. fix sound bug (occurs sometimes when pushing box)
+3. fix song playing at exit
+4. fix level 1 not working

@@ -20,13 +20,25 @@ int main (int argc, char *argv[]) {
 
 	/* initialize game and screen */
 	clear_screen();
-	init_game(argc);
-	printf("\nWELCOME TO SOKOBAN!\n\n");
+	reset_leds();
+	printf("\nWELCOME TO SOKOBAN!\n");
+	printf("Please choose level.\n\n");
+	int chosen = 0;
+	int choice;
+	while (!chosen) {
+		int cmd = read_button_status();
+		if (cmd != NONE) {
+			choice = chooseLevel(cmd);
+			chosen = 1;
+		}
+	}
+	init_game(choice);
+	
 	play_sound(WELCOME);
-
+	paintLevel();
+	debounce();
 	/* busy waiting until a button is pushed */	
 	while (!completed) {
-		paintLevel();
 		int cmd = read_button_status();
 		if (cmd != NONE) {
 			performAction(cmd);
@@ -34,13 +46,14 @@ int main (int argc, char *argv[]) {
 		}
 	}
 
-	/* press any button to exit program */
+	/* press button 0 to exit program */
 	/* (safeguard to avoid forked processes writing to drivers after they close) */
-	int exit = 1;
+	int exit = 0;
 	while (!exit) {
 		int cmd = read_button_status();
-		if (cmd != NONE) {
-			exit = 0;
+		if (cmd == BUTTON0) {
+			printf("\nExiting game.\n");
+			exit = 1;
 		}
 	}
 	/* close all drivers */
@@ -48,6 +61,18 @@ int main (int argc, char *argv[]) {
 	close_buttons_driver();
 	close_led_driver();
 	close_screen_driver();
+}
+
+int chooseLevel(int cmd) {
+	int choice;
+	if (cmd == BUTTON0) choice = 1;
+	else if (cmd == BUTTON1) choice = 2;
+	else if (cmd == BUTTON2) choice = 3;
+	else if (cmd == BUTTON3) choice = 4;
+	else if (cmd == BUTTON4) choice = 5;
+	else if (cmd == BUTTON5) choice = 6;
+	else if (cmd == BUTTON6) choice = 7;
+	return choice;
 }
 
 void performAction(int cmd) {
@@ -65,11 +90,6 @@ void performAction(int cmd) {
 		displayWin();
 	}
 }
-
-/*void updateScreen(int x, int y, char tile) {
-	display_tile(tile, x, y, 16);
-}*/
-
 
 void paintLevel(void) {
 	/* paint level on screen */
