@@ -91,8 +91,7 @@ void undoBox(char dir) {
 		}
 		else {
 			setTile(newX, newY, BOX);
-		}
-		
+		}	
 	}
 }
 

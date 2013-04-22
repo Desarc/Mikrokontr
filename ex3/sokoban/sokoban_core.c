@@ -83,9 +83,14 @@ volatile char *getPath() {
 	return path_ptr;
 }
 
-/* reset game and load the level specified */
-void reset(int num) {
+/* initialize fields and load the level specified */
+void init_game(int num) {
 	current_level = num;
+	reset();
+}
+
+/* reset game */
+void reset() {
 	reset_path_ptr();
 	reset_undone_ptr();
 	path_length = 0;

@@ -47,7 +47,7 @@ static struct file_operations buttons_fops = {
 /* read data from button status register */
 void read_button_status(void) {
 	piob->isr;
-	int status = piob->pdsr;
+	status = piob->pdsr;
 	button_status[0] = status >> 8;
 	button_status[1] = status;
 }

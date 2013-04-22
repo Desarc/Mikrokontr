@@ -36,7 +36,6 @@ char setTile(int x, int y, char tile) {
 		posX = x;
 		posY = y;
 	}
-	updateScreen(x, y, tile);
 	return old;
 }
 

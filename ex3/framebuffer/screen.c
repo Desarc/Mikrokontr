@@ -151,6 +151,7 @@ void open_screen_driver(void) {
     	    perror("Error: failed to map framebuffer device to memory");
         	exit(4);
     	}
+	clear_screen();
     	printf("The framebuffer device was mapped to memory successfully.\n");
 }
 
