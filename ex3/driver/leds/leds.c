@@ -35,8 +35,8 @@ int first_minor = 0, count = 1;
 const char name[] = "leds";
 struct cdev *leds_cdev;
 
-const int SET_ALL_LEDS = 0xffffff00;
-volatile char led_status[3];
+const long SET_ALL_LEDS = 0xffffff00;
+volatile char led_status[4];
 
 
 volatile avr32_pio_t *piob = &AVR32_PIOB;
@@ -52,9 +52,9 @@ static struct file_operations leds_fops = {
 };
 
 void set_leds(void) {
-	led_status[2] = 0x0;
+	led_status[3] = 0x0;
 	piob->codr = SET_ALL_LEDS;
-	long vector = (led_status[0] << 16)+(led_status[1] << 8)+led_status[2];
+	long vector = (led_status[0] << 24)+(led_status[1] << 16)+(led_status[2] << 8)+led_status[3];
 	piob->sodr = vector;
 }
 
@@ -130,7 +130,6 @@ static ssize_t leds_read (struct file *filp, char __user *buff,
 
 static ssize_t leds_write (struct file *filp, const char __user *buff,
                size_t count, loff_t *offp) {
-	//char status[2];
 	copy_from_user(led_status, buff, count);
 	set_leds();
 

@@ -1,4 +1,5 @@
 #include "sokoban_move.h"
+#include "../sound/sound.h"
 
 int validMove(int fromX, int fromY, int toX, int toY) {
 	int dimX = getDimX(), dimY = getDimY();
@@ -35,7 +36,8 @@ int moveTo(int fromX, int fromY, int toX, int toY) {
 		}
 		else if (next == TARGET) {
 			setTile(toX, toY, PLAYER_ON_TARGET);
-			increaseRemaining();
+			increaseRemaining();	
+			play_sound(ONE_MORE);
 		}
 		int newMovableY = toY+(toY-fromY);
 		int newMovableX = toX+(toX-fromX);
@@ -46,6 +48,7 @@ int moveTo(int fromX, int fromY, int toX, int toY) {
 		else if (newMovablePos == TARGET) {
 			setTile(newMovableX, newMovableY, BOX_ON_TARGET);
 			decreaseRemaining();
+			play_sound(ONE_LESS);
 		}
 	}
 	else {

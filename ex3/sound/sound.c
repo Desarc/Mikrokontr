@@ -10,7 +10,7 @@
 
 
 #define MAX_SOUND_SAMPLES 112000
-#define SAMPLES 8000
+#define SAMPLES 16000
 //char sound[MAX_SOUND_SAMPLES];
 //int sound_size;
 
@@ -41,8 +41,8 @@ void play_sound(int code) {
 void load_sokoban_sounds(void) {
 	
 	welcome_size = load_sound_from_file("dudu.wav", welcome);
-	one_less_size = load_sound_from_file("off.wav", one_less);
-	one_more_size = load_sound_from_file("on.wav", one_more);
+	one_less_size = load_sound_from_file("on.wav", one_less);
+	one_more_size = load_sound_from_file("off.wav", one_more);
 	hit_wall_size = load_sound_from_file("wall.wav", hit_wall);
 	victory_size = load_sound_from_file("sekvens.wav", victory);
 	printf("Sokoban sounds loaded.\n");
