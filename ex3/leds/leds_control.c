@@ -34,6 +34,20 @@ void decrement_leds(void) {
 	if (n_of_leds > 0) n_of_leds--;
 }
 
+void blink_leds(void) {
+	led_vector = 0x0;
+	int i;
+	for (i=0;i<10;i++) {
+		write_to_led_driver();
+		if (i%2 == 0) led_vector = ALL_LEDS;
+		else led_vector = 0x0; 
+		int wait = 0xeffff;
+		while (wait > 0) {
+			wait--;
+		}
+	}
+}
+
 int get_led_status(void) {
 	return led_vector;
 }

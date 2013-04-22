@@ -1,4 +1,5 @@
 #include "sokoban_core.h"
+#include "../sound/sound.h"
 
 
 volatile char path[100];
@@ -43,12 +44,14 @@ void move(char dir, int undo, int redo) {
 		undone_length = 0;
 	}
 	int posX = getX(), posY = getY();
-	if (validMove(posX, posY, posX+dirX, posY+dirY)) {
+	int valid = validMove(posX, posY, posX+dirX, posY+dirY);
+	if (valid) {
 		int box = moveTo(posX, posY, posX+dirX, posY+dirY);
 		if (!undo && !replaying) {
 			updatePath(dirX, dirY, box);
 		}
 	}
+	else play_sound(HIT_WALL);
 	if (getRemaining() == 0) {
 		displayWin();
 		playing = 0;

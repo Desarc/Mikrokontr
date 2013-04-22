@@ -18,6 +18,10 @@ default:
 send:
 	$(shell scp ${MODULE} root@${ADDR})
 
+.PHONY : sendsounds
+sendsounds:
+	$(shell scp *.wav root@${ADDR})
+
 
 .PHONY : clean
 clean:

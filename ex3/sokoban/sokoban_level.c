@@ -1,6 +1,7 @@
 #include "sokoban_level.h"
 #include "sokoban_leveldefs.h"
 #include "../leds/leds_control.h"
+#include "../sound/sound.h"
 
 volatile int posX, posY, dimX, dimY;
 volatile int remaining;
@@ -60,11 +61,13 @@ int getRemaining(void) {
 void increaseRemaining(void) {
 	remaining++;
 	increment_leds();
+	play_sound(ONE_MORE);
 }
 
 void decreaseRemaining(void) {
 	remaining--;
 	decrement_leds();
+	play_sound(ONE_LESS);
 }
 
 void loadLevel(int num) {

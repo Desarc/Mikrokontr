@@ -9,9 +9,11 @@
 #define LED2 0x0004
 #define LED1 0x0002
 #define LED0 0x0001
+#define ALL_LEDS (LED0+LED1+LED2+LED3+LED4+LED5+LED6+LED7)
 
 void increment_leds(void);
 void decrement_leds(void);
+void blink_leds(void);
 int get_led_status(void);
 void reset_leds(void);
 static void set_led_on(int led);

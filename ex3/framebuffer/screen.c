@@ -9,6 +9,7 @@
 #include <sys/ioctl.h>
 
 #define MAX_IMAGE_SIZE 76800
+#define MAX_BUFFER_SIZE (MAX_IMAGE_SIZE*3)
 #define MAX_HEIGHT 240
 #define MAX_WIDTH 320
 #define TILE_SIZE_8 64
@@ -16,9 +17,6 @@
 #define TILE_SIZE_32 1024
 
 int fbfd = 0;
-struct fb_var_screeninfo vinfo;
-struct fb_fix_screeninfo finfo;
-long int screensize = 0;
 char *fbp = 0;
 
 char win_image[MAX_IMAGE_SIZE][3];
@@ -31,25 +29,6 @@ char target_image[TILE_SIZE_16][3];
 char player_on_target_image[TILE_SIZE_16][3];
 char box_on_target_image[TILE_SIZE_16][3];
 
-/*int main() {
-	//test1(test);
-	//test2(test);
-	open_screen_driver();
-	
-	load_sokoban_images();
-	generate_random_image(&image_array[0][0]);
-	//read_image_data("24bit_flip_row_order.bmp", image_array, MAX_HEIGHT, MAX_WIDTH);
-	clear_screen();
-	
-	display_tile(PLAYER, 5, 5, 16);
-    	//write_to_screen(player_image, 100, 100, 16, 16);
-	//write_to_screen(&image_array[0][0], 0, 0, MAX_HEIGHT, MAX_WIDTH);	
-
-    	close_screen_driver();
-    	
-    return 0;
-}*/
-
 void load_sokoban_images(void) {
 	read_image_data("crate.bmp", &box_image[0][0], 16, 16);
 	read_image_data("player.bmp", &player_image[0][0], 16, 16);
@@ -59,6 +38,7 @@ void load_sokoban_images(void) {
 	read_image_data("playertarget.bmp", &player_on_target_image[0][0], 16, 16);
 	read_image_data("cratetarget.bmp", &box_on_target_image[0][0], 16, 16);
 	read_image_data("win.bmp", &win_image[0][0], MAX_HEIGHT, MAX_WIDTH);
+	printf("Sokoban images loaded.\n");
 }
 
 void read_image_data(char image_path[], char *pixel_ptr, int height, int width) {
@@ -80,27 +60,6 @@ void read_image_data(char image_path[], char *pixel_ptr, int height, int width) 
 		pixel_ptr++;
 	}
 	fclose(streamIn);
-}
-
-void generate_random_image(char *pixel_ptr) {
-	int i;
-	char blue = 0xff, green = 0x0, red = 0x0;
-	for(i=0;i<MAX_IMAGE_SIZE;i++) {    // foreach pixel
-		*pixel_ptr = blue;
-		pixel_ptr++;
-		*pixel_ptr = green;
-		pixel_ptr++;
-		*pixel_ptr = red;
-		pixel_ptr++;
-		if (i > MAX_IMAGE_SIZE*2/3) {
-			green = 0x0;
-			red = 0xff;
-		}
-		else if (i > MAX_IMAGE_SIZE/3) {
-			blue = 0x0;
-			green = 0xff;
-		}
-	}
 }
 
 void display_image(int image) {
@@ -180,27 +139,8 @@ void open_screen_driver(void) {
    	 }
     	printf("The framebuffer device was opened successfully.\n");
 
-    	// Get fixed screen information
-	int fscreen_success = ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo);
-    	if ( fscreen_success == -1) {
-        	perror("Error reading fixed information");
-        	exit(2);
-    	}
-
-    	// Get variable screen information
-	int vscreen_success = ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo);
-    	if (vscreen_success == -1) {
-        	perror("Error reading variable information");
-        	exit(3);
-    	}
-
-    	printf("%dx%d, %dbpp\n", vinfo.xres, vinfo.yres, vinfo.bits_per_pixel);
-
-    	// Figure out the size of the screen in bytes
-    	screensize = vinfo.xres * vinfo.yres * vinfo.bits_per_pixel / 8;
-
     	// Map the device to memory
-    	fbp = (char *)mmap(NULL, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
+    	fbp = (char *)mmap(NULL, MAX_BUFFER_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
     	if ((int)fbp == -1) {
     	    perror("Error: failed to map framebuffer device to memory");
         	exit(4);
@@ -210,6 +150,6 @@ void open_screen_driver(void) {
 
 
 void close_screen_driver(void) {
-	munmap(fbp, screensize);
+	munmap(fbp, MAX_BUFFER_SIZE);
     	close(fbfd);
 }

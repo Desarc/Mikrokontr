@@ -2,6 +2,7 @@
 #include "../framebuffer/screen.h"
 #include "../leds/leds_control.h"
 #include "../buttons/buttons_control.h"
+#include "../sound/sound.h"
 
 volatile int completed = 0;
 
@@ -10,10 +11,13 @@ int main (int argc, char *argv[]) {
 	open_screen_driver();
 	open_led_driver();
 	open_buttons_driver();
+	open_sound_driver();
 	load_sokoban_images();
+	load_sokoban_sounds();
 	clear_screen();
 	reset();
-	printf("WELCOME TO SOKOBAN!\n\n");
+	printf("\nWELCOME TO SOKOBAN!\n\n");
+	play_sound(WELCOME);	
 	while (!completed) {
 		paintLevel();
 		int cmd = read_button_status();
@@ -23,6 +27,7 @@ int main (int argc, char *argv[]) {
 			debounce();
 		}
 	}
+	close_sound_driver();
 	close_buttons_driver();
 	close_led_driver();
 	close_screen_driver();
@@ -67,5 +72,7 @@ void paintLevel(void) {
 void displayWin(void) {
 	completed = 1;
 	display_image(WIN);
+	blink_leds();
+	play_sound(VICTORY);
 }
 

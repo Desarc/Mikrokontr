@@ -54,7 +54,7 @@ volatile int silence_wave[1] = {0};
 const int A = 2000;
 
 /* Frequency sampling */
-#define Fs 46875.0f		// = 12M/256
+#define Fs 8000f		// = 12M/256
 //#define Fs 23437.5f		// = (12M/2)/256
 //#define Fs 11718.75f		// = (12M/4)/256
 
