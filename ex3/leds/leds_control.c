@@ -35,16 +35,21 @@ void decrement_leds(void) {
 }
 
 void blink_leds(void) {
-	led_vector = 0x0;
-	int i;
-	for (i=0;i<10;i++) {
-		write_to_led_driver();
-		if (i%2 == 0) led_vector = ALL_LEDS;
-		else led_vector = 0x0; 
-		int wait = 0xeffff;
-		while (wait > 0) {
-			wait--;
+	pid_t childPID = fork();
+	
+	if (childPID == 0) {
+		led_vector = 0x0;
+		int i;
+		for (i=0;i<10;i++) {
+			write_to_led_driver();
+			if (i%2 == 0) led_vector = ALL_LEDS;
+			else led_vector = 0x0; 
+			int wait = 0xeffff;
+			while (wait > 0) {
+				wait--;
+			}
 		}
+		exit(1);
 	}
 }
 

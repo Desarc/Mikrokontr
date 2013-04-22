@@ -22,20 +22,24 @@ char one_more[SAMPLES];
 int one_more_size;
 char hit_wall[SAMPLES];
 int hit_wall_size;
-char victory[SAMPLES];
+char victory[MAX_SOUND_SAMPLES];
 int victory_size;
 
 
 int fd_dsp;
 
 void play_sound(int code) {
-	
-	if (code == WELCOME) write_sound_to_device(welcome, welcome_size);
-	else if (code == ONE_LESS) write_sound_to_device(one_less, one_less_size);
-	else if (code == ONE_MORE) write_sound_to_device(one_more, one_more_size);
-	else if (code == HIT_WALL) write_sound_to_device(hit_wall, hit_wall_size);
-	else if (code == VICTORY) write_sound_to_device(victory, victory_size);
 
+	pid_t childPID = fork();
+	
+	if (childPID == 0) {
+		if (code == WELCOME) write_sound_to_device(welcome, welcome_size);
+		else if (code == ONE_LESS) write_sound_to_device(one_less, one_less_size);
+		else if (code == ONE_MORE) write_sound_to_device(one_more, one_more_size);
+		else if (code == HIT_WALL) write_sound_to_device(hit_wall, hit_wall_size);
+		else if (code == VICTORY) write_sound_to_device(victory, victory_size);
+		exit(1);
+	}
 }
 
 void load_sokoban_sounds(void) {
@@ -44,7 +48,7 @@ void load_sokoban_sounds(void) {
 	one_less_size = load_sound_from_file("on.wav", one_less);
 	one_more_size = load_sound_from_file("off.wav", one_more);
 	hit_wall_size = load_sound_from_file("wall.wav", hit_wall);
-	victory_size = load_sound_from_file("sekvens.wav", victory);
+	victory_size = load_sound_from_file("soundfile.wav", victory);
 	printf("Sokoban sounds loaded.\n");
 
 }
