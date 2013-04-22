@@ -22,16 +22,21 @@ static int __init buttons_init(void);
 static void __exit buttons_exit(void);
 static int buttons_open (struct inode *inode, struct file *filp);
 static int buttons_release (struct inode *inode, struct file *filp);
-static ssize_t buttons_read (struct file *filp, char __user *buff,
-                     size_t count, loff_t *offp);
-static ssize_t buttons_write (struct file *filp, const char __user *buff,
-                      size_t count, loff_t *offp);
+static ssize_t buttons_read (struct file *filp, char __user *buff, size_t count, loff_t *offp);
+static ssize_t buttons_write (struct file *filp, const char __user *buff, size_t count, loff_t *offp);
 
+void button_isr(void);
 
-dev_t dec;
+dev_t dev;
 int first_minor = 0, count = 1;
 const char name[] = "buttons";
-struct resource;
+struct cdev *buttons_cdev;
+int status;
+
+const int SET_ALL_BUTTONS = 0xff;
+volatile char button_status[2];
+
+volatile avr32_pio_t *piob = &AVR32_PIOB;
 
 /* fops-struct */
 
@@ -46,20 +51,47 @@ static struct file_operations buttons_fops = {
 /*****************************************************************************/
 /* init-funksjon (kalles når modul lastes) */
 
+void read_button_status(void) {
+	piob->isr;
+	int status = piob->pdsr;
+	button_status[0] = status >> 8;
+	button_status[1] = status;
+}
+
 static int __init buttons_init (void) {
 
 	/* allocating minor and major numbers */
-	int alloc_success = -1;
-  	alloc_success = alloc_chrdev_region(&dev, first_minor, count, name);
-	printk("alloc success? %i \n", alloc_success);
 	
-	request_region(AVR32_PIOB_ADDRESS, AVR32_PIOB_IRQ, name);
+  	status = alloc_chrdev_region(&dev, first_minor, count, name);
+	printk("alloc success? %i\n", status);
+	
+	
   	/* be om tilgang til I/O-porter */
-	//resource = *request_region();
-  
-  /* initialisere PIO-maskinvaren (som i øving 2) */
+	
+	status = check_region(AVR32_PIOB_ADDRESS, AVR32_PIOB_IRQ);
+	printk("region available? %i\n", status);
+  	request_region(AVR32_PIOB_ADDRESS, AVR32_PIOB_IRQ, name);
+  	
+	/* initialisere PIO-maskinvaren (som i øving 2) */
+
+	piob->per = SET_ALL_BUTTONS;
+	piob->puer = SET_ALL_BUTTONS;
+	piob->ier = SET_ALL_BUTTONS;
+  	//register_interrupt(button_isr, AVR32_PIOC_IRQ/32, AVR32_PIOC_IRQ % 32, BUTTONS_INT_LEVEL);
+	piob->isr;	
+	//init_interrupts();
  
-  /* registrere device i systemet (må gjøres når alt annet er initialisert) */
+  	/* registrere device i systemet (må gjøres når alt annet er initialisert) */
+
+	
+	buttons_cdev = cdev_alloc();
+	buttons_cdev->ops = &buttons_fops;
+	cdev_init(buttons_cdev, &buttons_fops);
+	buttons_cdev->owner = THIS_MODULE;
+	status = cdev_add(buttons_cdev, dev, count);
+	printk("cdev_add success? %i \n", status);
+
+	printk(KERN_ALERT "Button module enabled.\n");
 
   return 0;
 }
@@ -69,12 +101,14 @@ static int __init buttons_init (void) {
 
 static void __exit buttons_exit (void) {
 
-	
+	cdev_del(buttons_cdev);
+
+	release_region(AVR32_PIOB_ADDRESS, AVR32_PIOB_IRQ);
 
 	/* releasing minor and major numbers */
 	unregister_chrdev_region(dev, count);
 
-	//release_region();
+	printk(KERN_ALERT "Buttons module disabled.\n");
 }
 
 /*****************************************************************************/
@@ -94,7 +128,10 @@ static int buttons_release (struct inode *inode, struct file *filp) {
 
 static ssize_t buttons_read (struct file *filp, char __user *buff,
               size_t count, loff_t *offp) {
-  return 0;
+
+	read_button_status();
+	copy_to_user(buff, &button_status, count);
+	return 0;
 }
 
 /*---------------------------------------------------------------------------*/

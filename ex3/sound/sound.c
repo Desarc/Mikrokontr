@@ -1,6 +1,7 @@
 #include "sound.h"
 #include "linux/soundcard.h"
 #include "sys/mman.h"
+#include "sys/ioctl.h"
 #include "stdio.h"
 #include "audio.h"
 #include "sys/stat.h"
@@ -32,6 +33,8 @@ volatile float *current_sound_ptr;
 /* Pointer to the length value (in seconds) of the next tone */
 volatile float *current_sound_tl_ptr;
 
+int fd_dsp;
+
 int main (int argc, char *argv[]) {
 	pregenerateTones();
 	open_driver();
@@ -39,10 +42,8 @@ int main (int argc, char *argv[]) {
 }
 
 int open_driver(void) {
-	
-	int fd_dsp;
 	char *dsp_p = 0;
-	int sample_size = 8;
+	
 
 	fd_dsp = open("/dev/dsp", O_RDWR);
 	
@@ -50,33 +51,59 @@ int open_driver(void) {
 		perror("open: ");
 		return 1;
 	}
-	printf("sound device opened, %i\n", fd_dsp);
-	//if (lseek(fd_dsp, 1, SEEK_SET) < 0) {
-		//perror("lseek: ");
+	printf("Sound device opened, %i\n", fd_dsp);
+	/*if (lseek(fd_dsp, 1, SEEK_SET) < 0) {
+		perror("lseek: ");
 		//return 1;
-	//}
+	}*/
 
 	int dsp_rate = 8000;
-	int dsprate_success = -1;
-	dsprate_success = ioctl(fd_dsp, SOUND_PCM_WRITE_RATE, &dsp_rate);
-	printf("success setting dsp rate? %i\n", dsprate_success);
-	
-	int sample_size_success = -1;
+	int channels = 1;
+	int sample_size = 8;
+
+	int dsprate_success = 0;
+	int sample_size_success = 0;
+	int channels_success = 0;
+
+	channels_success = ioctl(fd_dsp, SOUND_PCM_WRITE_CHANNELS, &channels);
+	printf("set channels success?: %i\n", channels_success);
+
 	sample_size_success = ioctl(fd_dsp, SOUND_PCM_WRITE_BITS, &sample_size);
 	printf("set sample size success?: %i\n", sample_size_success);
-	
-	while(1) {
-		int sample = rand()%0xff;
-		printf("%i\n", sample);
-		int write_success = write(fd_dsp, &sample, 1);
-		printf("number of bytes written: %i\n", write_success);
-		if (write_success < 0) {
-		    perror("write: ");
-		    return 1;
-		}
-	}
 
-	/*dsp_p = (char *)mmap(NULL, sample_size, PROT_WRITE, MAP_SHARED, fd_dsp, 0);
+	dsprate_success = ioctl(fd_dsp, SOUND_PCM_WRITE_RATE, &dsp_rate);
+	printf("success setting write rate? %i\n", dsprate_success);
+
+	int dsp_rate_check = -1;
+	dsprate_success = ioctl(fd_dsp, SOUND_PCM_READ_RATE, &dsp_rate_check);
+	printf("write rate: %i\n", dsp_rate_check);
+
+	int sample_size_check = -1;
+	sample_size_success = ioctl(fd_dsp, SOUND_PCM_READ_BITS, &sample_size_check);
+	printf("sample size: %i\n", sample_size_check);
+	/*if (sample_size_success < 0) {
+		perror("read bits: ");
+		return 1;
+	}*/
+	char samples[40000];	
+	int i;
+	for (i=0;i<40000;i++) {
+		samples[i] = rand()%0xff;
+		//printf("%i\n", samples[i]);
+	}		
+		
+	//printf("%i\n", sample);
+	int write_success = write(fd_dsp, samples, 40000);
+	//printf("number of bytes written: %i\n", write_success);
+	if (write_success < 0) {
+	    perror("write: ");
+	    return 1;
+	}
+	
+	int sync_success = -1;
+	sync_success = ioctl(fd_dsp, SOUND_PCM_SYNC, 0);
+	printf("sync success: %i\n", sync_success);
+	/*dsp_p = (char *)mmap(NULL, 10000, PROT_WRITE | PROT_READ, MAP_SHARED, fd_dsp, 0);
 	
 	if ((int)dsp_p == -1) {
     	    perror("Error: failed to map sound device to memory");
@@ -86,7 +113,12 @@ int open_driver(void) {
 	
 
 	
+}
+
+void close_driver(void) {
+
 	close(fd_dsp);
+
 }
 
 /* Pre-generate sine and triangle tones */

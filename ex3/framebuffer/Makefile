@@ -6,7 +6,7 @@
 
 # navn på kjernemodul (navnet på C-fila men uten ".c")
 MODULE = screen
-ADDR = 129.241.103.120:/root
+ADDR = 129.241.103.134:/root
 
 
 default:

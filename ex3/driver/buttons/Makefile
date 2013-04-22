@@ -6,6 +6,7 @@
 
 # navn på kjernemodul (navnet på C-fila men uten ".c")
 MODULE = buttons
+ADDR = 129.241.103.251:/root
 
 ifneq ($(KERNELRELEASE),)
 obj-m := ${MODULE}.o
@@ -19,6 +20,10 @@ default:
 	$(MAKE) -C $(KERNELDIR) M=$$PWD modules
 
 endif
+
+.PHONY : send
+send:
+	$(shell scp ${MODULE}.ko root@${ADDR})
 
 .PHONY : clean
 clean:

@@ -1,55 +1,44 @@
 #include "sokoban_graphics.h"
 #include "../framebuffer/screen.h"
 #include "../leds/leds_control.h"
+#include "../buttons/buttons_control.h"
 
 volatile int completed = 0;
 
 int main (int argc, char *argv[]) {
 	
 	open_screen_driver();
-	open_led_driver();
+	//open_led_driver();
+	open_buttons_driver();
 	load_sokoban_images();
 	clear_screen();
 	reset();
-		
 	printf("WELCOME TO SOKOBAN!\n\n");
 	while (!completed) {
 		paintLevel();
-		char cmd;
-		scanf("%c", &cmd);
-		performAction(cmd);
+		int cmd = read_button_status();
+		if (cmd != NONE) {
+			performAction(cmd);
+			debounce();
+		}
 	}
-	close_led_driver();
+	close_buttons_driver();
+	//close_led_driver();
 	close_screen_driver();
 }
 
-void performAction(char cmd) {
-	if (cmd == 'w') {
-		move('u', 0, 0);
-	}
-	else if (cmd == 'a') {
-		move('l', 0, 0);
-	}
-	else if (cmd == 's') {
-		move('d', 0, 0);
-	}
-	else if (cmd == 'd') {
-		move('r', 0, 0);
-	}
-	else if (cmd == 'u') {
-		undoLastMove();
-	}
-	else if (cmd == 'y') {
-		redoMove();
-	}
-	else if (cmd == 'p') {
-		printPath();
-	}
-	else if (cmd == 'r') {
+void performAction(int cmd) {
+	if (cmd == BUTTON5) move('u', 0, 0);
+	else if (cmd == BUTTON7) move('l', 0, 0);
+	else if (cmd == BUTTON6) move('d', 0, 0);
+	else if (cmd == BUTTON4) move('r', 0, 0);
+	else if (cmd == BUTTON3) undoLastMove();
+	else if (cmd == BUTTON2) redoMove();
+	else if (cmd == BUTTON1) {
 		reset_leds();
 		reset();		
 	}
-	else if (cmd == 'x') {
+	else if (cmd == BUTTON0) {
 		completed = 1;
 	}
 }
@@ -58,17 +47,6 @@ void updateScreen(int x, int y, char tile) {
 	display_tile(tile, x, y, 16);
 }
 
-void printPath(void) {
-	volatile char *path_ptr = getPath();
-	int moves = numberOfMoves();
-	path_ptr -= moves;
-	int i;
-	for (i = 0; i < moves; i++) {
-		printf("%c", *path_ptr);
-		path_ptr++;
-	}
-	printf("\n");
-}
 
 void paintLevel(void) {
 	volatile char *level_ptr = getLevel();
@@ -86,6 +64,6 @@ void paintLevel(void) {
 
 void displayWin(void) {
 	completed = 1;
-	printf("\n\nLevel completed!\n\n");
+	display_image(WIN, 0, 0);
 }
 

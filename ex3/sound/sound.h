@@ -2,7 +2,8 @@
 #define SOUND_H
 
 int main (int argc, char *argv[]);
-static int open_driver(void);
+int open_driver(void);
+void close_driver(void);
 static void pregenerateTones(void);
 static void generateSine(float f);
 static void generateTriangle(float f);

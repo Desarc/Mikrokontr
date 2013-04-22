@@ -6,10 +6,11 @@
 
 # navn på kjernemodul (navnet på C-fila men uten ".c")
 MODULE = sound
-ADDR = 129.241.102.251:/root
+ADDR = 129.241.103.251:/root
 
 
 default:
+	rm -rf *.o
 	avr32-linux-gcc ${MODULE}.c -o ${MODULE} -lm
 
 	

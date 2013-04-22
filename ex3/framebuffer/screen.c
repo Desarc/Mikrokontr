@@ -21,7 +21,7 @@ struct fb_fix_screeninfo finfo;
 long int screensize = 0;
 char *fbp = 0;
 
-char image_array[MAX_IMAGE_SIZE][3];
+char win_image[MAX_IMAGE_SIZE][3];
 
 char box_image[TILE_SIZE_16][3];
 char player_image[TILE_SIZE_16][3];
@@ -58,6 +58,7 @@ void load_sokoban_images(void) {
 	read_image_data("target.bmp", &target_image[0][0], 16, 16);
 	read_image_data("playertarget.bmp", &player_on_target_image[0][0], 16, 16);
 	read_image_data("cratetarget.bmp", &box_on_target_image[0][0], 16, 16);
+	read_image_data("win.bmp", &win_image[0][0], MAX_HEIGHT, MAX_WIDTH);
 }
 
 void read_image_data(char image_path[], char *pixel_ptr, int height, int width) {
@@ -100,6 +101,14 @@ void generate_random_image(char *pixel_ptr) {
 			green = 0xff;
 		}
 	}
+}
+
+void display_image(int image) {
+	char *image_ptr;
+	if (image == WIN) {
+		image_ptr = &win_image[0][0];
+	}
+	write_to_screen(image_ptr, 0, 0, MAX_HEIGHT, MAX_WIDTH);
 }
 
 void display_tile(char image, int tilePosX, int tilePosY, int dim) {

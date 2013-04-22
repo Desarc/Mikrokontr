@@ -30,9 +30,10 @@ void set_leds(void);
 dev_t dev;
 int first_minor = 0, count = 1;
 const char name[] = "leds";
-const int SET_ALL = 0xffffffff;
 struct cdev *leds_cdev;
-volatile int led_status = 0;
+
+const int SET_ALL_LEDS = 0xffffff00;
+volatile long led_status = 0;
 
 
 volatile avr32_pio_t *piob = &AVR32_PIOB;
@@ -47,6 +48,13 @@ static struct file_operations leds_fops = {
   .release = leds_release
 };
 
+void set_leds(void) {
+	//printk("Writing %i to LED driver.\n", led_status);
+	piob->codr = SET_ALL_LEDS;
+	piob->sodr = led_status;
+
+}
+
 /*****************************************************************************/
 /* init-funksjon (kalles når modul lastes) */
 
@@ -58,17 +66,18 @@ static int __init leds_init (void) {
 	printk("alloc success? %i \n", alloc_success);
 
   	/* be om tilgang til I/O-porter */
-
+	int available = check_region(AVR32_PIOB_ADDRESS, AVR32_PIOB_IRQ);
+	printk("region available? %i\n", available);
 	request_region(AVR32_PIOB_ADDRESS, AVR32_PIOB_IRQ, name);
 
 	/* initialisere PIO-maskinvaren (som i øving 2) */
 	
-	piob->per = SET_ALL;
-	piob->oer = SET_ALL;
-	piob->codr = SET_ALL;
+	piob->per = SET_ALL_LEDS;
+	piob->oer = SET_ALL_LEDS;
+	piob->codr = SET_ALL_LEDS;
 	
 	/* registrere device i systemet (må gjøres når alt annet er initialisert) */
-	int cdev_success = -1;
+	int cdev_success;
 	leds_cdev = cdev_alloc();
 	leds_cdev->ops = &leds_fops;
 	cdev_init(leds_cdev, &leds_fops);
@@ -81,23 +90,17 @@ static int __init leds_init (void) {
   	return 0;
 }
 
-void set_leds(void) {
-	//printk("Writing %i to LED driver.\n", led_status);
-	piob->codr = SET_ALL;
-	piob->sodr = led_status;
-
-}
-
 /*****************************************************************************/
 /* exit-funksjon (kalles når modul fjernes fra systemet) */
 
 static void __exit leds_exit (void) {
 
+	cdev_del(leds_cdev);
+
 	release_region(AVR32_PIOB_ADDRESS, AVR32_PIOB_IRQ);
 
 	/* releasing minor and major numbers */
 	unregister_chrdev_region(dev, count);
-	
 
 	printk(KERN_ALERT "LED module disabled.\n");
 }
@@ -128,12 +131,16 @@ static ssize_t leds_read (struct file *filp, char __user *buff,
 
 static ssize_t leds_write (struct file *filp, const char __user *buff,
                size_t count, loff_t *offp) {
+	long num;
 	buff++;
-	led_status = *buff << 32;
+	num = *buff;
+	led_status = num << 32;
 	buff++;
-	led_status = *buff << 16;
+	num = *buff;
+	led_status = num << 16;
 	buff++;
-	led_status += *buff << 8;
+	num = *buff;
+	led_status += num << 8;
 	set_leds();
 
 	return 0;
