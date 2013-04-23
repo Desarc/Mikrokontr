@@ -27,7 +27,7 @@ TDT4258 Energy Efficient Computer Design \\}
 \maketitle
 
 \begin{abstract}
-In this assignment we write C code for an AVR microcontroller on linux. Through this assignment we aim to become more familiar with C coding for AVR32, linux and how to write a driver for linux. Our approach was to first replicate the features of the previous assignment, then we ..................
+In this assignment we write C code for an AVR microcontroller on linux. The goal is to make a game be played on the development board. Through this assignment we aim to become more familiar with C coding for AVR32, linux and how to write a driver for linux. 
 \end{abstract}
 
 \bigskip
@@ -43,8 +43,6 @@ In this exercise we write a game in C, which is executed on top of linux on a ST
 \textbf{Forrige rapport: organize report better (overview and block diagram before description of code fragments and functions). Ergo, block diagram her?}\\
 
 First off we started out with trying to install linux on the STK1000 development board. This turned out to be a tricky affair. We had a step by step guide for compiling linux that we followed, but with no luck. Luckily there was mentioned an image of a precompiled linux that we could extract to the SD card. After some mixing back and forth with environment variables from the other u-boot.bin file(from itslearning) into the one we were using we finally started to get somewhere. Another group posted a guide on itslearning that worked for us.
-
-\textbf{(d e bare å korrigera osv) }
 
 Once we had linux up and running we started out with a simple "Hello world" program to verify things were working. Now we started out with programming a driver for the LEDs. We sometimes thought we had found the solution, but we still hadn't figured it out correctly. We gave the LED driver a pause and started to communicate with the frame buffer in linux. 
 
@@ -139,28 +137,32 @@ Figure 2: Debugging the \emph{generateTriangle} function
 \end{center}
 
 \section{Results}
+\subsection{Description} 
+
 This exercise resulted in a working sokoban game on the STK1000 development board displayed. The game is played by using the buttons as controllers to move around in the game which is displayed on the LCD screen. In addition to a general "arrow key" setup, there is also a possibility to undo and redo with the buttons. 
 
-There are sounds and LEDs to help you understand the game play better through audiovisual feedback. The LEDs show how many crates you have left in the game, and when you win all LEDs will blink several times. There are sounds for the start of the game, when you place a crate on a target, when you remove a crate from a target, when you hit a wall and when you win. When you win there will also be a splash screen telling you that you've won. 
+\subsection{Feedback}There are sounds and LEDs to help you understand the game play better through audiovisual feedback. The LEDs show how many crates you have left in the game, and when you win all LEDs will blink several times to emphasize your epic win.
 
-In regards to the game play we have movement in 4 four directions, the ability to push crates, disability to walk through walls, undo and redo. 
+\subsection{Sounds}There are sounds for the start of the game, when you place a crate on a target, when you remove a crate from a target, when you hit a wall and when you win. When you win there will also be a splash screen telling you that you've won. 
 
-Technically the resulting game is written in C code on top of a linux operating system. To manage the LEDs and buttons we have written two corresponding linux drivers that operates as interfaces between the STK1000 development board and linux. 
+\subsection{Game play}
+In regards to the game play we have movement in four directions, the ability to push crates, disability to walk through walls, and the ability to undo and redo. 
+
+\subsection{Technical aspects}Technically the resulting game is written in C code on top of a linux operating system. To manage the LEDs and buttons we have written two corresponding linux drivers that operates as interfaces between the STK1000 development board and linux. 
 
 
 \section{Tests}
-\paragraph{Description}
+\subsection{Description}
 
-We've created a few test scenarios in order to test different aspects of our game functionality. The tests were conducted by a person interacting with the switches and looking at the LCD screen, wearing a headset. Another person logged the results of the test. The main equipment was the STK1000 development board and a headset with the main focus on the LCD screen. The jumpers of the board were set as specified in the compendium (section 4.2) \cite{komp}. The GPIO was set up with both LEDs and switches connected to B as follows: LEDs on 0-7, switches on 8-15. 
-
-
+We've created a few test scenarios in order to test different aspects of our game functionality. The tests were conducted by a person interacting with the switches and looking at the LCD screen, wearing a headset. Another person logged the results of the test. The main equipment was the STK1000 development board and a headset with the main focus on the LCD screen. The jumpers of the board were set as specified in the compendium (section 4.2) \cite{komp}. The GPIO was set up with both LEDs and switches connected to B as follows: LEDs on 8-15, switches on 0-7. 
 
 
 
-\paragraph{Results}
+
+
+\subsection{Results}
 Below is a table of the different tests we ran, the preconditions and the results. 
 
-Here we checked whether a sound would play without any interruptions during a switch press (both up and down). Releasing the button provides a new interrupt, which calls the button interrupt routine of our program, which further delays the waiting sound sample, causing a noticeable effect on the sound.
 
 \begin{center}
 \footnotesize
@@ -170,19 +172,22 @@ Here we checked whether a sound would play without any interruptions during a sw
 
 \hline Steady-state test & Power is on and the main program is running & The board has been programmed and powered on & The board is powered and no LEDs or sounds should be on & Passed \\
 
-\hline SFX1 & The first SFX plays & The main program is running & \emph{SFX1} plays once after \emph{SW7} is pressed. \emph{LED7} should be turned on & Passed \\
+\hline Left & Player is moved left & A level is loaded and there is free space to the left of the player & Player moves to the left when \emph{SW7} is pressed.  & Passed \\
 
-\hline SFX2 & The first SFX plays & The main program is running & \emph{SFX2} plays once after \emph{SW6} is pressed. \emph{LED6} should be turned on & Passed \\
+\hline Down & Player is moved down & A level is loaded and there is free space beneath the player & Player moves down when \emph{SW6} is pressed.  & Passed \\
 
-\hline SFX3 & The first SFX plays & The main program is running & \emph{SFX3} plays once after \emph{SW5} is pressed. \emph{LED5} should be turned on & Passed \\ 
+\hline Up & Player is moved up & A level is loaded and there is free space above the player & Player moves up when \emph{SW5} is pressed.  & Passed \\
 
-\hline Intro theme & The intro theme plays & The main program is running & The intro theme plays once after \emph{SW4} is pressed. \emph{LED4} should be turned on & Passed \\
+\hline Right & Player is moved right & A level is loaded and there is free space to the right of the player & Player moves to the right when \emph{SW4} is pressed.  & Passed \\
 
-\hline Bouncing & Any sound should only be played once per press of switch & Press down any switch from \emph{SW7} to \emph{SW4} and let it go & The sound should finish playing without any interruptions & Failed \\
+\hline Undo & The last move is undone & At least one move is made & The last move is undone when \emph{SW3} is pressed.  & Passed \\
 
-\hline Change sound & Play a sound while another sound is already playing & A switch has been pressed and a sound is playing. While playing another switch has been pressed & The sound of the newly pressed switched should be playing & Passed \\ 
+\hline Redo & The last undo is undone & Undo must have been done as the previous move. & The undone move is redone when \emph{SW2} is pressed.  & Passed \\
 
-\hline Stop & Stop playing sounds when pressing any switch from \emph{SW3} to \emph{SW0} & Press any switch from \emph{SW3} to \emph{SW0} while sound is playing & The sound should stop playing & Passed \\ 
+\hline Reset level & The loaded level is reset & A level must have been loaded and the game may or may not have been initialized & Level is reset when \emph{SW1} is pressed.  & Passed \\
+
+\hline Return to main menu & Main menu is displayed & Sokoban is loaded?? & Main menu is displayed when \emph{SW0} is pressed.  & Passed \\
+
 
 \hline 
 \end{tabular} 
@@ -191,10 +196,13 @@ Here we checked whether a sound would play without any interruptions during a sw
 \newpage
 
 \section{Evaluation of assignment}
-This assignment was more demanding yet also more fun than the first assignment. The learning curve was a bit harder as not all of us had coded much in C before, but it was a nice opportunity to learn.
+
+We found it interesting to learn more about the inner workings of linux and how a device driver is written. 
+
+We had quite a lot of problems with getting linux to work. This was much due to the guide we got didn't really seem to work, at least no one that we talked to made it work through following that guide. Another group posted a different guide that we managed to get working. But in general this wasted much time for us and should be improved. 
 
 \section{Conclusion}
-We learned how to generate and play different sounds in C. This will be helpful when we start coding the next assignment. In the end we have four different sounds. Three short sound effects and one melody. 
+%We learned how to generate and play different sounds in C. This will be helpful when we start coding the next assignment. In the end we have four different sounds. Three short sound effects and one melody. 
 
 \footnotesize{  % This makes the Reference items print in footnotesize fonts
 \begin{thebibliography}{N}
