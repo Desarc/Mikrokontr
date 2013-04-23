@@ -1,5 +1,4 @@
 #include "sokoban_core.h"
-#include "../sound/sound.h"
 
 volatile char path[100];
 volatile char undone_moves[100];
@@ -48,9 +47,7 @@ void move(char dir, int undo, int redo) {
 		if (!undo && !replaying) {
 			updatePath(dirX, dirY, box);
 		}
-		paintLevel();
 	}
-	else play_sound(HIT_WALL);
 	if (getRemaining() == 0) {
 		displayWin();
 		playing = 0;

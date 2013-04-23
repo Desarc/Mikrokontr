@@ -24,6 +24,12 @@ int main (int argc, char *argv[]) {
 
 	/* game loop */
 	playGame();
+
+	/* close all drivers */
+	close_sound_driver();
+	close_buttons_driver();
+	close_led_driver();
+	close_screen_driver();
 }
 
 void playGame(void) {
@@ -60,11 +66,6 @@ void playGame(void) {
 			exit = 1;
 		}
 	}
-	/* close all drivers */
-	close_sound_driver();
-	close_buttons_driver();
-	close_led_driver();
-	close_screen_driver();
 }
 
 int mainMenu(void) {

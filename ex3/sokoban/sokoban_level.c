@@ -1,6 +1,7 @@
 #include "sokoban_level.h"
 #include "sokoban_leveldefs.h"
 #include "../leds/leds_control.h"
+#include "../sound/sound.h"
 
 volatile int posX, posY, dimX, dimY;
 volatile int remaining;
@@ -44,6 +45,10 @@ char getTile(int x, int y) {
 	reset_level_ptr();
 	int pos = (y*dimX)+x;
 	level_ptr += pos;
+	char tile = *level_ptr;
+	it (tile == WALL) {
+		play_sound(HIT_WALL);
+	}
 	return *level_ptr;
 }
 
@@ -62,11 +67,15 @@ int getRemaining(void) {
 void increaseRemaining(void) {
 	remaining++;
 	increment_leds();
+	play_sound(ONE_MORE);
 }
 
 void decreaseRemaining(void) {
 	remaining--;
 	decrement_leds();
+	if (getRemaining() > 0) {
+		play_sound(ONE_LESS);	
+	}
 }
 
 /* select level, load it to the array, and initialize fields */
@@ -135,10 +144,10 @@ void loadLevel(int num) {
 		else if (tile == PLAYER_ON_TARGET) {
 			posX = i%dimY;
 			posY = (int)(i/dimY);
-			increaseRemaining();
+			remaining++;
 		}
 		else if (tile == TARGET) {
-			increaseRemaining();
+			remaining--;
 		}
 	}
 	reset_level_ptr();
