@@ -50,10 +50,9 @@ int moveTo(int fromX, int fromY, int toX, int toY) {
 			decreaseRemaining();
 		}
 	}
-	else {
+	else if (next == BLANK) {
 		setTile(toX, toY, PLAYER);
 	}
-	paintLevel();
 	return box;
 }
 
@@ -89,6 +88,5 @@ void undoBox(char dir) {
 			setTile(newX, newY, BOX);
 		}	
 	}
-	paintLevel();
 }
 

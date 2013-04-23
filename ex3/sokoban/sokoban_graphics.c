@@ -52,6 +52,7 @@ void playGame(void) {
 		int cmd = read_button_status();
 		if (cmd != NONE) {
 			performAction(cmd);
+			paintLevel();
 			debounce();
 		}
 	}

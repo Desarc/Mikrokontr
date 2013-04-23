@@ -152,7 +152,6 @@ void loadLevel(int num) {
 	}
 	reset_level_ptr();
 	reset_grid_ptr();
-	paintLevel();
 }
 
 int getX(void) {
