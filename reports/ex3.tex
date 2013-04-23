@@ -22,7 +22,7 @@ language=C
 \date{{Norwegian University of Science and Technology \\
 TDT4258 Energy Efficient Computer Design \\}
 \today}
- 
+
 \begin{document}
 \maketitle
 
@@ -53,20 +53,20 @@ First off we thought maybe this file had to be a kernel module as well, but we s
 \emph{linux compiling, image to sd, previous assignment, driver(led and button), framebuffer, porting of sokoban to C, sound, generated sounds, }
 
 \subsection{Game}
-\begin{figure}[h]
+\begin{figure}
 \centering
 \includegraphics{images/sokoban.png}
-\caption{An example implementation of Sokoban by Borgar Porsteinsson \cite{sokobanscreen}.}
+\caption{A screenshot of another implementation of Sokoban by Borgar Porsteinsson \cite{sokobanscreen}.}
 \label{fig:sokobanimage}
 \end{figure}
 
 \subsubsection{Sokoban}
-The game we chose to implement was a simple top-down puzzle game called \textit{Sokoban}\cite{sokoban}. The point of the game is for the player to push boxes onto marked goal squares. The levels are small maps confined by walls which cannot be walked through. The puzzle is solved when all the boxes are on the goal squares. We had some previous experience of implementing this game in Java in the course TDT4100: Object Oriented Programming. We therefore chose to port it to C.
+The game we chose to implement was a simple top-down puzzle game called \textit{Sokoban}\cite{sokoban}. The point of the game is for the player to push boxes onto marked goal squares. The levels are small maps confined by walls which cannot be walked through. The puzzle is solved when all the boxes are on the goal squares. We had some previous experience of implementing this game in Java in the course TDT4100: Object Oriented Programming. We therefore chose to port it to C. See figure~\ref{fig:sokobanimage} for a screenshot of another implementation of Sokoban.
 
 \subsubsection{Levels}
-The levels are defined by it's dimensions and an array of characters of the different elements. For more information see the level format page on Sokoban Wiki \cite{sokobanlevel}. See table \ref{tab:levelformat} for the level format we use.
+The levels are defined by it's dimensions and an array of characters of the different elements. For more information see the level format page on Sokoban Wiki \cite{sokobanlevel}. See table \ref{tab:levelformat} for the level format we use. The first level is defined in figure \ref{fig:leveldef} and is the simplest solvable level. The only move available is to push the box to the left.
 
-\begin{table}[h]
+\begin{table}
 \centering
 \begin{tabular}{|l|l|}
 \hline \textbf{Level element} & \textbf{Character} \\ 
@@ -83,8 +83,7 @@ The levels are defined by it's dimensions and an array of characters of the diff
 \label{tab:levelformat}
 \end{table}
 
-The first level is defined below in figure \ref{fig:leveldef}. It is the simplest solvable level where the box just has to pushed to the left.
-\begin{figure}[h]
+\begin{figure}
 \begin{lstlisting}
 // From sokoban_leveldefs.h
 #define level1dimX 5
@@ -101,8 +100,8 @@ char level1[] = "######@$.######";
 \end{figure}
 
 \subsubsection{Controls}
-The game can 
-\begin{table}[h]
+The controls of the game are listed in table~\ref{tab:gamecontrols}. 
+\begin{table}
 \centering
 \begin{tabular}{|l|l|}
 \hline \textbf{Switch} & \textbf{Action} \\ 
@@ -120,26 +119,21 @@ The game can
 \label{tab:gamecontrols}
 \end{table}
 
-\subsubsection{Code}
-\begin{lstlisting}
-void button_isr(void) {
-\end{lstlisting}
+\subsection{Drivers}
+\subsubsection{LEDs}
 
-\begin{center}
-\centering
-\includegraphics[scale=0.75]{images/lucid_chart.png}
-\linebreak
-Figure 1: State Diagram of the program
-\end{center}
+\subsubsection{Buttons}
 
-\newpage
+
 
 \subsection*{Debugging}
+%State diagrams
+
+
 
 %Here is a screenshot (Figure 2) showing us debugging our \emph{generateTriangle} function which generates triangle sound wave samples. More specifically we check that the values we get from each part of our (complex) mathematical expression are valid. 
 
 \begin{center}
-
 \includegraphics{images/debugsmall.png}
 Figure 2: Debugging the \emph{generateTriangle} function
 \end{center}

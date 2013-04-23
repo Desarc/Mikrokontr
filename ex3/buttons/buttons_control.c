@@ -4,7 +4,6 @@
 #include "unistd.h"
 #include "fcntl.h"
 
-
 int fd_buttons = 0;
 volatile int button_status;
 
@@ -28,7 +27,6 @@ void debounce(void) {
 	}
 }
 
-
 void open_buttons_driver(void) {
 	/* open the driver file for reading and writing */
 	fd_buttons = open("/dev/buttons", O_RDWR);
@@ -39,8 +37,6 @@ void open_buttons_driver(void) {
     	printf("The button device was opened successfully.\n");
 }
 
-
 void close_buttons_driver(void) {
     	close(fd_buttons);
 }
-
