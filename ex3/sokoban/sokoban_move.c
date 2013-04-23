@@ -50,7 +50,9 @@ int moveTo(int fromX, int fromY, int toX, int toY) {
 		else if (newMovablePos == TARGET) {
 			setTile(newMovableX, newMovableY, BOX_ON_TARGET);
 			decreaseRemaining();
-			play_sound(ONE_LESS);
+			if (getRemaining() > 0) {
+				play_sound(ONE_LESS);	
+			}
 		}
 	}
 	else {
