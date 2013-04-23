@@ -157,7 +157,12 @@ Figure 2: Debugging the \emph{generateTriangle} function
 \end{center}
 
 \section{Results}
-%The result of the exercise is that we coded a single program in C which generates and plays four different sounds when different switches (\emph{SW7} to \emph{SW4}) are pressed. At the start of the program it generates tones (\emph{A4} to \emph{C7}) based on the sine and triangle waves. Then once it gets an interrupt from a switch it plays the first sample of that switch whereafter the ABDAC generates an interrupt which plays the next sample until it is finished.
+This exercise resulted in a working sokoban game on the STK1000 development board displayed. The game is played by using the buttons as controllers to move around in the game which is displayed on the LCD screen. In addition to a general "arrow key" setup, there is also a possibility to undo and redo with the buttons. 
+
+There are sounds and LEDs to help you understand the game play better through audiovisual feedback. The LEDs show how many crates you have left in the game, and when you win all LEDs will blink several times. There are sounds for the start of the game, when you place a crate on a target, when you remove a crate from a target, when you hit a wall and when you win. When you win there will also be a splash screen telling you that you've won. 
+
+Technically the resulting game is written in C code on top of a linux operating system. To manage the LEDs and buttons we have written two correspondig linux drivers that operates as interfaces between the STK1000 development board and linux. 
+
 
 \section{Tests}
 \paragraph{Description}
