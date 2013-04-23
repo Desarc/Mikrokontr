@@ -45,7 +45,7 @@ int main (int argc, char *argv[]) {
 		}
 		
 	}
-	stop_looping();
+	kill_sound_process();
 	/* press button 0 to exit program */
 	/* (safeguard to avoid forked processes writing to drivers after they close) */
 	int exit = 0;

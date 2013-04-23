@@ -18,27 +18,28 @@
 char one_less[SAMPLES_1S];
 int one_less_size;
 char *one_less_pos;;
-char *one_less_counter;
+//char *one_less_counter;
 char one_more[SAMPLES_1S];
 int one_more_size;
 char *one_more_pos;;
-char *one_more_counter;
+//char *one_more_counter;
 char hit_wall[SAMPLES_1S];
 int hit_wall_size;
 char *hit_wall_pos;;
-char *hit_wall_counter;
+//char *hit_wall_counter;
 char victory[SAMPLES_8S];
 int victory_size;
 char *victory_pos;
-char *victory_counter;
+//char *victory_counter;
 char intro[SAMPLES_8S];
 int intro_size;
 char *intro_pos;
-char *intro_counter;
+//char *intro_counter;
 
 int fd_dsp;
 
-int active_sound_size;
+//int active_sound_size;
+char *active_sound_size;
 int frag_size;
 char *next_ptr;
 char *looping_ptr;
@@ -52,30 +53,33 @@ void play_sound(int code) {
 	
 	if (code == ONE_LESS && *one_less_pos == 255) {
 		*one_less_pos = activate_sound(one_less, one_less_size);
-		*one_less_counter = 0;
+		//*one_less_counter = 0;
 	}
 	else if (code == ONE_MORE && *one_more_pos == 255) {
 		*one_more_pos = activate_sound(one_more, one_more_size);
-		*one_more_counter = 0;
+		//*one_more_counter = 0;
 	}
 	else if (code == HIT_WALL && *hit_wall_pos == 255) {
 		*hit_wall_pos = activate_sound(hit_wall, hit_wall_size);
-		*hit_wall_counter = 0;
+		//*hit_wall_counter = 0;
 	}
 	else if (code == MUSIC && *intro_pos == 255) {
 		//clear_sound();
+		decompose_int(active_sound_size, intro_size);
 		*intro_pos = activate_sound(intro, intro_size);
-		*intro_counter = 0;
+		//*intro_counter = 0;
 	}
 	else if (code == VICTORY && *victory_pos == 255) {
 		//clear_sound();
+		decompose_int(active_sound_size, victory_size);
 		*victory_pos = activate_sound(victory, victory_size);
-		*victory_counter = 0;
+		//*victory_counter = 0;
 	}
 	else if (code == INTRO && *intro_pos == 255) {
 		//clear_sound();
+		decompose_int(active_sound_size, intro_size);
 		*intro_pos = activate_sound(intro, intro_size);
-		*intro_counter = 0;
+		//*intro_counter = 0;
 	}
 	
 }
@@ -83,15 +87,15 @@ void play_sound(int code) {
 void stop_sound(int code) {
 	if (code == ONE_LESS && *one_less_pos != 255) {
 		*one_less_pos = deactivate_sound(one_less, one_less_size, *one_less_pos);
-		*one_less_counter = 255;
+		//*one_less_counter = 255;
 	}
 	else if (code == ONE_MORE && *one_more_pos != 255) {
 		*one_more_pos = deactivate_sound(one_more, one_more_size, *one_more_pos);
-		*one_more_counter = 255;
+		//*one_more_counter = 255;
 	}
 	else if (code == HIT_WALL && *hit_wall_pos != 255) {
 		*hit_wall_pos = deactivate_sound(hit_wall, hit_wall_size, *hit_wall_pos);
-		*hit_wall_counter = 255;
+		//*hit_wall_counter = 255;
 	}
 	else if (code == MUSIC && *intro_pos != 255) {
 		clear_sound();
@@ -121,7 +125,7 @@ char activate_sound(char *sound_array_ptr, int size) {
 		sound_array_ptr++;
 		/* wrap around */
 		if ((long)active_sound_ptr > sound_addr_end) {
-			active_sound_ptr -= active_sound_size;
+			active_sound_ptr = (char *)sound_addr_start;
 		}
 	}
 	return offset;
@@ -141,13 +145,13 @@ char deactivate_sound(char *sound_array_ptr, int size, char offset) {
 		sound_array_ptr++;
 		/* wrap around */
 		if ((long)active_sound_ptr > sound_addr_end) {
-			active_sound_ptr = sound_addr;
+			active_sound_ptr = (char*)sound_addr_start;
 		}
 	}
 	return -1;
 }
 
-void stop_looping(void) {
+void kill_sound_process(void) {
 	*looping_ptr = 0;
 }
 
@@ -167,7 +171,16 @@ void loop_sound(void) {
 }
 
 void deactivate_expired_sounds(int offset) {
-	char check = *one_less_counter;
+	if (offset == *one_less_pos) {
+		stop_sound(ONE_LESS);
+	}
+	if (offset == *one_more_pos) {
+		stop_sound(ONE_MORE);
+	}
+	if (offset == *hit_wall_pos) {
+		stop_sound(HIT_WALL);
+	}
+	/*char check = *one_less_counter;
 	if (check == N_OF_FRAGS-1) {
 		stop_sound(ONE_LESS);
 	}
@@ -187,7 +200,7 @@ void deactivate_expired_sounds(int offset) {
 	}
 	else if (check != 255) {
 		*hit_wall_counter += 1;
-	}
+	}*/
 }
 
 void load_sokoban_sounds(void) {
@@ -202,18 +215,42 @@ void load_sokoban_sounds(void) {
 
 
 void clear_sound(void) {
+	char *active_sound_ptr = sound_addr;
+	int size = build_int(active_sound_size);
 	int i;
-	for (i=0;i<active_sound_size;i++) {
+	for (i=0;i<size;i++) {
 		*active_sound_ptr = 0;
 		active_sound_ptr++;
 	}
 }
 
+int build_int(char *bytes) {
+	int num = *bytes << 24;
+	bytes++;
+	num += *bytes << 16;
+	bytes++;
+	num += *bytes << 8;
+	bytes++;
+	num += *bytes;
+	return num;
+}
+
+void decompose_int(char *bytes, int data) {
+	*bytes = data >> 24;
+	bytes++;
+	*bytes = data >> 16;
+	bytes++;
+	*bytes = data >> 8;
+	bytes++;
+	*bytes = data;
+}
+
 void map_shared_memory(void) {
-	active_sound_size = intro_size;
+	char bytes[4];
+	decompose_int(bytes, intro_size);
 	frag_size = intro_size/N_OF_FRAGS;
 
-	size_t length_sound = active_sound_size;
+	size_t length_sound = intro_size;
 	off_t offset = 0;
 	int prot = (PROT_READ | PROT_WRITE );
 	int flags = MAP_SHARED;
@@ -228,11 +265,14 @@ void map_shared_memory(void) {
 		printf("File seek error ocurred. Exiting program.\n");
 		exit(0);
 	}
-	write(fd_sound, active_sound_ptr, length_sound);
 	
 	/* data is next, looping, one_less_counter, one_more_counter, hit_wall_counter, one_less_pos, one_more_pos, hit_wall_pos */
-	char counters[12] = {0,0,255,255,255,255,255,255,255,255,255,255};
-	size_t length_counters = 12;
+	//char counters[12] = {0,0,255,255,255,255,255,255,255,255,255,255};
+	//size_t length_counters = 12;
+
+	/* data is next, looping, one_less_pos, one_more_pos, hit_wall_pos, victory_pos, intro_pos, active_sound_size (decomposed into bytes) */
+	char counters[11] = {0,0,255,255,255,255,255, bytes[0],bytes[1],bytes[2],bytes[3]};
+	size_t length_counters = 11;
 	int fd_counters = -1;
 
 	fd_counters = open("./shared_counters", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
@@ -266,16 +306,17 @@ void map_shared_memory(void) {
 		}
 		next_ptr = counters_addr++;
 		looping_ptr = counters_addr++;
-		one_less_counter = counters_addr++;
-		one_more_counter = counters_addr++;
-		hit_wall_counter = counters_addr++;
-		victory_counter = counters_addr++;
-		intro_counter = counters_addr++;
+		//one_less_counter = counters_addr++;
+		//one_more_counter = counters_addr++;
+		//hit_wall_counter = counters_addr++;
+		//victory_counter = counters_addr++;
+		//intro_counter = counters_addr++;
 		one_less_pos = counters_addr++;
 		one_more_pos = counters_addr++;
 		hit_wall_pos = counters_addr++;
 		victory_pos = counters_addr++;
-		intro_pos = counters_addr;
+		intro_pos = counters_addr++;
+		active_sound_size = counters_addr;
 		loop_sound();
 		exit(1);
 	}
@@ -298,16 +339,17 @@ void map_shared_memory(void) {
 		}
 		next_ptr = counters_addr++;
 		looping_ptr = counters_addr++;
-		one_less_counter = counters_addr++;
-		one_more_counter = counters_addr++;
-		hit_wall_counter = counters_addr++;
-		victory_counter = counters_addr++;
-		intro_counter = counters_addr++;
+		//one_less_counter = counters_addr++;
+		//one_more_counter = counters_addr++;
+		//hit_wall_counter = counters_addr++;
+		//victory_counter = counters_addr++;
+		//intro_counter = counters_addr++;
 		one_less_pos = counters_addr++;
 		one_more_pos = counters_addr++;
 		hit_wall_pos = counters_addr++;
 		victory_pos = counters_addr++;
-		intro_pos = counters_addr;
+		intro_pos = counters_addr++;
+		active_sound_size = counters_addr;
 	}
 	printf("Shared sound data memory mapped.\n");
 }
