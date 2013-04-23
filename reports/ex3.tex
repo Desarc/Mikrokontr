@@ -49,9 +49,10 @@ First off we started out with trying to install linux on the STK1000 development
 
 Once we had linux up and running we started out with a simple "Hello world" program to verify that things were working. Now we started out with programming a driver for the LEDs. We sometimes thought we had found the solution, but we still hadn't figured it out correctly. We gave the LED driver a pause and started to communicate with the frame buffer in linux. 
 
-First off we thought maybe this file had to be a kernel module as well, but we soon understood that we needed access to quite a few libraries to make the memory mapping work. We started with generating a random bit values for the display and went on with more logical values, for example a third of the screen was made red. As we tried to read bit values from an image of the file format bitmap, we started to see that there were some errors in regards to how we read the file. After a lot of trial and error in addition to googling we finally managed to display the images properly. 
+First off we thought maybe this file had to be a kernel module as well, but we soon understood that we needed access to quite a few libraries to make the memory mapping work. We started with generating a random bit values for the display and went on with more logical values, for example a third of the screen was made red. As we tried to read bit values from an image of the file format bitmap, we started to see that there were some errors in regards to how we read the file. After a lot of trial and error in addition to googling we finally managed to display the image files properly. We organized the entire screen into a grid of 20 by 15 tiles built up of 16 by 16 pixels for each tile. This made it easy to map the \textit{charmap} to the images and render the levels on the LCD scren. It is also a fairly convenient size for the game when it comes to the variety of the sizes of each level.
 
-\emph{linux compiling, image to sd, previous assignment, driver(led and button), framebuffer, porting of sokoban to C, sound, generated sounds, }
+From the previous exercise we learnt how to handle sound in C which came in handy for the game sounds. We wanted the player to get good feedback through sound effects by telling the player when he does something right or wrong. Therefore we constructed a negative sound when you hit the wall or removed a crate from a target and a more positive sound when you push a crate on a target. 
+
 
 \subsection{Game}
 \subsubsection{Sokoban}
