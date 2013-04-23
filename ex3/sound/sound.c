@@ -63,14 +63,17 @@ void play_sound(int code) {
 		*hit_wall_counter = 0;
 	}
 	else if (code == MUSIC && *intro_pos == 255) {
+		//clear_sound();
 		*intro_pos = activate_sound(intro, intro_size);
 		*intro_counter = 0;
 	}
 	else if (code == VICTORY && *victory_pos == 255) {
+		//clear_sound();
 		*victory_pos = activate_sound(victory, victory_size);
 		*victory_counter = 0;
 	}
 	else if (code == INTRO && *intro_pos == 255) {
+		//clear_sound();
 		*intro_pos = activate_sound(intro, intro_size);
 		*intro_counter = 0;
 	}
@@ -91,16 +94,19 @@ void stop_sound(int code) {
 		*hit_wall_counter = 255;
 	}
 	else if (code == MUSIC && *intro_pos != 255) {
-		*intro_pos = deactivate_sound(intro, intro_size, *intro_pos);
-		*intro_counter = 255;
+		clear_sound();
+		//*intro_pos = deactivate_sound(intro, intro_size, *intro_pos);
+		//*intro_counter = 255;
 	}
 	else if (code == VICTORY && *victory_pos != 255) {
-		*victory_pos = deactivate_sound(victory, victory_size, *victory_pos);
-		*victory_counter = 255;
+		clear_sound();
+		//*victory_pos = deactivate_sound(victory, victory_size, *victory_pos);
+		//*victory_counter = 255;
 	}
 	else if (code == INTRO && *intro_pos != 255) {
-		*intro_pos = deactivate_sound(intro, intro_size, *intro_pos);
-		*intro_counter = 255;
+		clear_sound();
+		//*intro_pos = deactivate_sound(intro, intro_size, *intro_pos);
+		//*intro_counter = 255;
 	}
 }
 
@@ -194,17 +200,18 @@ void load_sokoban_sounds(void) {
 	printf("Sokoban sounds loaded.\n");
 }
 
-void map_shared_memory(void) {
-	active_sound_size = intro_size;
-	frag_size = intro_size/N_OF_FRAGS;
-	char active_sound[SAMPLES_8S];
-	char *active_sound_ptr = active_sound;
+
+void clear_sound(void) {
 	int i;
-	/* writing initial empty sound data */
 	for (i=0;i<active_sound_size;i++) {
 		*active_sound_ptr = 0;
 		active_sound_ptr++;
 	}
+}
+
+void map_shared_memory(void) {
+	active_sound_size = intro_size;
+	frag_size = intro_size/N_OF_FRAGS;
 
 	size_t length_sound = active_sound_size;
 	off_t offset = 0;
@@ -246,7 +253,7 @@ void map_shared_memory(void) {
 		/* mapping sound file */
 		sound_addr = mmap(NULL, length_sound, prot, flags, fd_sound, offset);
 		if (sound_addr <= 0) {
-			printf("Child memory mapping error ocurred. Exiting program.\n");
+			printf("Child memory mapping error of sample data ocurred. Exiting program.\n");
 			exit(0);
 		}
 		sound_addr_end = (long)sound_addr+length_sound;
@@ -254,7 +261,7 @@ void map_shared_memory(void) {
 		/* mapping counter file */
 		counters_addr = mmap(NULL, length_counters, prot, flags, fd_counters, offset);
 		if (counters_addr <= 0) {
-			printf("Parent memory mapping error ocurred. Exiting program.\n");
+			printf("Parent memory mapping error of counters ocurred. Exiting program.\n");
 			exit(0);
 		}
 		next_ptr = counters_addr++;
@@ -278,7 +285,7 @@ void map_shared_memory(void) {
 		/* mapping sound file */
 		sound_addr = mmap(NULL, length_sound, prot, flags, fd_sound, offset);
 		if (sound_addr <= 0) {
-			printf("Parent memory mapping error ocurred. Exiting program.\n");
+			printf("Parent memory mapping error of sample data ocurred. Exiting program.\n");
 			exit(0);
 		}
 		sound_addr_end = (long)sound_addr+length_sound;
@@ -286,7 +293,7 @@ void map_shared_memory(void) {
 		/* mapping counter file */
 		counters_addr = mmap(NULL, length_counters, prot, flags, fd_counters, offset);
 		if (counters_addr <= 0) {
-			printf("Parent memory mapping error ocurred. Exiting program.\n");
+			printf("Parent memory mapping error of counters ocurred. Exiting program.\n");
 			exit(0);
 		}
 		next_ptr = counters_addr++;

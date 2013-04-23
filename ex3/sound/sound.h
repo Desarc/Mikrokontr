@@ -13,6 +13,7 @@ void play_sound(int code);
 void stop_sound(int code);
 static char activate_sound(char *sound_array_ptr, int size);
 static char deactivate_sound(char *sound_array_ptr, int size, char offset);
+void clear_sound(void);
 void deactivate_expired_sounds(int offset);
 void load_sokoban_sounds(void);
 static void loop_sound();
