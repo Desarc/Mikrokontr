@@ -1,5 +1,5 @@
 MODULE = sokoban
-ADDR = 129.241.103.251:/root
+ADDR = 129.241.103.209:/root
 
 default:
 	rm -rf *.o
@@ -16,7 +16,6 @@ default:
 .PHONY : send
 send:
 	$(shell scp ${MODULE} root@${ADDR})
-
 
 .PHONY : clean
 clean:

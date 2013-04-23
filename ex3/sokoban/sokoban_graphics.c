@@ -20,7 +20,7 @@ int main (int argc, char *argv[]) {
 	/* initialize game and screen */
 	clear_screen();
 	reset_leds();
-	displaySplash();
+	display_image(SPLASH);
 	printf("\nWELCOME TO SOKOBAN!\n");
 
 	/* level select */
@@ -36,6 +36,7 @@ int main (int argc, char *argv[]) {
 	}
 	init_game(choice);
 	play_sound(WELCOME);
+	clear_screen();
 	paintLevel();
 	debounce();
 
@@ -86,6 +87,7 @@ void performAction(int cmd) {
 	else if (cmd == BUTTON3) undoLastMove();
 	else if (cmd == BUTTON2) redoMove();
 	else if (cmd == BUTTON1) {
+		clear_screen();
 		reset_leds();
 		reset();		
 	}
@@ -106,11 +108,6 @@ void paintLevel(void) {
 			level_ptr++;
 		}
 	}
-}
-
-void displaySplash(void) {
-	display_image(SPLASH);
-	blink_leds();
 }
 
 void displayWin(void) {

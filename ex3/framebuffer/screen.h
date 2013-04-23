@@ -2,7 +2,7 @@
 #define SCREEN_H
 
 #define WIN 0
-#define SPLASH 0
+#define SPLASH 1
 
 void open_screen_driver(void);
 void close_screen_driver(void);

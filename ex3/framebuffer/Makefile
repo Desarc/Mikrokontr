@@ -6,12 +6,10 @@
 
 # navn på kjernemodul (navnet på C-fila men uten ".c")
 MODULE = screen
-ADDR = 129.241.103.251:/root
-
+ADDR = 129.241.103.222:/root
 
 default:
 	avr32-linux-gcc ${MODULE}.c -o ${MODULE}
-
 	
 .PHONY : send
 send:
@@ -20,7 +18,6 @@ send:
 .PHONY : sendimages
 sendimages:
 	$(shell scp *.bmp root@${ADDR})
-
 
 .PHONY : clean
 clean:

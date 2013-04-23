@@ -22,12 +22,12 @@ char hit_wall[SAMPLES];
 int hit_wall_size;
 char victory[MAX_SOUND_SAMPLES];
 int victory_size;
-
+char intro[MAX_SOUND_SAMPLES];
+int intro_size;
 
 int fd_dsp;
 
 void play_sound(int code) {
-
 	/* forking process to avoid blocking while sound is playing */
 	pid_t childPID = fork();
 	
@@ -37,25 +37,24 @@ void play_sound(int code) {
 		else if (code == ONE_MORE) write_sound_to_device(one_more, one_more_size);
 		else if (code == HIT_WALL) write_sound_to_device(hit_wall, hit_wall_size);
 		else if (code == VICTORY) write_sound_to_device(victory, victory_size);
+		else if (code == INTRO) write_sound_to_device(intro, intro_size);
 		exit(1);
 	}
 }
 
 void load_sokoban_sounds(void) {
-	
 	/* load all sokoban sounds from file */
 	welcome_size = load_sound_from_file("dudu.wav", welcome);
 	one_less_size = load_sound_from_file("on.wav", one_less);
 	one_more_size = load_sound_from_file("off.wav", one_more);
 	hit_wall_size = load_sound_from_file("wall.wav", hit_wall);
 	victory_size = load_sound_from_file("soundfile.wav", victory);
+//	intro_size = load_sound_from_file("intro.wav", intro);
 	printf("Sokoban sounds loaded.\n");
-
 }
 
 /* load sound samples from a file to an array */
 int load_sound_from_file(char file_path[], char *sound_array_ptr) {
-	
 	FILE *streamIn;
 	streamIn = fopen(file_path, "r");
 	if (streamIn == (FILE *)0){
@@ -79,7 +78,6 @@ int load_sound_from_file(char file_path[], char *sound_array_ptr) {
 
 /* write sound samples to sound device */
 void write_sound_to_device(char *sound_array_ptr, int size) {
-	
 	int ready = -1;
 	while (!ready) {
 		ready = ioctl(fd_dsp, SOUND_PCM_SYNC, 0);
@@ -97,7 +95,6 @@ void write_sound_to_device(char *sound_array_ptr, int size) {
 }
 
 int open_sound_driver(void) {
-
 	/* open driver file */
 	fd_dsp = open("/dev/dsp", O_RDWR);
 	
@@ -119,7 +116,5 @@ int open_sound_driver(void) {
 }
 
 void close_sound_driver(void) {
-
 	close(fd_dsp);
-
 }

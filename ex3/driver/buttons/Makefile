@@ -6,7 +6,7 @@
 
 # navn på kjernemodul (navnet på C-fila men uten ".c")
 MODULE = buttons
-ADDR = 129.241.103.251:/root
+ADDR = 129.241.103.222:/root
 
 ifneq ($(KERNELRELEASE),)
 obj-m := ${MODULE}.o
