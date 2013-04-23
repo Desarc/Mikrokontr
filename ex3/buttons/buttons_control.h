@@ -1,6 +1,7 @@
 #ifndef BUTTONS_CONTROL_H
 #define BUTTONS_CONTROL_H
 
+// define which button is pressed when reading from the driver
 #define BUTTON7 127
 #define BUTTON6 191
 #define BUTTON5 223
@@ -11,13 +12,10 @@
 #define BUTTON0 254
 #define NONE 255
 
-//int main (int argc, char *argv[]);
-
 int read_button_status(void);
 void open_buttons_driver(void);
 void close_buttons_driver(void);
 void debounce(void);
-
 
 #endif
 

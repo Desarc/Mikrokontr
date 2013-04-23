@@ -1,16 +1,13 @@
 #include "sokoban_core.h"
 #include "../sound/sound.h"
 
-
 volatile char path[100];
 volatile char undone_moves[100];
 volatile int current_level;
-
 volatile int path_length = 0;
 volatile int undone_length = 0;
 volatile int replaying = 0;
 volatile int playing = 1;
-
 volatile char *path_ptr = path;
 volatile char *undone_moves_ptr = undone_moves;
 	

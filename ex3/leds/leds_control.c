@@ -96,6 +96,7 @@ void write_to_led_driver(void) {
    	}
 }
 
+/* open buttons driver */
 void open_led_driver(void) {
 	/* open the driver file for reading and writing */
 	fd_leds = open("/dev/leds", O_RDWR);
@@ -106,10 +107,7 @@ void open_led_driver(void) {
     	printf("The LED device was opened successfully.\n");
 }
 
-
+/* close buttons driver */
 void close_led_driver(void) {
     	close(fd_leds);
 }
-
-
-

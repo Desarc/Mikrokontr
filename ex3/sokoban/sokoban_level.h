@@ -18,6 +18,4 @@ int getY(void);
 int getDimX(void);
 int getDimY(void);
 
-
 #endif
-

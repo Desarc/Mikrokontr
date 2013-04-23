@@ -31,7 +31,6 @@ char player_on_target_image[TILE_SIZE_16][3];
 char box_on_target_image[TILE_SIZE_16][3];
 
 void load_sokoban_images(void) {
-
 	/* load all sokoban images */
 	read_image_data("crate.bmp", &box_image[0][0], 16, 16);
 	read_image_data("player.bmp", &player_image[0][0], 16, 16);

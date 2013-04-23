@@ -1,6 +1,7 @@
 #ifndef LEDS_CONTROL_H
 #define LEDS_CONTROL_H
 
+// define the values of the leds for the driver
 #define LED7 0x400000
 #define LED6 0x0100
 #define LED5 0x0080
@@ -22,6 +23,4 @@ static void write_to_led_driver(void);
 void open_led_driver(void);
 void close_led_driver(void);
 
-
 #endif
-

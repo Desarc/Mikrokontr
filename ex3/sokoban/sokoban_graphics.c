@@ -33,7 +33,7 @@ void playGame(void) {
 	clear_screen();
 
 	/* level select */
-	int level = levelSelect();
+	int level = mainMenu();
 	init_game(level);
 	play_sound(WELCOME);
 	clear_screen();
@@ -67,7 +67,7 @@ void playGame(void) {
 	close_screen_driver();
 }
 
-int levelSelect(void) {
+int mainMenu(void) {
 	/* level select */
 	printf("Please choose a level.\n\n");
 	play_sound(INTRO);
@@ -83,6 +83,7 @@ int levelSelect(void) {
 	}
 }
 
+/* main menu button actions */
 int chooseLevel(int cmd) {
 	int choice;
 	if (cmd == BUTTON0) choice = 1;
@@ -95,6 +96,7 @@ int chooseLevel(int cmd) {
 	return choice;
 }
 
+/* in-game button actions */
 void performAction(int cmd) {
 	if (cmd == BUTTON5) move('u', 0, 0);
 	else if (cmd == BUTTON7) move('l', 0, 0);
@@ -103,11 +105,13 @@ void performAction(int cmd) {
 	else if (cmd == BUTTON3) undoLastMove();
 	else if (cmd == BUTTON2) redoMove();
 	else if (cmd == BUTTON1) {
+		/* reset level */
 		clear_screen();
 		reset_leds();
 		reset();		
 	}
 	else if (cmd == BUTTON0) {
+		/* go to main menu */
 		playGame();
 	}
 }

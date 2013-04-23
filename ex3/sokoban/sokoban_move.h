@@ -8,4 +8,3 @@ int moveTo(int fromX, int fromY, int toX, int toY);
 void undoBox(char dir);
 
 #endif
-

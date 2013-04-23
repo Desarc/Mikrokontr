@@ -16,9 +16,4 @@ void undoLastMove(void);
 void redoMove(void);
 int numberOfMoves();
 
-
-
-
-
 #endif
-

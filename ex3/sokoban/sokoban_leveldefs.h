@@ -13,9 +13,9 @@ char level2[] = "###  #.####*$ ##  @######";
 #define level3dimY 7
 char level3[] ="########.@ # ##$* $ ##   $ ## ..  ##  *  ########";
 
-#define level4dimX 14
-#define level4dimY 9
-char level4[] = "*###########*#           ##  ... ...  ##  *$$ $.$  ## $*+$ $*$$ ##  *$$ $.$  ##  ...  .   ##           #*###########*";
+#define level4dimX 8
+#define level4dimY 6
+char level4[] = "####    #  ###### .  $ ## $  .@####  ###  ####  ";
 
 #define level5dimX 8
 #define level5dimY 9
@@ -29,6 +29,4 @@ char level6[] = " ######### #   ##  # #       #### ###  ## $ @ # ###..* .#$# # $
 #define level7dimY 14
 char level7[] = "    #####      ## @ ##   ###  #  ### #   ###   # #$   #    # # ####### ### . ###   ##.$ * #  ####  .  #  ## ###  ###  #  #  ##### ## #      $  # ##  ###   #  ##########";
 
-
 #endif
-

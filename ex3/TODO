@@ -1,5 +1,5 @@
+fix framebuffer (images are painted slightly wrong)
+fix sound bug (occurs sometimes when pushing box)
 
-1. fix framebuffer (images are painted slightly wrong)
-2. fix sound bug (occurs sometimes when pushing box)
-3. fix song playing at exit
-4. fix level 1 not working
+pressing SW7 in title screen loads level 6996
+only levels working properly are levels 2 and 3.

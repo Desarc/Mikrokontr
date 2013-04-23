@@ -10,4 +10,3 @@
 #define BOX_ON_TARGET '*'
 
 #endif
-
