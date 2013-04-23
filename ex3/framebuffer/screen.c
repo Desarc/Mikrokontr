@@ -20,6 +20,7 @@ int fbfd = 0;
 char *fbp = 0;
 
 char win_image[MAX_IMAGE_SIZE][3];
+char splash_image[MAX_IMAGE_SIZE][3];
 
 char box_image[TILE_SIZE_16][3];
 char player_image[TILE_SIZE_16][3];
@@ -40,6 +41,7 @@ void load_sokoban_images(void) {
 	read_image_data("playertarget.bmp", &player_on_target_image[0][0], 16, 16);
 	read_image_data("cratetarget.bmp", &box_on_target_image[0][0], 16, 16);
 	read_image_data("win.bmp", &win_image[0][0], MAX_HEIGHT, MAX_WIDTH);
+	read_image_data("splash.bmp", &splash_image[0][0], MAX_HEIGHT, MAX_WIDTH);
 	printf("Sokoban images loaded.\n");
 }
 
@@ -70,6 +72,8 @@ void display_image(int image) {
 	char *image_ptr;
 	if (image == WIN) {
 		image_ptr = &win_image[0][0];
+	} else if (image == SPLASH) {
+		image_ptr = &splash_image[0][0];
 	}
 	write_to_screen(image_ptr, 0, 0, MAX_HEIGHT, MAX_WIDTH);
 }

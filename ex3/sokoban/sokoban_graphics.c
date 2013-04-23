@@ -7,7 +7,6 @@
 volatile int completed = 0;
 
 int main (int argc, char *argv[]) {
-	
 	/* open all drivers */
 	open_screen_driver();
 	open_led_driver();
@@ -21,8 +20,11 @@ int main (int argc, char *argv[]) {
 	/* initialize game and screen */
 	clear_screen();
 	reset_leds();
+	displaySplash();
 	printf("\nWELCOME TO SOKOBAN!\n");
-	printf("Please choose level.\n\n");
+
+	/* level select */
+	printf("Please choose a level.\n\n");
 	int chosen = 0;
 	int choice;
 	while (!chosen) {
@@ -33,11 +35,12 @@ int main (int argc, char *argv[]) {
 		}
 	}
 	init_game(choice);
-	
 	play_sound(WELCOME);
 	paintLevel();
 	debounce();
-	/* busy waiting until a button is pushed */	
+
+	/* game loop */
+ 	/* busy waiting until a button is pushed */
 	while (!completed) {
 		int cmd = read_button_status();
 		if (cmd != NONE) {
@@ -105,10 +108,14 @@ void paintLevel(void) {
 	}
 }
 
+void displaySplash(void) {
+	display_image(SPLASH);
+	blink_leds();
+}
+
 void displayWin(void) {
 	completed = 1;
 	display_image(WIN);
 	blink_leds();
 	play_sound(VICTORY);
 }
-

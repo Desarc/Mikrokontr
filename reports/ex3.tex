@@ -27,8 +27,6 @@ TDT4258 Energy Efficient Computer Design \\}
 \maketitle
 
 \begin{abstract}
-
-
 In this assignment we write C code for an AVR microcontroller on linux. Through this assignment we aim to become more familiar with C coding for AVR32, linux and how to write a driver for linux. Our approach was to first replicate the features of the previous assignment, then we ..................
 \end{abstract}
 
@@ -52,90 +50,80 @@ Once we had linux up and running we started out with a simple "Hello world" prog
 
 First off we thought maybe this file had to be a kernel module as well, but we soon understood that we needed acceess to quite a few libraries to make the memory mapping work. We started with generating a random bit values for the display and went on with more logical values, for example a third of the screen was made red. As we tried to read bit values from an image of the file format bitmap, we started to see that there were some errors in regards to how we read the file. 
 
-From a previous course we had implemented sokoban in Java, so we figured this game would fit neatly for this exercise, thus we translated it into C. 
-
 \emph{linux compiling, image to sd, previous assignment, driver(led and button), framebuffer, porting of sokoban to C, sound, generated sounds, }
 
+\subsection{Game}
+\begin{figure}[h]
+\centering
+\includegraphics{images/sokoban.png}
+\caption{An example implementation of Sokoban by Borgar Porsteinsson \cite{sokobanscreen}.}
+\label{fig:sokobanimage}
+\end{figure}
 
+\subsubsection{Sokoban}
+The game we chose to implement was a simple top-down puzzle game called \textit{Sokoban}\cite{sokoban}. The point of the game is for the player to push boxes onto marked goal squares. The levels are small maps confined by walls which cannot be walked through. The puzzle is solved when all the boxes are on the goal squares. We had some previous experience of implementing this game in Java in the course TDT4100: Object Oriented Programming. We therefore chose to port it to C.
 
-%We started out by implementing the previous assignment that we had coded in assembly, only this time in C. This was an easy start for implementing an interrupt routine in C based on a program we had already designed. The primary challenge was making the buttons work with interrupts. Once we had a functional program with buttons and LEDs, we were ready to start working on the ABDAC. We started by simply trying to enable the ABDAC while still retaining the rest of the functionality. This proved troublesome at first, because interrupts from the buttons stopped working as soon as we enabled interrupts from the ABDAC. We decided to work around this by having the buttons and the ABDAC connected to different PIOs, which solved our problem. The next step was generating random noise and sending samples to the ABDAC. This proved to be rather trivial, we simply wrote the first sample to the ABDAC from the button interrupt routine, and then used interrupts from the ABDAC to retrieve the next sample (random in this case) and write it to the ABDAC.
+\subsubsection{Levels}
+The levels are defined by it's dimensions and an array of characters of the different elements. For more information see the level format page on Sokoban Wiki \cite{sokobanlevel}. See table \ref{tab:levelformat} for the level format we use.
 
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|}
+\hline \textbf{Level element} & \textbf{Character} \\ 
+\hline Wall & \# \\ 
+\hline Player & @ \\ 
+\hline Player on goal square & + \\ 
+\hline Box & \$ \\ 
+\hline Box on goal square & * \\ 
+\hline Goal square & . \\ 
+\hline Floor & (whitespace) \\ 
+\hline 
+\end{tabular}
+\caption{The level format.}
+\label{tab:levelformat}
+\end{table}
 
-
-
+The first level is defined below in figure \ref{fig:leveldef}. It is the simplest solvable level where the box just has to pushed to the left.
+\begin{figure}[h]
 \begin{lstlisting}
-void abdac_isr(void) {
-	(...)
-	/* Send sample to ABDAC */
-	dac->SDR.channel0 = (short) *current_wave_ptr;
-	dac->SDR.channel1 = (short) *current_wave_ptr;
-	sample_counter++;
-	current_wave_ptr++;
-}
+// From sokoban_leveldefs.h
+#define level1dimX 5
+#define level1dimY 3
+char level1[] = "######@$.######";
+
+// The level above looks like this when formatted.
+#####
+#@$.#
+#####
 \end{lstlisting}
+\caption{Definition of the first level.}
+\label{fig:leveldef}
+\end{figure}
 
-%Then we started working on the specific sounds we wanted our program to play. We wrote a function for mathematical generation of sine wave samples, and created sample vectors based on frequency levels of musical tones. 
+\subsubsection{Controls}
+The game can 
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|}
+\hline \textbf{Switch} & \textbf{Action} \\ 
+\hline SW7 & Move left \\ 
+\hline SW6 & Move down \\ 
+\hline SW5 & Move up \\ 
+\hline SW4 & Move right \\ 
+\hline SW3 & Undo move \\ 
+\hline SW2 & Redo move \\ 
+\hline SW1 & Reset level \\ 
+\hline SW0 & Display win screen \\ 
+\hline 
+\end{tabular}
+\caption{Game controls} 
+\label{tab:gamecontrols}
+\end{table}
 
-\begin{lstlisting}
-/* Generate the sample vector for ~one period of a pure sine wave */
-void generateSine(float f) {
-	set_sample_size(f);
-	int i;
-	for (i = 0; i < sample_size; i++) {
-		*current_wave_ptr = (int) floor(A*sin(f*(2*M_PI)*i/Fs));
-		current_wave_ptr++;
-	}
-\end{lstlisting}
-
-%We then added sample vectors together to create longer sounds, and tested this by writing samples to the ABDAC in the same way as with random noise.
+\subsubsection{Code}
 \begin{lstlisting}
 void button_isr(void) {
-	(...)
-	if (buttons == BUTTON7) {
-		current_sound_ptr = test_sound;
-		current_sound_tl_ptr = test_sound_tone_length;
-		sound_length = test_sound_length;
-		LED_VECTOR = LED7;
-	}
-	(...)
-	init_sound(); // Start playing the sound
-	(...)
-}
-/* Initialize sound counters and pointers, and send first sample to ABDAC */
-void init_sound(void) {
-	(...)
-	set_tone(*current_sound_ptr);
-	set_tone_length(*current_sound_ptr, *current_sound_tl_ptr);
-	dac->SDR.channel0 = (short) *current_wave_ptr;
-	dac->SDR.channel1 = (short) *current_wave_ptr;	
-	(...)
-}
 \end{lstlisting}
-
-%Through this we were able to play simple musical melodies. Because of our choice to play musical tones (up to a frequency of 2093Hz), we used the undivided clock frequency of OSC1 for the ABDAC in order to get the best possible sound quality (attempts to use the divided frequency screwed up our sounds). This meant the sampling frequency \textit{Fs} for our program would be 12MHz/256 ~ 47KHz. We also experimented with generating sawtooth, square, triangle and frequency modulated waves (also mathematically) to increase the diversity of our possible sounds, but ended up with only implementing the triangle waves in addition to pure sine. Finally we added tones with appropriate lengths together to make the microcontroller play the well known melody of "Tetris". 
-
-\begin{lstlisting}
-/* Frequency levels for various tones */
-#define C6 1046.50f
-#define D6 1174.66f
-#define E6 1318.51f
-
-/* Tone sample arrays */
-#define default_sample_size 100
-volatile int C6_wave[default_sample_size];
-volatile int D6_wave[default_sample_size];
-volatile int E6_wave[default_sample_size];
-
-/* Tone lengths (seconds) */
-#define E 0.125			// 1/8
-#define Q 0.25			// 1/4
-
-float tetris[] = { E6, B5, C6, D6, C6, B5, A5, A5, C6, E6, D6, C6, B5, (...) };
-float tetris_tone_length[] = { Q, E, E, Q, E, E, Q, E, E, Q, E, E, Q,  (...) };
-int tetris_length = sizeof(tetris)/sizeof(*(tetris));
-\end{lstlisting}
-
-%As an extra touch, we spent some time trying to get rid of the random noise we ended up with after playing our sounds. By tweaking the debounce delay properly and resetting the ABDAC after the final sample was played, all unwanted noise disappeared. See Figure 1 below for a full state diagram of how the program works.
 
 \begin{center}
 \centering
@@ -195,10 +183,10 @@ Figure 2: Debugging the \emph{generateTriangle} function
 \newpage
 
 \section{Evaluation of assignment}
-%This assignment was more demanding yet also more fun than the first assignment. The learning curve was a bit harder as not all of us had coded much in C before, but it was a nice opportunity to learn.
+This assignment was more demanding yet also more fun than the first assignment. The learning curve was a bit harder as not all of us had coded much in C before, but it was a nice opportunity to learn.
 
 \section{Conclusion}
-%We learned how to generate and play different sounds in C. This will be helpful when we start coding the next assignment. In the end we have four different sounds. Three short sound effects and one melody. 
+We learned how to generate and play different sounds in C. This will be helpful when we start coding the next assignment. In the end we have four different sounds. Three short sound effects and one melody. 
 
 \footnotesize{  % This makes the Reference items print in footnotesize fonts
 \begin{thebibliography}{N}
@@ -211,6 +199,16 @@ Figure 2: Debugging the \emph{generateTriangle} function
 
 \bibitem[3]{komp} TDT4258 Compendium
 \url{http://www.idi.ntnu.no/emner/tdt4258/_media/kompendium.pdf}
+
+\bibitem[4]{sokoban} Description of the game Sokoban on Sokoban Wiki . Retrieved 23.04.13.
+\url{http://www.sokobano.de/wiki/index.php?title=The_rules_of_the_game}
+
+\bibitem[5]{sokobanlevel} Description of Sokobon levels on Sokoban Wiki. Retrieved 23.04.13.
+\url{http://www.sokobano.de/wiki/index.php?title=Level_format}
+
+\bibitem[5]{sokobanscreen} Screenshot based on Sokoban skins on GitHub. Retrieved 23.04.13.
+\url{https://github.com/borgar/sokoban-skins}
+
 
 \end{thebibliography}  
 }
