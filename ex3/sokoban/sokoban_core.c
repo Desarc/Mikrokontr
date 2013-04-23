@@ -4,7 +4,7 @@
 
 volatile char path[100];
 volatile char undone_moves[100];
-volatile int current_level = 3;
+volatile int current_level;
 
 volatile int path_length = 0;
 volatile int undone_length = 0;
@@ -21,7 +21,8 @@ void reset_path_ptr(void) {
 void reset_undone_ptr(void) {
 	undone_moves_ptr = undone_moves;
 }
-	
+
+/* move in the direction 'dir' */	
 void move(char dir, int undo, int redo) {
 	int dirX = 0, dirY = 0;
 	if (dir == 'r' || dir == 'R') {
@@ -50,6 +51,7 @@ void move(char dir, int undo, int redo) {
 		if (!undo && !replaying) {
 			updatePath(dirX, dirY, box);
 		}
+		paintLevel();
 	}
 	else play_sound(HIT_WALL);
 	if (getRemaining() == 0) {
@@ -58,6 +60,7 @@ void move(char dir, int undo, int redo) {
 	}
 }
 
+/* keep track of all moves */
 void updatePath(int dirX, int dirY, int box) {
 	char move;
 	if (dirX == 1) {
@@ -80,8 +83,15 @@ void updatePath(int dirX, int dirY, int box) {
 volatile char *getPath() {
 	return path_ptr;
 }
-	
-void reset(void) {
+
+/* initialize fields and load the level specified */
+void init_game(int num) {
+	current_level = num;
+	reset();
+}
+
+/* reset game */
+void reset() {
 	reset_path_ptr();
 	reset_undone_ptr();
 	path_length = 0;
@@ -98,7 +108,8 @@ void setReplaying(int rep) {
 void setPlaying(int play) {
 	playing = play;
 }
-	
+
+/* undo the last move done */
 void undoLastMove(void) {
 	if (!playing || path_length == 0) {
 		return;
@@ -121,10 +132,11 @@ void undoLastMove(void) {
 	else if (dir == 'u' || dir == 'U') {
 		dir = 'd';
 	}
-	move(dir, 1, 0);
 	undoBox(dir);
+	move(dir, 1, 0);
 }
 	
+/* redo the last undone move */
 void redoMove(void) {
 	if (undone_length > 0) {
 		undone_moves_ptr--;

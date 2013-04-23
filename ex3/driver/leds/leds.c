@@ -1,9 +1,3 @@
-/*****************************************************************************
- *
- * Øving 3 uCSysDes, driverkoden
- *
- *****************************************************************************/
-
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/moduleparam.h>
@@ -38,6 +32,8 @@ struct cdev *leds_cdev;
 const long SET_ALL_LEDS = 0xffffff00;
 volatile char led_status[4];
 
+int status;
+long vector;
 
 volatile avr32_pio_t *piob = &AVR32_PIOB;
 
@@ -51,39 +47,35 @@ static struct file_operations leds_fops = {
   .release = leds_release
 };
 
+/* activate the LEDs indicated by the led_status number by writing to input data register */
 void set_leds(void) {
 	led_status[3] = 0x0;
 	piob->codr = SET_ALL_LEDS;
-	long vector = (led_status[0] << 24)+(led_status[1] << 16)+(led_status[2] << 8)+led_status[3];
+	vector = (led_status[0] << 24)+(led_status[1] << 16)+(led_status[2] << 8)+led_status[3];
 	piob->sodr = vector;
 }
-
-/*****************************************************************************/
-/* init-funksjon (kalles når modul lastes) */
 
 static int __init leds_init (void) {
 
 	/* allocating minor and major numbers */
-	int alloc_success = -1;
-  	alloc_success = alloc_chrdev_region(&dev, first_minor, count, name);
-	printk("alloc success? %i \n", alloc_success);
+  	status = alloc_chrdev_region(&dev, first_minor, count, name);
+	printk("alloc success? %i \n", status);
 
-  	/* be om tilgang til I/O-porter */
+  	/* request access to ports */
 	request_region(AVR32_PIOB_ADDRESS+PORT_OFFSET, PORT_RANGE, name);
 
-	/* initialisere PIO-maskinvaren (som i øving 2) */
+	/* initialize LEDs */
 	piob->per = SET_ALL_LEDS;
 	piob->oer = SET_ALL_LEDS;
 	piob->codr = SET_ALL_LEDS;
 	
-	/* registrere device i systemet (må gjøres når alt annet er initialisert) */
-	int cdev_success;
+	/* register device in the system */
 	leds_cdev = cdev_alloc();
 	leds_cdev->ops = &leds_fops;
 	cdev_init(leds_cdev, &leds_fops);
 	leds_cdev->owner = THIS_MODULE;
-	cdev_success = cdev_add(leds_cdev, dev, count);
-	printk("cdev_add success? %i \n", cdev_success);
+	status = cdev_add(leds_cdev, dev, count);
+	printk("cdev_add success? %i \n", status);
 
 	printk(KERN_ALERT "LED module enabled.\n");
 
@@ -95,6 +87,7 @@ static int __init leds_init (void) {
 
 static void __exit leds_exit (void) {
 
+	/* unregister device and release ports */
 	cdev_del(leds_cdev);
 	release_region(AVR32_PIOB_ADDRESS+PORT_OFFSET, PORT_RANGE);
 
@@ -130,7 +123,9 @@ static ssize_t leds_read (struct file *filp, char __user *buff,
 
 static ssize_t leds_write (struct file *filp, const char __user *buff,
                size_t count, loff_t *offp) {
-	copy_from_user(led_status, buff, count);
+	
+	/* get data from user space and write to LEDs */
+	copy_from_user(&led_status, buff, count);
 	set_leds();
 
 	return 0;
