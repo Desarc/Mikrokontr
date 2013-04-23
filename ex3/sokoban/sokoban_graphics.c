@@ -24,12 +24,13 @@ int main (int argc, char *argv[]) {
 
 	/* game loop */
 	playGame();
-
 }
 
 void playGame(void) {
-	/* avoid double pressing when resetting the game */
+	/* clean up if you choose to play again */
 	debounce();
+	reset_leds();
+	clear_screen();
 
 	/* level select */
 	int level = levelSelect();
@@ -126,11 +127,13 @@ void paintLevel(void) {
 }
 
 void displayWin(void) {
+	/* display win screen */
 	completed = 1;
 	display_image(WIN);
 	blink_leds();
 	play_sound(VICTORY);
 
+	/* check if you want to play again */
 	while (completed) {
 		int cmd = read_button_status();
 		int choice;

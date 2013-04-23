@@ -1,9 +1,0 @@
-go to destination folder (on board)
-
-Alt+A  ->  Z
-
-Send files (S)
-
-zmodem
-
-to choose file, tag with space -> Okay

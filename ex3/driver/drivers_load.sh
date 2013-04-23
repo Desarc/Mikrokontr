@@ -21,5 +21,4 @@ major2=$(awk '$2=="'$module2'" {print $1}' /proc/devices)
 echo $major2
 
 mknod /dev/${device1} c ${major1} 0
-
 mknod /dev/${device2} c ${major2} 0
