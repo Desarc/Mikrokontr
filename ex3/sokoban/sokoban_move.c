@@ -1,5 +1,4 @@
 #include "sokoban_move.h"
-#include "../sound/sound.h"
 
 /* check if a move is valid */
 int validMove(int fromX, int fromY, int toX, int toY) {
@@ -38,8 +37,7 @@ int moveTo(int fromX, int fromY, int toX, int toY) {
 		}
 		else if (next == TARGET) {
 			setTile(toX, toY, PLAYER_ON_TARGET);
-			increaseRemaining();	
-			play_sound(ONE_MORE);
+			increaseRemaining();
 		}
 		int newMovableY = toY+(toY-fromY);
 		int newMovableX = toX+(toX-fromX);
@@ -50,12 +48,9 @@ int moveTo(int fromX, int fromY, int toX, int toY) {
 		else if (newMovablePos == TARGET) {
 			setTile(newMovableX, newMovableY, BOX_ON_TARGET);
 			decreaseRemaining();
-			if (getRemaining() > 0) {
-				play_sound(ONE_LESS);	
-			}
 		}
 	}
-	else {
+	else if (next == BLANK) {
 		setTile(toX, toY, PLAYER);
 	}
 	return box;
@@ -83,12 +78,10 @@ void undoBox(char dir) {
 		int newY = getY()+dirY;
 		if (getTile(boxX, boxY) == BOX_ON_TARGET) {
 			increaseRemaining();
-			play_sound(ONE_MORE);
 		}
 		setTile(boxX, boxY, getGridTile(boxX, boxY));
 		if (getGridTile(newX, newY) == TARGET) {
 			decreaseRemaining();
-			play_sound(ONE_LESS);
 			setTile(newX, newY, BOX_ON_TARGET);
 		}
 		else {
