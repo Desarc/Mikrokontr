@@ -15,7 +15,7 @@ default:
 
 .PHONY : send
 send:
-	$(shell scp ${MODULE} root@${ADDR})
+	$(shell scp ${MODULE} ../framebuffer/*.bmp ../sound/*.wav root@${ADDR})
 
 .PHONY : clean
 clean:
