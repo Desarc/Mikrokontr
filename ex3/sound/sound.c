@@ -10,47 +10,285 @@
 
 
 #define MAX_SOUND_SAMPLES 112000
-#define SAMPLES 16000
+#define SAMPLES_8S 64000
+#define SAMPLES_1S 8000
 
-char welcome[SAMPLES];
-int welcome_size;
-char one_less[SAMPLES];
+#define N_OF_FRAGS 16
+
+char one_less[SAMPLES_1S];
 int one_less_size;
-char one_more[SAMPLES];
+char *one_less_pos;;
+char *one_less_counter;
+char one_more[SAMPLES_1S];
 int one_more_size;
-char hit_wall[SAMPLES];
+char *one_more_pos;;
+char *one_more_counter;
+char hit_wall[SAMPLES_1S];
 int hit_wall_size;
-char victory[MAX_SOUND_SAMPLES];
+char *hit_wall_pos;;
+char *hit_wall_counter;
+char victory[SAMPLES_8S];
 int victory_size;
-char intro[MAX_SOUND_SAMPLES];
+char victory_pos = 255;
+//short victory_counter = -1;
+char intro[SAMPLES_8S];
 int intro_size;
+char intro_pos = 255;
+//short intro_counter = -1;
 
 int fd_dsp;
 
+int active_sound_size;
+int frag_size;
+char *next_ptr;
+char *looping_ptr;
+void *sound_addr = 0;
+long sound_addr_start;
+long sound_addr_end;
+void *counters_addr = 0;
+
+
 void play_sound(int code) {
-	/* forking process to avoid blocking while sound is playing */
-	pid_t childPID = fork();
 	
-	if (childPID == 0) {
-		if (code == WELCOME) write_sound_to_device(welcome, welcome_size);
-		else if (code == ONE_LESS) write_sound_to_device(one_less, one_less_size);
-		else if (code == ONE_MORE) write_sound_to_device(one_more, one_more_size);
-		else if (code == HIT_WALL) write_sound_to_device(hit_wall, hit_wall_size);
-		else if (code == VICTORY) write_sound_to_device(victory, victory_size);
-		else if (code == INTRO) write_sound_to_device(intro, intro_size);
-		exit(1);
+	if (code == ONE_LESS && *one_less_pos == 255) {
+		*one_less_pos = activate_sound(one_less, one_less_size);
+		*one_less_counter = 0;
+	}
+	else if (code == ONE_MORE && *one_more_pos == 255) {
+		*one_more_pos = activate_sound(one_more, one_more_size);
+		*one_more_counter = 0;
+	}
+	else if (code == HIT_WALL && *hit_wall_pos == 255) {
+		*hit_wall_pos = activate_sound(hit_wall, hit_wall_size);
+		*hit_wall_counter = 0;
+	}
+	else if (code == MUSIC && intro_pos == 255) intro_pos = activate_sound(intro, intro_size);
+	else if (code == VICTORY && victory_pos == 255) victory_pos = activate_sound(victory, victory_size);
+	else if (code == INTRO && intro_pos == 255) intro_pos = activate_sound(intro, intro_size);
+	
+}
+
+void stop_sound(int code) {
+	if (code == ONE_LESS && *one_less_pos != 255) {
+		*one_less_pos = deactivate_sound(one_less, one_less_size, *one_less_pos);
+		*one_less_counter = 255;
+	}
+	else if (code == ONE_MORE && *one_more_pos != 255) {
+		*one_more_pos = deactivate_sound(one_more, one_more_size, *one_more_pos);
+		*one_more_counter = 255;
+	}
+	else if (code == HIT_WALL && *hit_wall_pos != 255) {
+		*hit_wall_pos = deactivate_sound(hit_wall, hit_wall_size, *hit_wall_pos);
+		*hit_wall_counter = 255;
+	}
+	else if (code == MUSIC && intro_pos != 255) intro_pos = deactivate_sound(intro, intro_size, intro_pos);
+	else if (code == VICTORY && victory_pos != 255) victory_pos = deactivate_sound(victory, victory_size, victory_pos);
+	else if (code == INTRO && intro_pos != 255) intro_pos = deactivate_sound(intro, intro_size, intro_pos);
+	
+}
+
+char activate_sound(char *sound_array_ptr, int size) {
+	char offset = *next_ptr;
+	char *active_sound_ptr = sound_addr+offset*frag_size;
+	printf("Base: %i\n", sound_addr);
+	printf("Adding sound at firstpos %i with offset %i\n", active_sound_ptr, offset);
+	//printf("Adding first sample: %i\n", *sound_array_ptr);
+	int i;
+	for (i=0;i<size;i++) {
+		char sample = *sound_array_ptr;
+		*active_sound_ptr += sample;
+		active_sound_ptr++;
+		sound_array_ptr++;
+		/* wrap around */
+		if ((long)active_sound_ptr > sound_addr_end) {
+			//printf("Wrap around!\n");
+			active_sound_ptr -= active_sound_size;
+		}
+	}
+	//printf("Adding sound at lastpos: %i\n", active_sound_ptr);
+	//printf("Last possible pos: %i\n", sound_addr_end);
+	return offset;
+}
+
+char deactivate_sound(char *sound_array_ptr, int size, char offset) {
+	if (offset == 255) {
+		return;
+	}
+	printf("Base: %i\n", sound_addr);
+	char *active_sound_ptr = sound_addr+offset*frag_size;
+	printf("Removing sound at firstpos %i with offset %i\n", active_sound_ptr, offset);
+	int i;
+	for (i=0;i<size;i++) {
+		char sample = *sound_array_ptr;
+		*active_sound_ptr -= sample;
+		active_sound_ptr++;
+		sound_array_ptr++;
+		/* wrap around */
+		if ((long)active_sound_ptr > sound_addr_end) {
+			active_sound_ptr = sound_addr;
+		}
+	}
+	return -1;
+}
+
+void stop_looping(void) {
+	*looping_ptr = 0;
+}
+
+void loop_sound(void) {
+	*looping_ptr = 1;
+	while (*looping_ptr) {
+		char offset = *next_ptr;
+		char *current_ptr = sound_addr+(offset*frag_size);
+		//printf("Looping sound at: %i\n", current_ptr);
+		//printf("First sample: %i\n", *current_ptr);
+		offset++;
+		deactivate_expired_sounds(offset);
+		*next_ptr = offset%N_OF_FRAGS;
+		//printf("Setting offset fragment: %i\n", offset);
+		int write_success = write(fd_dsp, current_ptr, frag_size);
+		if (write_success < 0) {
+			perror("Write: ");
+		}
+	}
+}
+
+void deactivate_expired_sounds(int offset) {
+	char check = *one_less_counter;
+	if (check == N_OF_FRAGS-1) {
+		stop_sound(ONE_LESS);
+	}
+	else if (check != 255) {
+		*one_less_counter += 1;
+	}
+	check = *one_more_counter;
+	if (check == N_OF_FRAGS-1) {
+		stop_sound(ONE_MORE);
+	}
+	else if (check != 255) {
+		*one_more_counter += 1;
+	}
+	check = *hit_wall_counter;
+	if (check == N_OF_FRAGS-1) {
+		stop_sound(HIT_WALL);		
+	}
+	else if (check != 255) {
+		*hit_wall_counter += 1;
 	}
 }
 
 void load_sokoban_sounds(void) {
 	/* load all sokoban sounds from file */
-	welcome_size = load_sound_from_file("dudu.wav", welcome);
 	one_less_size = load_sound_from_file("on.wav", one_less);
 	one_more_size = load_sound_from_file("off.wav", one_more);
 	hit_wall_size = load_sound_from_file("wall.wav", hit_wall);
-	victory_size = load_sound_from_file("sekvens.wav", victory);
-	intro_size = load_sound_from_file("short_intro.wav", intro);
+	victory_size = load_sound_from_file("victory.wav", victory);
+	intro_size = load_sound_from_file("intro.wav", intro);
 	printf("Sokoban sounds loaded.\n");
+}
+
+void map_shared_memory(void) {
+	active_sound_size = intro_size;
+	frag_size = intro_size/N_OF_FRAGS;
+	char active_sound[SAMPLES_8S];
+	char *active_sound_ptr = active_sound;
+	int i;
+	/* writing initial empty sound data */
+	for (i=0;i<active_sound_size;i++) {
+		*active_sound_ptr = 0;
+		active_sound_ptr++;
+	}
+
+	size_t length_sound = active_sound_size;
+	off_t offset = 0;
+	int prot = (PROT_READ | PROT_WRITE );
+	int flags = MAP_SHARED;
+	int fd_sound = -1;
+	/* creating shared files */
+	fd_sound = open("./shared_sound", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+	if (fd_sound <= 0){
+		printf("File opening error ocurred. Exiting program.\n");
+		exit(0);
+	}
+	if (lseek(fd_sound, length_sound-1, SEEK_SET) < 0) {
+		printf("File seek error ocurred. Exiting program.\n");
+		exit(0);
+	}
+	write(fd_sound, active_sound_ptr, length_sound);
+	
+	/* data is next, looping, one_less_counter, one_more_counter, hit_wall_counter, one_less_pos, one_more_pos, hit_wall_pos */
+	char counters[8] = {0,0,255,255,255,255,255,255};
+	size_t length_counters = 8;
+	int fd_counters = -1;
+
+	fd_counters = open("./shared_counters", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+	if (fd_counters <= 0){
+		printf("File opening error ocurred. Exiting program.\n");
+		exit(0);
+	}
+	write(fd_counters, counters, length_counters);
+	if (lseek(fd_counters, length_counters-1, SEEK_SET) < 0) {
+		printf("File seek error ocurred. Exiting program.\n");
+		exit(0);
+	}
+	
+	pid_t childPID = fork();
+
+	/* child process */	
+	if (childPID == 0) {
+		/* mapping sound file */
+		sound_addr = mmap(NULL, length_sound, prot, flags, fd_sound, offset);
+		if (sound_addr <= 0) {
+			printf("Child memory mapping error ocurred. Exiting program.\n");
+			exit(0);
+		}
+		sound_addr_end = (long)sound_addr+length_sound;
+
+		/* mapping counter file */
+		counters_addr = mmap(NULL, length_counters, prot, flags, fd_counters, offset);
+		if (counters_addr <= 0) {
+			printf("Parent memory mapping error ocurred. Exiting program.\n");
+			exit(0);
+		}
+		next_ptr = counters_addr++;
+		looping_ptr = counters_addr++;
+		one_less_counter = counters_addr++;
+		one_more_counter = counters_addr++;
+		hit_wall_counter = counters_addr++;
+		one_less_pos = counters_addr++;
+		one_more_pos = counters_addr++;
+		hit_wall_pos = counters_addr;
+		loop_sound();
+		exit(1);
+	}
+
+	/* parent process */
+	else {
+		/* mapping sound file */
+		sound_addr = mmap(NULL, length_sound, prot, flags, fd_sound, offset);
+		if (sound_addr <= 0) {
+			printf("Parent memory mapping error ocurred. Exiting program.\n");
+			exit(0);
+		}
+		sound_addr_end = (long)sound_addr+length_sound;
+
+		/* mapping counter file */
+		counters_addr = mmap(NULL, length_counters, prot, flags, fd_counters, offset);
+		if (counters_addr <= 0) {
+			printf("Parent memory mapping error ocurred. Exiting program.\n");
+			exit(0);
+		}
+		next_ptr = counters_addr++;
+		looping_ptr = counters_addr++;
+		one_less_counter = counters_addr++;
+		one_more_counter = counters_addr++;
+		hit_wall_counter = counters_addr++;
+		one_less_pos = counters_addr++;
+		one_more_pos = counters_addr++;
+		hit_wall_pos = counters_addr;
+		printf("Hit wall counter: %i\n", *hit_wall_counter);
+	}
+	printf("Shared memory mapped.\n");
 }
 
 /* load sound samples from a file to an array */
@@ -61,7 +299,6 @@ int load_sound_from_file(char file_path[], char *sound_array_ptr) {
 		printf("File opening error ocurred. Exiting program.\n");
 		exit(0);
 	}
-
 	int size;
 	fseek(streamIn, 0L, SEEK_END);
 	size = ftell(streamIn);
@@ -71,7 +308,6 @@ int load_sound_from_file(char file_path[], char *sound_array_ptr) {
 		*sound_array_ptr = getc(streamIn);
 		sound_array_ptr++;
 	}
-	
 	fclose(streamIn);
 	return size;
 }

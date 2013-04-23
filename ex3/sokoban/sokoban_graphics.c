@@ -4,7 +4,7 @@
 #include "../buttons/buttons_control.h"
 #include "../sound/sound.h"
 
-volatile int completed = 0;
+volatile int completed;
 
 int main (int argc, char *argv[]) {
 	/* open all drivers */
@@ -16,47 +16,33 @@ int main (int argc, char *argv[]) {
 	/* load images and sounds */
 	load_sokoban_images();
 	load_sokoban_sounds();
-
+	map_shared_memory();
+	play_sound(MUSIC);
 	/* initialize game and screen */
-	clear_screen();
 	reset_leds();
 	printf("\nWELCOME TO SOKOBAN!\n");
 
 	/* game loop */
-	playGame();
+	int playing = 1;
+	while (playing) {
+		playGame();
 
-	/* close all drivers */
-	close_sound_driver();
-	close_buttons_driver();
-	close_led_driver();
-	close_screen_driver();
-}
-
-void playGame(void) {
-	/* clean up if you choose to play again */
-	debounce();
-	reset_leds();
-	clear_screen();
-
-	/* level select */
-	int level = mainMenu();
-	init_game(level);
-	play_sound(WELCOME);
-	clear_screen();
-	paintLevel();
-	debounce();
-
-	/* game loop */
- 	/* busy waiting until a button is pushed */
-	while (!completed) {
-		int cmd = read_button_status();
-		if (cmd != NONE) {
-			performAction(cmd);
-			paintLevel();
-			debounce();
+		/* check if you want to play again */
+		int decided = 0;
+		while (!decided) {
+			int cmd = read_button_status();
+			if (cmd == BUTTON7) {
+				playing = 0;
+			}
+			if (cmd != NONE) {
+				decided = 1;
+				debounce();
+			}
+			
 		}
+		
 	}
-
+	stop_looping();
 	/* press button 0 to exit program */
 	/* (safeguard to avoid forked processes writing to drivers after they close) */
 	int exit = 0;
@@ -67,12 +53,43 @@ void playGame(void) {
 			exit = 1;
 		}
 	}
+	clear_screen();
+
+	/* close all drivers */
+	close_sound_driver();
+	close_buttons_driver();
+	close_led_driver();
+	close_screen_driver();
+}
+
+void playGame(void) {
+
+	/* level select */
+	int level = mainMenu();
+	init_game(level);
+	paintLevel();
+	//play_sound(MUSIC);
+	completed = 0;
+	/* game loop */
+ 	/* busy waiting until a button is pushed */
+	while (!completed) {
+		int cmd = read_button_status();
+		if (cmd != NONE) {
+			performAction(cmd);
+			paintLevel();
+			debounce();
+			int remaining = getRemaining();
+			if (remaining == 0) {
+				completed = 1;
+				displayWin();
+			}
+		}
+	}
 }
 
 int mainMenu(void) {
 	/* level select */
-	printf("Please choose a level.\n\n");
-	play_sound(INTRO);
+	reset_leds();
 	display_image(SPLASH);
 	int chosen = 0;
 	int choice;
@@ -81,8 +98,10 @@ int mainMenu(void) {
 		if (cmd != NONE) {
 			choice = chooseLevel(cmd);
 			chosen = 1;
+			debounce();
 		}
 	}
+	return choice;
 }
 
 /* main menu button actions */
@@ -95,6 +114,8 @@ int chooseLevel(int cmd) {
 	else if (cmd == BUTTON4) choice = 5;
 	else if (cmd == BUTTON5) choice = 6;
 	else if (cmd == BUTTON6) choice = 7;
+	else if (cmd == BUTTON7) choice = 8;
+	else choice = 1;
 	return choice;
 }
 
@@ -108,18 +129,19 @@ void performAction(int cmd) {
 	else if (cmd == BUTTON2) redoMove();
 	else if (cmd == BUTTON1) {
 		/* reset level */
-		clear_screen();
 		reset_leds();
 		reset();		
 	}
 	else if (cmd == BUTTON0) {
 		/* go to main menu */
-		playGame();
+		completed = 1;
+		stop_sound(MUSIC);
 	}
 }
 
 void paintLevel(void) {
 	/* paint level on screen */
+	clear_screen();
 	volatile char *level_ptr = getLevel();
 	int dimX = getDimX(), dimY = getDimY();
 	int i, j;
@@ -134,18 +156,9 @@ void paintLevel(void) {
 
 void displayWin(void) {
 	/* display win screen */
-	completed = 1;
+	printf("You win!\n");
+	stop_sound(MUSIC);
 	display_image(WIN);
 	blink_leds();
 	play_sound(VICTORY);
-
-	/* check if you want to play again */
-	while (completed) {
-		int cmd = read_button_status();
-		int choice;
-		if (cmd == BUTTON0) {
-			completed = 0;
-			playGame();
-		}
-	}
 }

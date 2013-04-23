@@ -1,5 +1,5 @@
 MODULE = sokoban
-ADDR = 129.241.103.209:/root
+ADDR = 129.241.102.197:/root
 
 default:
 	rm -rf *.o

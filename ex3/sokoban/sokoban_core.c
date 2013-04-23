@@ -49,7 +49,6 @@ void move(char dir, int undo, int redo) {
 		}
 	}
 	if (getRemaining() == 0) {
-		displayWin();
 		playing = 0;
 	}
 }

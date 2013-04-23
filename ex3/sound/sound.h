@@ -7,9 +7,17 @@
 #define VICTORY 3
 #define HIT_WALL 4
 #define INTRO 5
+#define MUSIC 6
 
 void play_sound(int code);
+void stop_sound(int code);
+static char activate_sound(char *sound_array_ptr, int size);
+static char deactivate_sound(char *sound_array_ptr, int size, char offset);
+void deactivate_expired_sounds(int offset);
 void load_sokoban_sounds(void);
+static void loop_sound();
+void stop_looping(void);
+void map_shared_memory(void);
 static int load_sound_from_file(char file_path[], char *sound_array_ptr);
 static void write_sound_to_device(char *sound_array_ptr, int size);
 int open_sound_driver(void);

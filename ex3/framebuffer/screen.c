@@ -109,7 +109,7 @@ void display_tile(char image, int tilePosX, int tilePosY, int dim) {
 void write_to_screen(char *pixel_ptr, int posX, int posY, int height, int width) {
 	long int location;
 	int i, j;
-	for (i = height; i >= 0; i--) {
+	for (i = height-1; i >= 0; i--) {
 		location = ((posY+i)*MAX_WIDTH+(posX))*3;
 		for (j = 0; j < width; j++) {
 			*(fbp+location) = *pixel_ptr; //blue

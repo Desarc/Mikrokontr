@@ -46,7 +46,7 @@ char getTile(int x, int y) {
 	int pos = (y*dimX)+x;
 	level_ptr += pos;
 	char tile = *level_ptr;
-	it (tile == WALL) {
+	if (tile == WALL) {
 		play_sound(HIT_WALL);
 	}
 	return *level_ptr;
@@ -118,6 +118,11 @@ void loadLevel(int num) {
 		dimX = level7dimX;
 		dimY = level7dimY;
 	}
+	else if (num == 8) {
+		load_ptr = level8;
+		dimX = level8dimX;
+		dimY = level8dimY;
+	}
 	reset_level_ptr();
 	reset_grid_ptr();
 	int tiles = dimX*dimY;
@@ -138,16 +143,18 @@ void loadLevel(int num) {
 		}
 		grid_ptr++;
 		if (tile == PLAYER) {
-			posX = i%dimY;
-			posY = (int)(i/dimY);
+			posX = i%dimX;
+			posY = (int)(i/dimX);
 		}
 		else if (tile == PLAYER_ON_TARGET) {
-			posX = i%dimY;
-			posY = (int)(i/dimY);
+			posX = i%dimX;
+			posY = (int)(i/dimX);
 			remaining++;
+			increment_leds();
 		}
 		else if (tile == TARGET) {
-			remaining--;
+			remaining++;
+			increment_leds();
 		}
 	}
 	reset_level_ptr();

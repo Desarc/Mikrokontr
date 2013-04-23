@@ -1,5 +1,0 @@
-fix framebuffer (images are painted slightly wrong)
-fix sound bug (occurs sometimes when pushing box)
-
-pressing SW7 in title screen loads level 6996
-only levels working properly are levels 2 and 3.
