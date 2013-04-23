@@ -33,10 +33,13 @@ int main (int argc, char *argv[]) {
 			int cmd = read_button_status();
 			if (cmd == BUTTON7) {
 				playing = 0;
-			}
-			if (cmd != NONE) {
 				decided = 1;
 				debounce();
+			}
+			else if (cmd == BUTTON0) {
+				decided = 1;
+				debounce();
+				stop_sound(VICTORY);
 			}
 			
 		}

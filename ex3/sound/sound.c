@@ -302,7 +302,7 @@ void map_shared_memory(void) {
 		victory_pos = counters_addr++;
 		intro_pos = counters_addr;
 	}
-	printf("Shared memory mapped.\n");
+	printf("Shared sound data memory mapped.\n");
 }
 
 /* load sound samples from a file to an array */
