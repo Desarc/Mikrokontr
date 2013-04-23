@@ -27,7 +27,7 @@ TDT4258 Energy Efficient Computer Design \\}
 \maketitle
 
 \begin{abstract}
-In this assignment we write C code for an AVR microcontroller on linux. Through this assignment we aim to become more familiar with C coding for AVR32, linux and how to write a driver for linux. Our approach was to first replicate the features of the previous assignment, then we ..................
+In this assignment we write C code for an AVR microcontroller on linux. The goal is to make a game be played on the development board. Through this assignment we aim to become more familiar with C coding for AVR32, linux and how to write a driver for linux. 
 \end{abstract}
 
 \bigskip
@@ -137,17 +137,22 @@ Figure 2: Debugging the \emph{generateTriangle} function
 \end{center}
 
 \section{Results}
+\subsection{Description} 
+
 This exercise resulted in a working sokoban game on the STK1000 development board displayed. The game is played by using the buttons as controllers to move around in the game which is displayed on the LCD screen. In addition to a general "arrow key" setup, there is also a possibility to undo and redo with the buttons. 
 
-There are sounds and LEDs to help you understand the game play better through audiovisual feedback. The LEDs show how many crates you have left in the game, and when you win all LEDs will blink several times. There are sounds for the start of the game, when you place a crate on a target, when you remove a crate from a target, when you hit a wall and when you win. When you win there will also be a splash screen telling you that you've won. 
+\subsection{Feedback}There are sounds and LEDs to help you understand the game play better through audiovisual feedback. The LEDs show how many crates you have left in the game, and when you win all LEDs will blink several times to emphasize your epic win.
 
-In regards to the game play we have movement in 4 four directions, the ability to push crates, disability to walk through walls, undo and redo. 
+\subsection{Sounds}There are sounds for the start of the game, when you place a crate on a target, when you remove a crate from a target, when you hit a wall and when you win. When you win there will also be a splash screen telling you that you've won. 
 
-Technically the resulting game is written in C code on top of a linux operating system. To manage the LEDs and buttons we have written two corresponding linux drivers that operates as interfaces between the STK1000 development board and linux. 
+\subsection{Game play}
+In regards to the game play we have movement in four directions, the ability to push crates, disability to walk through walls, and the ability to undo and redo. 
+
+\subsection{Technical aspects}Technically the resulting game is written in C code on top of a linux operating system. To manage the LEDs and buttons we have written two corresponding linux drivers that operates as interfaces between the STK1000 development board and linux. 
 
 
 \section{Tests}
-\paragraph{Description}
+\subsection{Description}
 
 We've created a few test scenarios in order to test different aspects of our game functionality. The tests were conducted by a person interacting with the switches and looking at the LCD screen, wearing a headset. Another person logged the results of the test. The main equipment was the STK1000 development board and a headset with the main focus on the LCD screen. The jumpers of the board were set as specified in the compendium (section 4.2) \cite{komp}. The GPIO was set up with both LEDs and switches connected to B as follows: LEDs on 8-15, switches on 0-7. 
 
@@ -155,7 +160,7 @@ We've created a few test scenarios in order to test different aspects of our gam
 
 
 
-\paragraph{Results}
+\subsection{Results}
 Below is a table of the different tests we ran, the preconditions and the results. 
 
 
@@ -175,8 +180,6 @@ Below is a table of the different tests we ran, the preconditions and the result
 
 \hline Right & Player is moved right & A level is loaded and there is free space to the right of the player & Player moves to the right when \emph{SW4} is pressed.  & Passed \\
 
-
-
 \hline Undo & The last move is undone & At least one move is made & The last move is undone when \emph{SW3} is pressed.  & Passed \\
 
 \hline Redo & The last undo is undone & Undo must have been done as the previous move. & The undone move is redone when \emph{SW2} is pressed.  & Passed \\
@@ -186,7 +189,6 @@ Below is a table of the different tests we ran, the preconditions and the result
 \hline Return to main menu & Main menu is displayed & Sokoban is loaded?? & Main menu is displayed when \emph{SW0} is pressed.  & Passed \\
 
 
-
 \hline 
 \end{tabular} 
 \end{center}
@@ -194,10 +196,13 @@ Below is a table of the different tests we ran, the preconditions and the result
 \newpage
 
 \section{Evaluation of assignment}
-This assignment was more demanding yet also more fun than the first assignment. The learning curve was a bit harder as not all of us had coded much in C before, but it was a nice opportunity to learn.
+
+We found it interesting to learn more about the inner workings of linux and how a device driver is written. 
+
+We had quite a lot of problems with getting linux to work. This was much due to the guide we got didn't really seem to work, at least no one that we talked to made it work through following that guide. Another group posted a different guide that we managed to get working. But in general this wasted much time for us and should be improved. 
 
 \section{Conclusion}
-We learned how to generate and play different sounds in C. This will be helpful when we start coding the next assignment. In the end we have four different sounds. Three short sound effects and one melody. 
+%We learned how to generate and play different sounds in C. This will be helpful when we start coding the next assignment. In the end we have four different sounds. Three short sound effects and one melody. 
 
 \footnotesize{  % This makes the Reference items print in footnotesize fonts
 \begin{thebibliography}{N}
