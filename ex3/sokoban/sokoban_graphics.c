@@ -20,21 +20,20 @@ int main (int argc, char *argv[]) {
 	/* initialize game and screen */
 	clear_screen();
 	reset_leds();
-	display_image(SPLASH);
 	printf("\nWELCOME TO SOKOBAN!\n");
 
+	/* game loop */
+	playGame();
+
+}
+
+void playGame(void) {
+	/* avoid double pressing when resetting the game */
+	debounce();
+
 	/* level select */
-	printf("Please choose a level.\n\n");
-	int chosen = 0;
-	int choice;
-	while (!chosen) {
-		int cmd = read_button_status();
-		if (cmd != NONE) {
-			choice = chooseLevel(cmd);
-			chosen = 1;
-		}
-	}
-	init_game(choice);
+	int level = levelSelect();
+	init_game(level);
 	play_sound(WELCOME);
 	clear_screen();
 	paintLevel();
@@ -67,6 +66,22 @@ int main (int argc, char *argv[]) {
 	close_screen_driver();
 }
 
+int levelSelect(void) {
+	/* level select */
+	printf("Please choose a level.\n\n");
+	play_sound(INTRO);
+	display_image(SPLASH);
+	int chosen = 0;
+	int choice;
+	while (!chosen) {
+		int cmd = read_button_status();
+		if (cmd != NONE) {
+			choice = chooseLevel(cmd);
+			chosen = 1;
+		}
+	}
+}
+
 int chooseLevel(int cmd) {
 	int choice;
 	if (cmd == BUTTON0) choice = 1;
@@ -92,7 +107,7 @@ void performAction(int cmd) {
 		reset();		
 	}
 	else if (cmd == BUTTON0) {
-		displayWin();
+		playGame();
 	}
 }
 
@@ -115,4 +130,13 @@ void displayWin(void) {
 	display_image(WIN);
 	blink_leds();
 	play_sound(VICTORY);
+
+	while (completed) {
+		int cmd = read_button_status();
+		int choice;
+		if (cmd == BUTTON0) {
+			completed = 0;
+			playGame();
+		}
+	}
 }

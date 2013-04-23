@@ -48,8 +48,8 @@ void load_sokoban_sounds(void) {
 	one_less_size = load_sound_from_file("on.wav", one_less);
 	one_more_size = load_sound_from_file("off.wav", one_more);
 	hit_wall_size = load_sound_from_file("wall.wav", hit_wall);
-	victory_size = load_sound_from_file("soundfile.wav", victory);
-//	intro_size = load_sound_from_file("intro.wav", intro);
+	victory_size = load_sound_from_file("sekvens.wav", victory);
+	intro_size = load_sound_from_file("short_intro.wav", intro);
 	printf("Sokoban sounds loaded.\n");
 }
 
