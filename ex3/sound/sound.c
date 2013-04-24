@@ -47,52 +47,60 @@ void *counters_addr = 0;
 
 void play_sound(int code) {
 	
-	if (code == ONE_LESS && build_int(*one_less_pos) == -1) {
-		*one_less_pos = activate_sound(one_less, one_less_size);
+	if (code == ONE_LESS && build_int(one_less_pos) == -1) {
+		int new_pos = activate_sound(one_less, one_less_size);
+		decompose_int(one_less_pos, new_pos);
 	}
-	else if (code == ONE_MORE && build_int(*one_more_pos) == -1) {
-		*one_more_pos = activate_sound(one_more, one_more_size);
+	else if (code == ONE_MORE && build_int(one_more_pos) == -1) {
+		int new_pos = activate_sound(one_more, one_more_size);
+		decompose_int(one_more_pos, new_pos);
 	}
-	else if (code == HIT_WALL && build_int(*hit_wall_pos) == -1) *hit_wall_pos = activate_sound(hit_wall, hit_wall_size);
-	else if (code == MUSIC && build_int(*intro_pos) == -1) {
+	else if (code == HIT_WALL && build_int(hit_wall_pos) == -1) {
+		int new_pos = activate_sound(hit_wall, hit_wall_size);
+		decompose_int(hit_wall_pos, new_pos);
+	}
+	else if (code == MUSIC && build_int(intro_pos) == -1) {
 		set_current_sound_size(music_size);
 		int new_pos = activate_sound(music, music_size);
-		decompose_int(*music_pos, new_pos);
+		decompose_int(music_pos, new_pos);
 	}
-	else if (code == VICTORY && build_int(*victory_pos) == -1) {
+	else if (code == VICTORY && build_int(victory_pos) == -1) {
 		set_current_sound_size(victory_size);
 		int new_pos = activate_sound(victory, victory_size);
-		decompose_int(*victory_pos, new_pos); 
+		decompose_int(victory_pos, new_pos); 
 	}
-	else if (code == INTRO && build_int(*intro_pos) == -1) {
+	else if (code == INTRO && build_int(intro_pos) == -1) {
 		set_current_sound_size(intro_size);
 		int new_pos = activate_sound(intro, intro_size);
-		decompose_int(*intro_pos, new_pos);
+		decompose_int(intro_pos, new_pos);
 	}
 	
 }
 
 void stop_sound(int code) {
-	if (code == ONE_LESS && build_int(*one_less_pos) != -1) {
-		*one_less_pos = deactivate_sound(one_less, one_less_size, build_int(*one_less_pos));
+	if (code == ONE_LESS && build_int(one_less_pos) != -1) {
+		deactivate_sound(one_less, one_less_size, build_int(one_less_pos));
+		decompose_int(one_less_pos, -1);
 	}
-	else if (code == ONE_MORE && build_int(*one_more_pos) != -1) {
-		*one_more_pos = deactivate_sound(one_more, one_more_size, build_int(*one_more_pos));
+	else if (code == ONE_MORE && build_int(one_more_pos) != -1) {
+		deactivate_sound(one_more, one_more_size, build_int(one_more_pos));
+		decompose_int(one_more_pos, -1);
 	}
-	else if (code == HIT_WALL && build_int(*hit_wall_pos) != -1) {
-		*hit_wall_pos = deactivate_sound(hit_wall, hit_wall_size, build_int(*hit_wall_pos));
+	else if (code == HIT_WALL && build_int(hit_wall_pos) != -1) {
+		deactivate_sound(hit_wall, hit_wall_size, build_int(hit_wall_pos));
+		decompose_int(hit_wall_pos, -1);
 	}
-	else if (code == MUSIC && build_int(*intro_pos) != -1) {
+	else if (code == MUSIC && build_int(intro_pos) != -1) {
 		clear_sound();
-		decompose_int(*music_pos, -1);
+		decompose_int(music_pos, -1);
 	}
-	else if (code == VICTORY && build_int(*victory_pos) != -1) {
+	else if (code == VICTORY && build_int(victory_pos) != -1) {
 		clear_sound();
-		decompose_int(*victory_pos, -1);
+		decompose_int(victory_pos, -1);
 	}
-	else if (code == INTRO && build_int(*intro_pos) != -1) {
+	else if (code == INTRO && build_int(intro_pos) != -1) {
 		clear_sound();
-		decompose_int(*intro_pos, -1);
+		decompose_int(intro_pos, -1);
 	}
 }
 
@@ -103,7 +111,7 @@ void set_current_sound_size(int size) {
 
 int activate_sound(char *sound_array_ptr, int size) {
 	char offset = *next_ptr;
-	char *active_sound_ptr = sound_addr+offset*frag_size;
+	char *active_sound_ptr = sound_addr+offset*build_int(frag_size);
 	int i;
 	for (i=0;i<size;i++) {
 		char sample = *sound_array_ptr;
@@ -118,11 +126,11 @@ int activate_sound(char *sound_array_ptr, int size) {
 	return offset;
 }
 
-int deactivate_sound(char *sound_array_ptr, int size, int offset) {
+void deactivate_sound(char *sound_array_ptr, int size, int offset) {
 	if (offset == -1) {
 		return;
 	}
-	char *active_sound_ptr = sound_addr+offset*build_int(*frag_size);
+	char *active_sound_ptr = sound_addr+offset*build_int(frag_size);
 	int i;
 	for (i=0;i<size;i++) {
 		char sample = *sound_array_ptr;
@@ -135,22 +143,21 @@ int deactivate_sound(char *sound_array_ptr, int size, int offset) {
 			active_sound_ptr = sound_addr;
 		}
 	}
-	return -1;
 }
 
 void kill_sound_process(void) {
-	decompose_int(*looping_ptr, 0);
+	decompose_int(looping_ptr, 0);
 }
 
 void loop_sound(void) {
 	*looping_ptr = 1;
 	while (*looping_ptr) {
-		int offset = build_int(*next_ptr);
-		char *current_ptr = sound_addr+(offset*build_int(*frag_size));
+		int offset = build_int(next_ptr);
+		char *current_ptr = sound_addr+(offset*build_int(frag_size));
 		offset++;
 		deactivate_expired_sounds(offset);
 		*next_ptr = offset%N_OF_FRAGS;
-		int write_success = write(fd_dsp, current_ptr, build_int(*frag_size));
+		int write_success = write(fd_dsp, current_ptr, build_int(frag_size));
 		if (write_success < 0) {
 			perror("Write: ");
 			exit(1);
@@ -159,13 +166,13 @@ void loop_sound(void) {
 }
 
 void deactivate_expired_sounds(int offset) {
-	if (offset == build_int(*one_less_pos)) {
+	if (offset == build_int(one_less_pos)) {
 		stop_sound(ONE_LESS);
 	}
-	if (offset == build_int(*one_more_pos)) {
+	if (offset == build_int(one_more_pos)) {
 		stop_sound(ONE_MORE);
 	}
-	if (offset == build_int(*hit_wall_pos)) {
+	if (offset == build_int(hit_wall_pos)) {
 		stop_sound(HIT_WALL);
 	}
 }
@@ -200,7 +207,7 @@ int build_int(char *bytes) {
 	num += *bytes << 8;
 	bytes++;
 	num += *bytes;
-	bytes-=3;
+	//bytes-=3;
 	return num;
 }
 
@@ -213,7 +220,7 @@ void decompose_int(char *bytes, int data) {
 	*bytes = data >> 8;
 	bytes++;
 	*bytes = data;
-	bytes-=3;
+	//bytes-=3;
 }
 
 void map_shared_memory(void) {

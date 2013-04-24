@@ -12,7 +12,7 @@
 void play_sound(int code);
 void stop_sound(int code);
 static int activate_sound(char *sound_array_ptr, int size);
-static int deactivate_sound(char *sound_array_ptr, int size, char offset);
+static void deactivate_sound(char *sound_array_ptr, int size, int offset);
 void clear_sound(void);
 static void set_current_sound_size(int size);
 static void deactivate_expired_sounds(int offset);
