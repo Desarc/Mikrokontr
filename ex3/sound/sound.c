@@ -13,32 +13,26 @@
 #define SAMPLES_8S 64000
 #define SAMPLES_1S 8000
 
-#define N_OF_FRAGS 16
+#define N_OF_FRAGS 64
 
 char one_less[SAMPLES_1S];
 int one_less_size;
 char *one_less_pos;;
-//char *one_less_counter;
 char one_more[SAMPLES_1S];
 int one_more_size;
 char *one_more_pos;;
-//char *one_more_counter;
 char hit_wall[SAMPLES_1S];
 int hit_wall_size;
 char *hit_wall_pos;;
-//char *hit_wall_counter;
 char victory[SAMPLES_8S];
 int victory_size;
 char *victory_pos;
-//char *victory_counter;
 char intro[SAMPLES_8S];
 int intro_size;
 char *intro_pos;
-//char *intro_counter;
 
 int fd_dsp;
 
-//int active_sound_size;
 char *active_sound_size;
 int frag_size;
 char *next_ptr;
@@ -51,67 +45,45 @@ void *counters_addr = 0;
 
 void play_sound(int code) {
 	
-	if (code == ONE_LESS && *one_less_pos == 255) {
-		*one_less_pos = activate_sound(one_less, one_less_size);
-		//*one_less_counter = 0;
-	}
-	else if (code == ONE_MORE && *one_more_pos == 255) {
-		*one_more_pos = activate_sound(one_more, one_more_size);
-		//*one_more_counter = 0;
-	}
-	else if (code == HIT_WALL && *hit_wall_pos == 255) {
-		*hit_wall_pos = activate_sound(hit_wall, hit_wall_size);
-		//*hit_wall_counter = 0;
-	}
+	if (code == ONE_LESS && *one_less_pos == 255) *one_less_pos = activate_sound(one_less, one_less_size);
+	else if (code == ONE_MORE && *one_more_pos == 255) *one_more_pos = activate_sound(one_more, one_more_size);
+	else if (code == HIT_WALL && *hit_wall_pos == 255) *hit_wall_pos = activate_sound(hit_wall, hit_wall_size);
 	else if (code == MUSIC && *intro_pos == 255) {
-		//clear_sound();
-		decompose_int(active_sound_size, intro_size);
+		set_current_sound_size(intro_size);
 		*intro_pos = activate_sound(intro, intro_size);
-		//*intro_counter = 0;
 	}
 	else if (code == VICTORY && *victory_pos == 255) {
-		//clear_sound();
-		decompose_int(active_sound_size, victory_size);
+		set_current_sound_size(victory_size);
 		*victory_pos = activate_sound(victory, victory_size);
-		//*victory_counter = 0;
 	}
 	else if (code == INTRO && *intro_pos == 255) {
-		//clear_sound();
-		decompose_int(active_sound_size, intro_size);
+		set_current_sound_size(intro_size);
 		*intro_pos = activate_sound(intro, intro_size);
-		//*intro_counter = 0;
 	}
 	
 }
 
 void stop_sound(int code) {
-	if (code == ONE_LESS && *one_less_pos != 255) {
-		*one_less_pos = deactivate_sound(one_less, one_less_size, *one_less_pos);
-		//*one_less_counter = 255;
-	}
-	else if (code == ONE_MORE && *one_more_pos != 255) {
-		*one_more_pos = deactivate_sound(one_more, one_more_size, *one_more_pos);
-		//*one_more_counter = 255;
-	}
-	else if (code == HIT_WALL && *hit_wall_pos != 255) {
-		*hit_wall_pos = deactivate_sound(hit_wall, hit_wall_size, *hit_wall_pos);
-		//*hit_wall_counter = 255;
-	}
+	if (code == ONE_LESS && *one_less_pos != 255) *one_less_pos = deactivate_sound(one_less, one_less_size, *one_less_pos);
+	else if (code == ONE_MORE && *one_more_pos != 255) *one_more_pos = deactivate_sound(one_more, one_more_size, *one_more_pos);
+	else if (code == HIT_WALL && *hit_wall_pos != 255) *hit_wall_pos = deactivate_sound(hit_wall, hit_wall_size, *hit_wall_pos);
 	else if (code == MUSIC && *intro_pos != 255) {
 		clear_sound();
-		//*intro_pos = deactivate_sound(intro, intro_size, *intro_pos);
-		//*intro_counter = 255;
+		*intro_pos = 255;
 	}
 	else if (code == VICTORY && *victory_pos != 255) {
 		clear_sound();
-		//*victory_pos = deactivate_sound(victory, victory_size, *victory_pos);
-		//*victory_counter = 255;
+		*victory_pos = 255;
 	}
 	else if (code == INTRO && *intro_pos != 255) {
 		clear_sound();
-		//*intro_pos = deactivate_sound(intro, intro_size, *intro_pos);
-		//*intro_counter = 255;
+		*intro_pos = 255;
 	}
+}
+
+void set_current_sound_size(int size) {
+	decompose_int(active_sound_size, size);
+	frag_size = size/N_OF_FRAGS;
 }
 
 char activate_sound(char *sound_array_ptr, int size) {
@@ -125,7 +97,7 @@ char activate_sound(char *sound_array_ptr, int size) {
 		sound_array_ptr++;
 		/* wrap around */
 		if ((long)active_sound_ptr > sound_addr_end) {
-			active_sound_ptr = (char *)sound_addr_start;
+			active_sound_ptr = sound_addr;
 		}
 	}
 	return offset;
@@ -145,7 +117,7 @@ char deactivate_sound(char *sound_array_ptr, int size, char offset) {
 		sound_array_ptr++;
 		/* wrap around */
 		if ((long)active_sound_ptr > sound_addr_end) {
-			active_sound_ptr = (char*)sound_addr_start;
+			active_sound_ptr = sound_addr;
 		}
 	}
 	return -1;
@@ -166,6 +138,7 @@ void loop_sound(void) {
 		int write_success = write(fd_dsp, current_ptr, frag_size);
 		if (write_success < 0) {
 			perror("Write: ");
+			exit(1);
 		}
 	}
 }
@@ -232,10 +205,12 @@ int build_int(char *bytes) {
 	num += *bytes << 8;
 	bytes++;
 	num += *bytes;
+	bytes-=3;
 	return num;
 }
 
 void decompose_int(char *bytes, int data) {
+	
 	*bytes = data >> 24;
 	bytes++;
 	*bytes = data >> 16;
@@ -243,6 +218,7 @@ void decompose_int(char *bytes, int data) {
 	*bytes = data >> 8;
 	bytes++;
 	*bytes = data;
+	bytes-=3;
 }
 
 void map_shared_memory(void) {
@@ -250,12 +226,13 @@ void map_shared_memory(void) {
 	decompose_int(bytes, intro_size);
 	frag_size = intro_size/N_OF_FRAGS;
 
+	/* creating shared files */
 	size_t length_sound = intro_size;
 	off_t offset = 0;
 	int prot = (PROT_READ | PROT_WRITE );
 	int flags = MAP_SHARED;
 	int fd_sound = -1;
-	/* creating shared files */
+	
 	fd_sound = open("./shared_sound", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
 	if (fd_sound <= 0){
 		printf("File opening error ocurred. Exiting program.\n");
@@ -265,7 +242,13 @@ void map_shared_memory(void) {
 		printf("File seek error ocurred. Exiting program.\n");
 		exit(0);
 	}
-	
+	/* write initial file data */
+	char zeros[SAMPLES_8S];
+	int i;
+	for (i=0;i<length_sound;i++) {
+		zeros[i] = 0;
+	}
+	write(fd_sound, zeros, length_sound);
 	/* data is next, looping, one_less_counter, one_more_counter, hit_wall_counter, one_less_pos, one_more_pos, hit_wall_pos */
 	//char counters[12] = {0,0,255,255,255,255,255,255,255,255,255,255};
 	//size_t length_counters = 12;
@@ -285,7 +268,6 @@ void map_shared_memory(void) {
 		printf("File seek error ocurred. Exiting program.\n");
 		exit(0);
 	}
-	
 	pid_t childPID = fork();
 
 	/* child process */	

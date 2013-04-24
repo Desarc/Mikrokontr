@@ -17,16 +17,14 @@ int main (int argc, char *argv[]) {
 	load_sokoban_images();
 	load_sokoban_sounds();
 	map_shared_memory();
-	play_sound(MUSIC);
+	clear_sound();
 	/* initialize game and screen */
-	reset_leds();
 	printf("\nWELCOME TO SOKOBAN!\n");
 
 	/* game loop */
 	int playing = 1;
 	while (playing) {
 		playGame();
-
 		/* check if you want to play again */
 		int decided = 0;
 		while (!decided) {
@@ -71,7 +69,7 @@ void playGame(void) {
 	int level = mainMenu();
 	init_game(level);
 	paintLevel();
-	//play_sound(MUSIC);
+	play_sound(MUSIC);
 	completed = 0;
 	/* game loop */
  	/* busy waiting until a button is pushed */
@@ -93,6 +91,8 @@ void playGame(void) {
 int mainMenu(void) {
 	/* level select */
 	reset_leds();
+	stop_sound(VICTORY);
+	play_sound(INTRO);
 	display_image(SPLASH);
 	int chosen = 0;
 	int choice;
@@ -104,6 +104,7 @@ int mainMenu(void) {
 			debounce();
 		}
 	}
+	stop_sound(INTRO);
 	return choice;
 }
 
@@ -161,7 +162,7 @@ void displayWin(void) {
 	/* display win screen */
 	printf("You win!\n");
 	stop_sound(MUSIC);
+	play_sound(VICTORY);
 	display_image(WIN);
 	blink_leds();
-	play_sound(VICTORY);
 }
