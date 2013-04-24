@@ -47,71 +47,60 @@ void *counters_addr = 0;
 
 void play_sound(int code) {
 	
-	if (code == ONE_LESS && build_int(one_less_pos) == -1) {
+	if (code == ONE_LESS) {
 		int new_pos = activate_sound(one_less, one_less_size);
-		decompose_int(one_less_pos, new_pos);
+		decompose_short(one_less_pos, new_pos);
 	}
-	else if (code == ONE_MORE && build_int(one_more_pos) == -1) {
+	else if (code == ONE_MORE) {
 		int new_pos = activate_sound(one_more, one_more_size);
-		decompose_int(one_more_pos, new_pos);
+		decompose_short(one_more_pos, new_pos);
 	}
-	else if (code == HIT_WALL && build_int(hit_wall_pos) == -1) {
+	else if (code == HIT_WALL) {
 		int new_pos = activate_sound(hit_wall, hit_wall_size);
-		decompose_int(hit_wall_pos, new_pos);
+		decompose_short(hit_wall_pos, new_pos);
 	}
-	else if (code == MUSIC && build_int(intro_pos) == -1) {
+	else if (code == MUSIC && build_short(music_pos) == -1) {
 		set_current_sound_size(music_size);
 		int new_pos = activate_sound(music, music_size);
-		decompose_int(music_pos, new_pos);
+		decompose_short(music_pos, new_pos);
 	}
-	else if (code == VICTORY && build_int(victory_pos) == -1) {
+	else if (code == VICTORY && build_short(victory_pos) == -1) {
 		set_current_sound_size(victory_size);
 		int new_pos = activate_sound(victory, victory_size);
-		decompose_int(victory_pos, new_pos); 
+		decompose_short(victory_pos, new_pos); 
 	}
-	else if (code == INTRO && build_int(intro_pos) == -1) {
+	else if (code == INTRO && build_short(intro_pos) == -1) {
 		set_current_sound_size(intro_size);
 		int new_pos = activate_sound(intro, intro_size);
-		decompose_int(intro_pos, new_pos);
+		decompose_short(intro_pos, new_pos);
 	}
 	
 }
 
 void stop_sound(int code) {
-	if (code == ONE_LESS && build_int(one_less_pos) != -1) {
-		deactivate_sound(one_less, one_less_size, build_int(one_less_pos));
-		decompose_int(one_less_pos, -1);
-	}
-	else if (code == ONE_MORE && build_int(one_more_pos) != -1) {
-		deactivate_sound(one_more, one_more_size, build_int(one_more_pos));
-		decompose_int(one_more_pos, -1);
-	}
-	else if (code == HIT_WALL && build_int(hit_wall_pos) != -1) {
-		deactivate_sound(hit_wall, hit_wall_size, build_int(hit_wall_pos));
-		decompose_int(hit_wall_pos, -1);
-	}
-	else if (code == MUSIC && build_int(intro_pos) != -1) {
+	if (code == MUSIC && build_short(music_pos) != -1) {
 		clear_sound();
-		decompose_int(music_pos, -1);
+		decompose_short(music_pos, -1);
 	}
-	else if (code == VICTORY && build_int(victory_pos) != -1) {
+	else if (code == VICTORY && build_short(victory_pos) != -1) {
 		clear_sound();
-		decompose_int(victory_pos, -1);
+		decompose_short(victory_pos, -1);
 	}
-	else if (code == INTRO && build_int(intro_pos) != -1) {
+	else if (code == INTRO && build_short(intro_pos) != -1) {
 		clear_sound();
-		decompose_int(intro_pos, -1);
+		decompose_short(intro_pos, -1);
 	}
 }
 
 void set_current_sound_size(int size) {
 	decompose_int(active_sound_size, size);
-	decompose_int(frag_size, size/N_OF_FRAGS);
+	decompose_short(frag_size, size/N_OF_FRAGS);
+	decompose_short(next_ptr, 0);
 }
 
 int activate_sound(char *sound_array_ptr, int size) {
-	char offset = *next_ptr;
-	char *active_sound_ptr = sound_addr+offset*build_int(frag_size);
+	char offset = build_short(next_ptr);
+	char *active_sound_ptr = sound_addr+offset*build_short(frag_size);
 	int i;
 	for (i=0;i<size;i++) {
 		char sample = *sound_array_ptr;
@@ -126,11 +115,11 @@ int activate_sound(char *sound_array_ptr, int size) {
 	return offset;
 }
 
-void deactivate_sound(char *sound_array_ptr, int size, int offset) {
+void deactivate_sound(char *sound_array_ptr, int size, short offset) {
 	if (offset == -1) {
 		return;
 	}
-	char *active_sound_ptr = sound_addr+offset*build_int(frag_size);
+	char *active_sound_ptr = sound_addr+offset*build_short(frag_size);
 	int i;
 	for (i=0;i<size;i++) {
 		char sample = *sound_array_ptr;
@@ -146,34 +135,38 @@ void deactivate_sound(char *sound_array_ptr, int size, int offset) {
 }
 
 void kill_sound_process(void) {
-	decompose_int(looping_ptr, 0);
+	*looping_ptr = 0;
 }
 
 void loop_sound(void) {
 	*looping_ptr = 1;
 	while (*looping_ptr) {
-		int offset = build_int(next_ptr);
-		char *current_ptr = sound_addr+(offset*build_int(frag_size));
+		short offset = build_short(next_ptr);
+		short frag = build_short(frag_size);
+		char *current_ptr = sound_addr+(offset*frag);
 		offset++;
-		deactivate_expired_sounds(offset);
-		*next_ptr = offset%N_OF_FRAGS;
-		int write_success = write(fd_dsp, current_ptr, build_int(frag_size));
+		decompose_short(next_ptr,offset%N_OF_FRAGS);
+		int write_success = write(fd_dsp, current_ptr, frag);
 		if (write_success < 0) {
 			perror("Write: ");
 			exit(1);
 		}
+		if (offset == N_OF_FRAGS) {
+			deactivate_expired_sounds();
+		}
 	}
 }
 
-void deactivate_expired_sounds(int offset) {
-	if (offset == build_int(one_less_pos)) {
-		stop_sound(ONE_LESS);
+void deactivate_expired_sounds() {
+	clear_sound();
+	if (build_short(music_pos) != -1) {
+		activate_sound(music, music_size);
 	}
-	if (offset == build_int(one_more_pos)) {
-		stop_sound(ONE_MORE);
+	else if (build_short(intro_pos) != -1) {
+		activate_sound(intro, intro_size);
 	}
-	if (offset == build_int(hit_wall_pos)) {
-		stop_sound(HIT_WALL);
+	else if (build_short(victory_pos) != -1) {
+		activate_sound(victory, victory_size);
 	}
 }
 
@@ -207,12 +200,17 @@ int build_int(char *bytes) {
 	num += *bytes << 8;
 	bytes++;
 	num += *bytes;
-	//bytes-=3;
+	return num;
+}
+
+short build_short(char *bytes) {
+	short num = *bytes << 8;
+	bytes++;
+	num += *bytes;
 	return num;
 }
 
 void decompose_int(char *bytes, int data) {
-	
 	*bytes = data >> 24;
 	bytes++;
 	*bytes = data >> 16;
@@ -220,17 +218,18 @@ void decompose_int(char *bytes, int data) {
 	*bytes = data >> 8;
 	bytes++;
 	*bytes = data;
-	//bytes-=3;
+}
+
+void decompose_short(char *bytes, short data) {
+	*bytes = data >> 8;
+	bytes++;
+	*bytes = data;
 }
 
 void map_shared_memory(void) {
-	char sound_size_bytes[4];
-	decompose_int(sound_size_bytes, intro_size);
-	char frag_size_bytes[4];
-	decompose_int(frag_size_bytes, intro_size/N_OF_FRAGS);
-
+	
 	/* creating shared files */
-	size_t length_sound = intro_size;
+	size_t length_sound = music_size;
 	off_t offset = 0;
 	int prot = (PROT_READ | PROT_WRITE );
 	int flags = MAP_SHARED;
@@ -245,42 +244,45 @@ void map_shared_memory(void) {
 		printf("File seek error ocurred. Exiting program.\n");
 		exit(0);
 	}
-	/* write initial file data to set size files */
+	/* write initial file data to set file sizes */
 	char zeros[SAMPLES_60S];
 	int i;
 	for (i=0;i<length_sound;i++) {
 		zeros[i] = 0;
 	}
 	write(fd_sound, zeros, length_sound);
-	char next_bytes[4];
-	decompose_int(next_bytes, -1);
-	char one_less_bytes[4];
-	decompose_int(one_less_bytes, -1);
-	char one_more_bytes[4];
-	decompose_int(one_more_bytes, -1);
-	char hit_wall_bytes[4];
-	decompose_int(hit_wall_bytes, -1);
-	char victory_bytes[4];
-	decompose_int(victory_bytes, -1);
-	char intro_bytes[4];
-	decompose_int(intro_bytes, -1);
-	char music_bytes[4];
-	decompose_int(music_bytes, -1);
-	/* data is next fragment, looping, one_less_pos, one_more_pos, hit_wall_pos, victory_pos, intro_pos, music_pos, active_sound_size (decomposed into bytes) */
-	char counters[37] = {next_bytes[0],next_bytes[1],next_bytes[2],next_bytes[3],0,one_less_bytes[0],one_less_bytes[1],one_less_bytes[2],one_less_bytes[3],one_more_bytes[0],one_more_bytes[1],one_more_bytes[2],one_more_bytes[3],hit_wall_bytes[0],hit_wall_bytes[1],hit_wall_bytes[2],hit_wall_bytes[3],victory_bytes[0],victory_bytes[1],victory_bytes[2],victory_bytes[3],intro_bytes[0],intro_bytes[1],intro_bytes[2],intro_bytes[3],music_bytes[0],music_bytes[1],music_bytes[2],music_bytes[3],sound_size_bytes[0],sound_size_bytes[1],sound_size_bytes[2],sound_size_bytes[3],frag_size_bytes[0],frag_size_bytes[1],frag_size_bytes[2],frag_size_bytes[3]};
-	size_t length_counters = 37;
+	char next_bytes[2];
+	decompose_int(next_bytes,0);
+	char one_less_bytes[2];
+	decompose_int(one_less_bytes,-1);
+	char one_more_bytes[2];
+	decompose_int(one_more_bytes,-1);
+	char hit_wall_bytes[2];
+	decompose_int(hit_wall_bytes,-1);
+	char victory_bytes[2];
+	decompose_int(victory_bytes,-1);
+	char intro_bytes[2];
+	decompose_int(intro_bytes,-1);
+	char music_bytes[2];
+	decompose_int(music_bytes,-1);
+	char sound_size_bytes[4];
+	decompose_int(sound_size_bytes, music_size);
+	char frag_size_bytes[2];
+	decompose_int(frag_size_bytes, music_size/N_OF_FRAGS);
+	/* data is next fragment, one_less_pos, one_more_pos, hit_wall_pos, victory_pos, intro_pos, music_pos, active_sound_size (decomposed into bytes), looping, */
+	char counters[21] = {next_bytes[0],next_bytes[1],one_less_bytes[0],one_less_bytes[1],one_more_bytes[0],one_more_bytes[1],hit_wall_bytes[0],hit_wall_bytes[1],victory_bytes[0],victory_bytes[1],intro_bytes[0],intro_bytes[1],music_bytes[0],music_bytes[1],sound_size_bytes[0],sound_size_bytes[1],sound_size_bytes[2],sound_size_bytes[3],frag_size_bytes[0],frag_size_bytes[1],0};
+	size_t length_counters = 21;
 	int fd_counters = -1;
-
 	fd_counters = open("./shared_counters", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
 	if (fd_counters <= 0){
 		printf("File opening error ocurred. Exiting program.\n");
 		exit(0);
 	}
-	write(fd_counters, counters, length_counters);
 	if (lseek(fd_counters, length_counters-1, SEEK_SET) < 0) {
 		printf("File seek error ocurred. Exiting program.\n");
 		exit(0);
 	}
+	write(fd_counters, counters, length_counters);
 	pid_t childPID = fork();
 
 	/* child process */	
@@ -300,6 +302,13 @@ void map_shared_memory(void) {
 			exit(0);
 		}
 		map_pointers(counters_addr);
+		decompose_short(next_ptr,0);
+		decompose_short(music_pos,-1);
+		decompose_short(intro_pos,-1);
+		decompose_short(hit_wall_pos,-1);
+		decompose_short(one_more_pos,-1);
+		decompose_short(one_less_pos,-1);
+		decompose_short(victory_pos,-1);
 		loop_sound();
 		exit(1);
 	}
@@ -321,21 +330,22 @@ void map_shared_memory(void) {
 			exit(0);
 		}
 		map_pointers(counters_addr);
+		
 	}
 	printf("Shared sound data memory mapped.\n");
 }
 
-void map_pointers(void *counters_addr) {
-	next_ptr = counters_addr+=3;
-	looping_ptr = counters_addr++;
-	one_less_pos = counters_addr+=3;
-	one_more_pos = counters_addr+=3;
-	hit_wall_pos = counters_addr+=3;
-	victory_pos = counters_addr+=3;
-	intro_pos = counters_addr+=3;
-	music_pos = counters_addr+=3;
-	active_sound_size = counters_addr+=3;
-	frag_size = counters_addr;
+void map_pointers(char *counters_addr) {
+	next_ptr = counters_addr;
+	one_less_pos = counters_addr+2;
+	one_more_pos = counters_addr+4;
+	hit_wall_pos = counters_addr+6;
+	victory_pos = counters_addr+8;
+	intro_pos = counters_addr+10;
+	music_pos = counters_addr+12;
+	active_sound_size = counters_addr+14;
+	frag_size = counters_addr+18;
+	looping_ptr = counters_addr+20;
 }
 
 /* load sound samples from a file to an array */
@@ -360,7 +370,7 @@ int load_sound_from_file(char file_path[], char *sound_array_ptr) {
 }
 
 /* write sound samples to sound device */
-void write_sound_to_device(char *sound_array_ptr, int size) {
+/*void write_sound_to_device(char *sound_array_ptr, int size) {
 	int ready = -1;
 	while (!ready) {
 		ready = ioctl(fd_dsp, SOUND_PCM_SYNC, 0);
@@ -375,7 +385,7 @@ void write_sound_to_device(char *sound_array_ptr, int size) {
 	if (sync_success < 0) {
 		perror("Sync: ");
 	}
-}
+}*/
 
 int open_sound_driver(void) {
 	/* open driver file */

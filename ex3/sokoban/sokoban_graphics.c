@@ -39,9 +39,7 @@ int main (int argc, char *argv[]) {
 				debounce();
 				stop_sound(VICTORY);
 			}
-			
-		}
-		
+		}	
 	}
 	display_image(END);
 	kill_sound_process();
