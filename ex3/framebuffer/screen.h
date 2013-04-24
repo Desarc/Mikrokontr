@@ -3,7 +3,7 @@
 
 #define WIN 0
 #define SPLASH 1
-#define AGAIN 0
+#define END 0
 
 #define MAX_IMAGE_SIZE 76800
 #define MAX_BUFFER_SIZE (MAX_IMAGE_SIZE*3)
