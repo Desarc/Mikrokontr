@@ -26,7 +26,6 @@ void kill_sound_process(void);
 void map_shared_memory(void);
 void map_pointers(char *counters_addr);
 static int load_sound_from_file(char file_path[], char *sound_array_ptr);
-//static void write_sound_to_device(char *sound_array_ptr, int size);
 int open_sound_driver(void);
 void close_sound_driver(void);
 

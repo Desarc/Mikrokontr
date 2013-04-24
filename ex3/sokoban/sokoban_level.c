@@ -74,9 +74,7 @@ void increaseRemaining(void) {
 void decreaseRemaining(void) {
 	remaining--;
 	decrement_leds();
-	if (getRemaining() > 0) {
-		play_sound(ONE_LESS);	
-	}
+	play_sound(ONE_LESS);
 }
 
 /* select level, load it to the array, and initialize fields */
