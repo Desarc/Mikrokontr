@@ -3,6 +3,20 @@
 
 #define WIN 0
 #define SPLASH 1
+#define AGAIN 0
+
+#define MAX_IMAGE_SIZE 76800
+#define MAX_BUFFER_SIZE (MAX_IMAGE_SIZE*3)
+#define MAX_HEIGHT 240
+#define MAX_WIDTH 320
+#define TILE_SIZE_8 64
+#define TILE_SIZE_16 256
+#define TILE_SIZE_32 1024
+#define TILE_SIZE TILE_SIZE_16
+#define TILE_DIM_8 8
+#define TILE_DIM_16 16
+#define TILE_DIM_32 32
+#define TILE_DIM TILE_DIM_16
 
 void open_screen_driver(void);
 void close_screen_driver(void);

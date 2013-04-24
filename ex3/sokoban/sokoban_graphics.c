@@ -77,7 +77,6 @@ void playGame(void) {
 		int cmd = read_button_status();
 		if (cmd != NONE) {
 			performAction(cmd);
-			paintLevel();
 			debounce();
 			int remaining = getRemaining();
 			if (remaining == 0) {
@@ -86,6 +85,10 @@ void playGame(void) {
 			}
 		}
 	}
+}
+
+void tile_updated(char tile, int x, int y) {
+	display_tile(tile, x, y, TILE_DIM);
 }
 
 int mainMenu(void) {
@@ -152,7 +155,7 @@ void paintLevel(void) {
 	for (j = 0; j < dimY; j++) {
 		for (i = 0; i < dimX; i++) {
 			char tile = *level_ptr;
-			display_tile(tile, i, j, 16);
+			display_tile(tile, i, j, TILE_DIM);
 			level_ptr++;
 		}
 	}

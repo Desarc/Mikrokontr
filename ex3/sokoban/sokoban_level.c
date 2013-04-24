@@ -37,6 +37,7 @@ char setTile(int x, int y, char tile) {
 		posX = x;
 		posY = y;
 	}
+	tile_updated(tile, x, y);
 	return old;
 }
 

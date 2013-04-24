@@ -8,27 +8,19 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 
-#define MAX_IMAGE_SIZE 76800
-#define MAX_BUFFER_SIZE (MAX_IMAGE_SIZE*3)
-#define MAX_HEIGHT 240
-#define MAX_WIDTH 320
-#define TILE_SIZE_8 64
-#define TILE_SIZE_16 256
-#define TILE_SIZE_32 1024
-
 int fbfd = 0;
 char *fbp = 0;
 
 char win_image[MAX_IMAGE_SIZE][3];
 char splash_image[MAX_IMAGE_SIZE][3];
 
-char box_image[TILE_SIZE_16][3];
-char player_image[TILE_SIZE_16][3];
-char wall_image[TILE_SIZE_16][3];
-char blank_image[TILE_SIZE_16][3];
-char target_image[TILE_SIZE_16][3];
-char player_on_target_image[TILE_SIZE_16][3];
-char box_on_target_image[TILE_SIZE_16][3];
+char box_image[TILE_SIZE][3];
+char player_image[TILE_SIZE][3];
+char wall_image[TILE_SIZE][3];
+char blank_image[TILE_SIZE][3];
+char target_image[TILE_SIZE][3];
+char player_on_target_image[TILE_SIZE][3];
+char box_on_target_image[TILE_SIZE][3];
 
 void load_sokoban_images(void) {
 	/* load all sokoban images */
