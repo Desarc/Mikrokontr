@@ -224,6 +224,7 @@ void map_shared_memory(void) {
 	int fd_sound = -1;
 	fd_sound = open("./shared_sound", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
 	if (fd_sound <= 0){
+		printf("Foo");
 		printf("File opening error ocurred. Exiting program.\n");
 		exit(0);
 	}

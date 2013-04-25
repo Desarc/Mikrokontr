@@ -136,7 +136,8 @@ void performAction(int cmd) {
 	else if (cmd == BUTTON1) {
 		/* reset level */
 		reset_leds();
-		reset();		
+		reset();
+		paintLevel();	
 	}
 	else if (cmd == BUTTON0) {
 		/* go to main menu */
