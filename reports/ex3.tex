@@ -55,16 +55,18 @@ In the beginning we thought maybe this file had to be a kernel module as well, b
 From the previous exercise we learned how to handle sound in C which came in handy for the game sounds. We wanted the player to get good feedback through sound effects by telling the player when he does something right or wrong. Therefore we constructed a negative sound when you hit the wall or removed a crate from a target and a more positive sound when you push a crate on a target. 
 
 \subsection{Overview}
+
+
 \begin{figure}[H]
 \centering
-\includegraphics[scale=0.5]{images/blockdiagram.png}
+\includegraphics[scale=0.6]{images/blockdiagram.png}
 \caption{A block diagram overview of the complete game.}
 \label{fig:blockdiagram}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[scale=0.5]{images/programflow.png}
+\includegraphics[scale=0.6]{images/programflow.png}
 \caption{An overview of the main game flow.}
 \label{fig:programflow}
 \end{figure}
@@ -126,7 +128,7 @@ In order to interact with the development board we wrote two separate device dri
 
 \begin{figure}[H]
 \centering
-\includegraphics[scale=0.5]{images/devicedrivers.png}
+\includegraphics[scale=0.6]{images/devicedrivers.png}
 \caption{An overview of the device drivers we wrote in the kernel and user space.}
 \label{fig:devicedrivers}
 \end{figure}
@@ -139,16 +141,6 @@ In order to interact with the development board we wrote two separate device dri
 
 \subsubsection{Sound}
 
-
-\subsection{Debugging}
-Debugging.
-
-\begin{figure}[H]
-\centering
-\includegraphics[scale=0.4]{images/consolestart.png}
-\caption{Loading of device drivers and running the game from the console.}
-\label{fig:consolestart}
-\end{figure}
 
 \section{How to setup, build and play}
 \subsection{STK1000 setup}
@@ -172,22 +164,23 @@ In the \textit{sokoban} directory, edit the \textit{Makefile} and again edit the
 \subsection{Run instructions}
 Connect to the board with \textit{Minicom} as described in the compendium. Run the \textit{drivers\_load.sh} script to load the drivers. Then to start the game, simply run the \textit{sokoban} executable. See figure~\ref{fig:consolestart} for the console output if the drivers and the game run successfully. 
 
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.4]{images/consolestart.png}
+\caption{Loading of device drivers and running the game from the console.}
+\label{fig:consolestart}
+\end{figure}
+
 \section{Results}
-\subsection{Description} 
-This exercise resulted in a working Sokoban game on the STK1000 development board displayed. The game is played by using the buttons as controllers to move around in the game which is displayed on the LCD screen. In addition to a general "arrow key" setup, there is also a possibility to undo and redo with the buttons. For a quick view of how the game operates see our gameplay video on Youtube\cite{youtube}.
+\subsection{Game} 
+This exercise resulted in a working Sokoban game on the STK1000 development board. The game is played by using the buttons as a controller to move around in the game which is displayed on the LCD screen. In addition to a general "arrow key" setup, there is also a possibility to undo and redo with the buttons. For a quick view of how the game operates see our gameplay video on Youtube\cite{youtube}. At the start of the program you are prompted with a main menu where you can choose between 8 different levels. After finishing a level you have the option to go back to the main menu or press \textit{SW7} to end the game.
 
-\subsection{Feedback}There are sounds and LEDs to help you understand the game play better through audiovisual feedback. The LEDs show how many crates you have left in the game, and when you win all LEDs will blink several times.
-
-\subsection{Levels}
-We 
-
-\subsection{Sounds}There are sounds for the start of the game, when you place a crate on a target, when you remove a crate from a target, when you hit a wall and when you win. When you win there will also be a splash screen telling you that you've won. 
-
-\subsection{Game play}
-In regards to the game play we have movement in four directions, the ability to push crates, disability to walk through walls, and the ability to undo and redo. 
+\subsection{LEDs and sounds}
+We've used the LEDs to show how many boxes there are left that need to be moved. If you complete a level the lights will also blink and display a splash screen. As for sounds, we have intro music in the main menu, background music while playing and song for when you win. These all continue looping. Also, while playing there are sound effects for when you move, push boxes on targets, and hit a wall.
 
 \subsection{Game controls}
-The controls of the game are listed below in table~\ref{tab:gamecontrols}. 
+The setup of the buttons are not ideal for playing the game, but for those who are familiar with the Unix layout for arrow keys first used in Vi text editor, it will be easy to play. The controls of the game are listed below in table~\ref{tab:gamecontrols}. 
+
 \begin{table}[H]
 \centering
 \begin{tabular}{|l|l|}
@@ -199,14 +192,12 @@ The controls of the game are listed below in table~\ref{tab:gamecontrols}.
 \hline SW3 & Undo move \\ 
 \hline SW2 & Redo move \\ 
 \hline SW1 & Reset level \\ 
-\hline SW0 & Main menu \\
+\hline SW0 (x2) & Main menu \\
 \hline 
 \end{tabular}
 \caption{Game controls} 
 \label{tab:gamecontrols}
 \end{table}
-
-\subsection{Technical aspects}Technically the resulting game is written in C code on top of a Linux operating system. To manage the LEDs and buttons we have written two corresponding Linux drivers that operates as interfaces between the STK1000 development board and Linux. 
 
 \section{Tests}
 \subsection{Description}
@@ -252,20 +243,10 @@ Below is a table of the different tests we ran, the preconditions and the result
 \newpage
 
 \section{Evaluation of assignment}
-We found it interesting to learn more about the inner workings of Linux and how a device driver is written. 
-
-We had quite a lot of problems with getting Linux running on the STK1000 development board. This was much due to the guide we got didn't really seem to work, at least no one that we talked to made it work by following that guide. Another group posted a different guide that worked for us. But in general this wasted much time for us and should be improved. 
+We found it interesting to learn more about the inner workings of Linux and how a device driver is written. We spent quite some time getting Linux to run on the STK1000 development board. This was much due to the original guide on the course site and Itslearning didn't really seem to work. At least no one that we talked to made it work by following that guide. After working together with another group who wrote the other guide posted later on Itslearning, we finally got it to work. 
 
 \section{Conclusion}
-During this exercise we have learned how to write Linux device drivers,install Linux on a STK1000 development board and implement a game on top of it. 
-
-%Det bør nok vær noge i mellom her
-
-
-We learned quite a bit about how image files like bitmap is built up since we used this image format for loading images. In our \textit{framebuffer.c} we had to read the image files correctly and then place them correctly in the memory map presentation of Linux' framebuffer. 
-
-
-The setup of the buttons are not ideal for playing the game as it is not very intuitive. But for those who are familiar with the unix layout for arrow keys first used in vi text editor, it will be easy to play. In general most people are able to quickly learn how to move with a little bit of training, and the speed is not essential for this game. The main bottleneck of the speed would probably be the players brain since it is a puzzle game.
+During this exercise we have learned how to write Linux device drivers, how to run a Linux-variant on the STK1000 development board and implement a game in C on top of it. Most of the time was spent writing the drivers for controlling the LEDs and getting input from the buttons and also trying to interface with the other devices for the LCD and sound. 
 
 \footnotesize{  % This makes the Reference items print in footnotesize fonts
 \begin{thebibliography}{N}
