@@ -118,13 +118,16 @@ char level1[] = "######@$.######";
 \label{fig:level1}
 \end{figure}
 
+\subsubsection{Game logic}
+
+
 \subsection{Drivers}
-In order to interact with the development board we wrote two separate device drivers. One for the LEDs and one for the buttons. 
+In order to interact with the development board we wrote two separate device drivers. One for the LEDs and one for the buttons. In addition we used the framebuffer device to display images on the LCD and for sound we used the built in sound driver in Linux.
 
 \begin{figure}[H]
 \centering
 \includegraphics[scale=0.5]{images/devicedrivers.png}
-\caption{An overview of the device drivers in the kernel and user space.}
+\caption{An overview of the device drivers we wrote in the kernel and user space.}
 \label{fig:devicedrivers}
 \end{figure}
 
@@ -132,17 +135,20 @@ In order to interact with the development board we wrote two separate device dri
 
 \subsubsection{Buttons}
 
+\subsubsection{LCD}
+
+\subsubsection{Sound}
+
+
 \subsection{Debugging}
+Debugging.
+
 \begin{figure}[H]
 \centering
 \includegraphics[scale=0.4]{images/consolestart.png}
 \caption{Loading of device drivers and running the game from the console.}
 \label{fig:consolestart}
 \end{figure}
-
-%State diagrams
-
-%Here is a screenshot (Figure 2) showing us debugging our \emph{generateTriangle} function which generates triangle sound wave samples. More specifically we check that the values we get from each part of our (complex) mathematical expression are valid. 
 
 \section{How to setup, build and play}
 \subsection{STK1000 setup}
@@ -204,7 +210,6 @@ The controls of the game are listed below in table~\ref{tab:gamecontrols}.
 
 \section{Tests}
 \subsection{Description}
-
 We've created a few test scenarios in order to test different aspects of our game functionality. The tests were conducted by a person interacting with the switches and looking at the LCD screen, wearing a headset. Another person logged the results of the test. The main equipment was the STK1000 development board and a headset with the main focus on the LCD screen. The jumpers of the board were set as specified in the compendium (section 4.2) \cite{komp}. The GPIO was set up with both LEDs and switches connected to B as follows: LEDs on 8-15, switches on 0-7. 
 
 \subsection{Results}
