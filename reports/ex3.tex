@@ -39,7 +39,7 @@ In this assignment the goal is to program a simple computer game in C for an AVR
 
 \section{Introduction}
 In this exercise we start out with installing linux on the STK1000 development board from the SD card. We are now able to write C code that benefits from linux functions. %Greit nok formulert?  
-To be able to communicate with the LEDs and the buttons on the STK1000 development board we write a pair of drivers for linux with great help from "Linux Device Drivers, Third Edition" \cite{ldd}
+To be able to communicate with the LEDs and the buttons on the STK1000 development board we write a pair of drivers for linux with great help from \textit{"Linux Device Drivers, Third Edition"} \cite{ldd}
 
 
 \section{Description and methodology}
@@ -49,7 +49,7 @@ To be able to communicate with the LEDs and the buttons on the STK1000 developme
 %Nevne uboot og bootloader
 First off we started out with trying to install linux on the STK1000 development board. This turned out to be a tricky affair. We had a step by step guide for compiling linux that we followed, but with no luck. Luckily there was mentioned an image of a precompiled linux that we could extract to the SD card. After some mixing back and forth with environment variables from the other u-boot.bin file(from itslearning) into the one we were using we finally started to get somewhere. Another group posted a guide on itslearning that worked for us.
 
-Once we had linux up and running we started out with a simple "Hello world" program to verify that things were working. Now we started out with programming a driver for the LEDs. We sometimes thought we had found the solution, but we still hadn't figured it out correctly. We gave the LED driver a pause and started to communicate with the frame buffer in linux. 
+Once we had linux up and running we started out with a simple "Hello world" program to verify that things were working. Now we started out with programming a driver for the LEDs. We sometimes thought we had found the solution, but we weren't quite right yet. We gave the LED driver a pause and started to communicate with the frame buffer in linux instead. 
 
 First off we thought maybe this file had to be a kernel module as well, but we soon understood that we needed access to quite a few libraries to make the memory mapping work. We started with generating a random bit values for the display and went on with more logical values, for example a third of the screen was made red. As we tried to read bit values from an image of the file format bitmap, we started to see that there were some errors in regards to how we read the file. After a lot of trial and error in addition to googling we finally managed to display the image files properly. We organized the entire screen into a grid of 20 by 15 tiles built up of 16 by 16 pixels for each tile. This made it easy to map the \textit{charmap} to the images and render the levels on the LCD scren. It is also a fairly convenient size for the game when it comes to the variety of the sizes of each level.
 
@@ -173,27 +173,32 @@ Below is a table of the different tests we ran, the preconditions and the result
 \begin{center}
 \footnotesize
 \renewcommand{\arraystretch}{1.25} %vertical cell padding
-\begin{tabular}[pos]{|m{45pt}|m{80pt}|m{90pt}|m{105pt}|m{60pt}|}
-\hline  \textbf{Name} & \textbf{Description} & \textbf{Conditions} & \textbf{Expected} & \textbf{Results} \\ 
+\begin{tabular}[pos]{|m{35pt}|m{45pt}|m{80pt}|m{90pt}|m{105pt}|m{40pt}|}
+\hline \textbf{Number} & \textbf{Name} & \textbf{Description} & \textbf{Conditions} & \textbf{Expected} & \textbf{Results} \\ 
 
-\hline Steady-state test & Power is on and the main program is running & The board has been programmed and powered on & The board is powered and no LEDs or sounds should be on & Passed \\
+\hline 1 & Steady-state test & Power is on and the main program is running & The board has been programmed and powered on & The board is powered and no LEDs or sounds should be on & Passed \\
 
-\hline Left & Player is moved left & A level is loaded and there is free space to the left of the player & Player moves to the left when \emph{SW7} is pressed.  & Passed \\
+\hline 2 & Left & Player is moved left & A level is loaded and there is free space to the left of the player & Player moves to the left when \emph{SW7} is pressed.  & Passed \\
 
-\hline Down & Player is moved down & A level is loaded and there is free space beneath the player & Player moves down when \emph{SW6} is pressed.  & Passed \\
+\hline 3 & Down & Player is moved down & A level is loaded and there is free space beneath the player & Player moves down when \emph{SW6} is pressed.  & Passed \\
 
-\hline Up & Player is moved up & A level is loaded and there is free space above the player & Player moves up when \emph{SW5} is pressed.  & Passed \\
+\hline 4 & Up & Player is moved up & A level is loaded and there is free space above the player & Player moves up when \emph{SW5} is pressed.  & Passed \\
 
-\hline Right & Player is moved right & A level is loaded and there is free space to the right of the player & Player moves to the right when \emph{SW4} is pressed.  & Passed \\
+\hline 5 & Right & Player is moved right & A level is loaded and there is free space to the right of the player & Player moves to the right when \emph{SW4} is pressed.  & Passed \\
 
-\hline Undo & The last move is undone & At least one move is made & The last move is undone when \emph{SW3} is pressed.  & Passed \\
+\hline 6 & Undo & The last move is undone & At least one move is made & The last move is undone when \emph{SW3} is pressed.  & Passed \\
 
-\hline Redo & The last undo is undone & Undo must have been done as the previous move. & The undone move is redone when \emph{SW2} is pressed.  & Passed \\
+\hline 7 & Redo & The last undo is undone & Undo must have been done as the previous move. & The undone move is redone when \emph{SW2} is pressed.  & Passed \\
 
-\hline Reset level & The loaded level is reset & A level must have been loaded and the game may or may not have been initialized & Level is reset when \emph{SW1} is pressed.  & Passed \\
+\hline 8 &  Reset level & The loaded level is reset & A level must have been loaded and the game may or may not have been initialized & Level is reset when \emph{SW1} is pressed.  & Passed \\
 
-\hline Return to main menu & Main menu is displayed & Sokoban is loaded?? & Main menu is displayed when \emph{SW0} is pressed.  & Passed \\
+\hline 9 & Return to main menu & Main menu is displayed & Sokoban has been loaded. & Main menu is displayed when \emph{SW0} is pressed.  & Passed \\
 
+\hline 10 & Return to main menu & Main menu is displayed & Sokoban is loaded and a game has been won. & Main menu is displayed when \emph{SW0} is pressed.  & Passed \\
+
+\hline 11 & Undo after reset & Nothing happens & A sokoban level is loaded and the game may or may not have been initialized. & Nothing is supposed to happen.  & Passed \\
+
+\hline 12 & Redo after reset & Nothing happens & A sokoban level is loaded and the game may or may not have been initialized. & Nothing is supposed to happen.  & Passed \\
 
 \hline 
 \end{tabular} 
@@ -201,17 +206,18 @@ Below is a table of the different tests we ran, the preconditions and the result
 
 \newpage
 
+
 \section{Evaluation of assignment}
 We found it interesting to learn more about the inner workings of linux and how a device driver is written. 
 
 We had quite a lot of problems with getting linux operational. This was much due to the guide we got didn't really seem to work, at least no one that we talked to made it work through following that guide. Another group posted a different guide that we managed to get working. But in general this wasted much time for us and should be improved. 
 
 \section{Conclusion}
+During this exercise we have gained better insight..
 %We learned how to generate and play different sounds in C. This will be helpful when we start coding the next assignment. In the end we have four different sounds. Three short sound effects and one melody. 
 
 \footnotesize{  % This makes the Reference items print in footnotesize fonts
 \begin{thebibliography}{N}
-
 \bibitem{ldd} Linux Device Drivers, Third Edition. Retrieved 04.04.13.
 \url{http://http://lwn.net/Kernel/LDD3/}
 
