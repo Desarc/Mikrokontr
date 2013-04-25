@@ -30,7 +30,7 @@ TDT4258 Energy Efficient Computer Design \\}
 \maketitle
 
 \begin{abstract}
-In this assignment the goal is to program a simple computer game in C for an AVR32 microcontroller running Linux. To accomplish one needs to understand and write Linux device drivers for I/O. We therefore wrote our own drivers for operating LEDs and switches on the development board. The game we chose to implement is a simple puzzle game called Sokoban.
+In this assignment the goal is to program a simple computer game in C for an AVR32 micro controller running Linux. To accomplish this one needs to understand and write Linux device drivers for I/O. We therefore wrote our own drivers for operating LEDs and switches on the development board. The game we chose to implement is a simple puzzle game called Sokoban.
 \end{abstract}
 
 \bigskip
@@ -38,43 +38,35 @@ In this assignment the goal is to program a simple computer game in C for an AVR
 \newpage
 
 \section{Introduction}
-In this exercise we start out with installing linux on the STK1000 development board from the SD card. We are now able to write C code that benefits from linux functions. %Greit nok formulert?  
-To be able to communicate with the LEDs and the buttons on the STK1000 development board we write a pair of drivers for linux with great help from \textit{"Linux Device Drivers, Third Edition"} \cite{ldd}
+In this exercise we start out with installing Linux on the STK1000 development board from the SD card. We are now able to write C code that benefits from Linux functions. %Greit nok formulert?  
+To be able to communicate with the LEDs and the buttons on the STK1000 development board we wrote a pair of drivers for Linux with great help from \textit{"Linux Device Drivers, Third Edition"} \cite{ldd}
 
 
 \section{Description and methodology}
-
 \textbf{Forrige rapport: organize report better (overview and block diagram before description of code fragments and functions). Ergo, block diagram her?}\\
 
 %Nevne uboot og bootloader
-First off we started out with trying to install linux on the STK1000 development board. This turned out to be a tricky affair. We had a step by step guide for compiling linux that we followed, but with no luck. Luckily there was mentioned an image of a precompiled linux that we could extract to the SD card. After some mixing back and forth with environment variables from the other u-boot.bin file(from itslearning) into the one we were using we finally started to get somewhere. Another group posted a guide on itslearning that worked for us.
+First off we started out with trying to install Linux on the STK1000 development board. This turned out to be a tricky affair. We had a step by step guide for compiling Linux that we followed, but with no luck. Luckily there was mentioned an image of a precompiled Linux that we could extract to the SD card. After some mixing back and forth with environment variables from the other u-boot.bin file(from Itslearning) into the one we were using we finally started to get somewhere. Another group posted a guide on Itslearning that worked for us.
 
-Once we had linux up and running we started out with a simple "Hello world" program to verify that things were working. Now we started out with programming a driver for the LEDs. We sometimes thought we had found the solution, but we weren't quite right yet. We gave the LED driver a pause and started to communicate with the frame buffer in linux instead. 
+Once we had Linux up and running we started out with a simple "Hello world" program to verify that things were working. Now we started out with programming a driver for the LEDs. We sometimes thought we had found the solution, but we weren't quite right yet. We gave the LED driver a pause and started to communicate with the frame buffer in Linux instead. 
 
-First off we thought maybe this file had to be a kernel module as well, but we soon understood that we needed access to quite a few libraries to make the memory mapping work. We started with generating a random bit values for the display and went on with more logical values, for example a third of the screen was made red. As we tried to read bit values from an image of the file format bitmap, we started to see that there were some errors in regards to how we read the file. After a lot of trial and error in addition to googling we finally managed to display the image files properly. We organized the entire screen into a grid of 20 by 15 tiles built up of 16 by 16 pixels for each tile. This made it easy to map the \textit{charmap} to the images and render the levels on the LCD scren. It is also a fairly convenient size for the game when it comes to the variety of the sizes of each level.
+First off we thought maybe this file had to be a kernel module as well, but we soon understood that we needed access to quite a few libraries to make the memory mapping work. We started with generating a random bit values for the display and went on with more logical values, for example a third of the screen was made red. As we tried to read bit values from an image of the file format bitmap, we started to see that there were some errors in regards to how we read the file. After a lot of trial and error we finally managed to display the image files properly. We organized the screen into a grid of 20 by 15 tiles built up of 16 by 16 pixels for each tile. This made it easy to map the \textit{charmap} to the images and render the levels on the LCD screen. It is also a fairly convenient size for the game when it comes to the variety of the sizes of each level.
 
-From the previous exercise we learnt how to handle sound in C which came in handy for the game sounds. We wanted the player to get good feedback through sound effects by telling the player when he does something right or wrong. Therefore we constructed a negative sound when you hit the wall or removed a crate from a target and a more positive sound when you push a crate on a target. 
+From the previous exercise we learned how to handle sound in C which came in handy for the game sounds. We wanted the player to get good feedback through sound effects by telling the player when he does something right or wrong. Therefore we constructed a negative sound when you hit the wall or removed a crate from a target and a more positive sound when you push a crate on a target. 
 
 \subsection{The game}
 \subsubsection{Sokoban}
-The game we chose to implement was a simple top-down puzzle game called \textit{Sokoban}\cite{sokoban}. The point of the game is for the player to push boxes onto marked goal squares. The levels are small maps confined by walls which cannot be walked through. The puzzle is solved when all the boxes are on the goal squares. We had some previous experience of implementing this game in Java in the course TDT4100: Object Oriented Programming. We therefore chose to port it to C. See Figure~\ref{fig:sokobanscreen} for a screenshot of another implementation of Sokoban.
+The game we chose to implement was a simple top-down puzzle game called \textit{Sokoban}\cite{sokoban}. The point of the game is for the player to push boxes onto marked goal squares. The levels are small maps confined by walls which cannot be walked through. The puzzle is solved when all the boxes are on the goal squares. We had some previous experience of implementing this game in Java in the course TDT4100: Object Oriented Programming. We therefore chose to port it to C. See figure~\ref{fig:sokobanscreen} for a screenshot of a level in Sokoban.
 
 \begin{figure}[H]
 \centering
-\includegraphics[scale=0.6]{images/sokobanscreen.png}
-\caption{A screenshot of Sokoban.}
+\includegraphics[scale=0.4]{images/sokobanscreen.png}
+\caption{A screenshot of a level in Sokoban.}
 \label{fig:sokobanscreen}
 \end{figure}
 
-\begin{figure}[H]
-\centering
-\includegraphics[scale=0.6]{images/sokobanmainmenu.png}
-\caption{A screenshot of Sokoban at the main menu.}
-\label{fig:sokobanmainmenu}
-\end{figure}
-
 \subsubsection{Levels}
-The levels are defined by it's dimensions and an array of characters of the different elements. For more information see the level format page on Sokoban Wiki \cite{sokobanlevel}. See Table~\ref{tab:levelformat} for the level format we use. The first level is defined in Figure~\ref{fig:leveldef} and is the simplest solvable level. The only move available is to push the box to the left.
+The levels are defined by it's dimensions and an array of characters of the different elements. For more information see the level format page on Sokoban Wiki \cite{sokobanlevel}. The  table~\ref{tab:levelformat} shows the level format we used. For an example of how the levels are designed, see figure~\ref{fig:leveldef}. This level 1 and it is the simplest solvable level. The only move available is to push the box to the left. Figure~\ref{fig:level1} shows how it looks on the STK1000.
 
 \begin{table}[H]
 \centering
@@ -99,18 +91,77 @@ The levels are defined by it's dimensions and an array of characters of the diff
 #define level1dimX 5
 #define level1dimY 3
 char level1[] = "######@$.######";
-
-// The level above looks like this when formatted.
-#####
-#@$.#
-#####
 \end{lstlisting}
-\caption{Definition of the first level.}
+\caption{Definition of the level 1.}
 \label{fig:leveldef}
 \end{figure}
 
-\subsubsection{Controls}
-The controls of the game are listed in Table~\ref{tab:gamecontrols}. 
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.5]{images/level1.png}
+\caption{Level 1 running on the STK1000.}
+\label{fig:level1}
+\end{figure}
+
+\subsubsection{Game logic}
+
+\subsection{Drivers}
+In order to interact with the development board we wrote two separate device drivers. One for the LEDs and one for the buttons. 
+\subsubsection{LEDs}
+
+\subsubsection{Buttons}
+
+\subsection{Debugging}
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.4]{images/consolestart.png}
+\caption{Loading of device drivers and running the game from the console.}
+\label{fig:consolestart}
+\end{figure}
+
+%State diagrams
+
+%Here is a screenshot (Figure 2) showing us debugging our \emph{generateTriangle} function which generates triangle sound wave samples. More specifically we check that the values we get from each part of our (complex) mathematical expression are valid. 
+
+\section{How to setup, build and play}
+\subsection{STK1000 setup}
+Make sure that all the jumpers and cables are connected as described in section 4.3.3 in the TDT4258 Compendium \cite{komp}.
+In addition, use the following setup for the GPIO, buttons and LEDs.
+
+\begin{itemize}
+\item Connect J1 to Switches
+\item Connect J2 to Buttons
+\end{itemize}
+
+\subsection{Build instructions}
+We've setup our build environment to automatically upload the necessary files to the development board. Should you want upload and run the compiled binaries yourself, then simply upload the files found in the \textit{bin} directory to the \textit{root} directory of the board and continue with the run instruction.
+
+\paragraph{Drivers}
+In the \textit{driver} directory, edit the \textit{compile\_and\_upload\_drivers.sh} script and set the correct IP address of the board. Then run the script which compiles and uploads them.
+
+\paragraph{Game}
+In the \textit{sokoban} directory, edit the \textit{Makefile} and again edit the IP of the board. Then run \textit{make} and \textit{make send}.
+
+\subsection{Run instructions}
+Connect to the board with \textit{Minicom} as described in the compendium. Run the \textit{drivers\_load.sh} script to load the drivers. Then to start the game, simply run the \textit{sokoban} executable. See figure~\ref{fig:consolestart} for the console output if the drivers and the game runs successfully. 
+
+\section{Results}
+\subsection{Description} 
+
+This exercise resulted in a working Sokoban game on the STK1000 development board displayed. The game is played by using the buttons as controllers to move around in the game which is displayed on the LCD screen. In addition to a general "arrow key" setup, there is also a possibility to undo and redo with the buttons. For a quick view of how the game operates see our gameplay video on Youtube\cite{youtube}.
+
+\subsection{Feedback}There are sounds and LEDs to help you understand the game play better through audiovisual feedback. The LEDs show how many crates you have left in the game, and when you win all LEDs will blink several times.
+
+\subsection{Levels}
+We 
+
+\subsection{Sounds}There are sounds for the start of the game, when you place a crate on a target, when you remove a crate from a target, when you hit a wall and when you win. When you win there will also be a splash screen telling you that you've won. 
+
+\subsection{Game play}
+In regards to the game play we have movement in four directions, the ability to push crates, disability to walk through walls, and the ability to undo and redo. 
+
+\subsection{Game controls}
+The controls of the game are listed below in table~\ref{tab:gamecontrols}. 
 \begin{table}[H]
 \centering
 \begin{tabular}{|l|l|}
@@ -122,45 +173,14 @@ The controls of the game are listed in Table~\ref{tab:gamecontrols}.
 \hline SW3 & Undo move \\ 
 \hline SW2 & Redo move \\ 
 \hline SW1 & Reset level \\ 
-\hline SW0 & Display win screen \\ 
+\hline SW0 & Main menu \\
 \hline 
 \end{tabular}
 \caption{Game controls} 
 \label{tab:gamecontrols}
 \end{table}
 
-\subsection{Drivers}
-\subsubsection{LEDs}
-
-\subsubsection{Buttons}
-
-
-
-\subsection*{Debugging}
-%State diagrams
-
-
-
-%Here is a screenshot (Figure 2) showing us debugging our \emph{generateTriangle} function which generates triangle sound wave samples. More specifically we check that the values we get from each part of our (complex) mathematical expression are valid. 
-
-\begin{center}
-\includegraphics{images/debugsmall.png}
-Figure 2: Debugging the \emph{generateTriangle} function
-\end{center}
-
-\section{Results}
-\subsection{Description} 
-
-This exercise resulted in a working sokoban game on the STK1000 development board displayed. The game is played by using the buttons as controllers to move around in the game which is displayed on the LCD screen. In addition to a general "arrow key" setup, there is also a possibility to undo and redo with the buttons. 
-
-\subsection{Feedback}There are sounds and LEDs to help you understand the game play better through audiovisual feedback. The LEDs show how many crates you have left in the game, and when you win all LEDs will blink several times to emphasize your epic win.
-
-\subsection{Sounds}There are sounds for the start of the game, when you place a crate on a target, when you remove a crate from a target, when you hit a wall and when you win. When you win there will also be a splash screen telling you that you've won. 
-
-\subsection{Game play}
-In regards to the game play we have movement in four directions, the ability to push crates, disability to walk through walls, and the ability to undo and redo. 
-
-\subsection{Technical aspects}Technically the resulting game is written in C code on top of a linux operating system. To manage the LEDs and buttons we have written two corresponding linux drivers that operates as interfaces between the STK1000 development board and linux. 
+\subsection{Technical aspects}Technically the resulting game is written in C code on top of a Linux operating system. To manage the LEDs and buttons we have written two corresponding Linux drivers that operates as interfaces between the STK1000 development board and Linux. 
 
 \section{Tests}
 \subsection{Description}
@@ -171,7 +191,7 @@ We've created a few test scenarios in order to test different aspects of our gam
 Below is a table of the different tests we ran, the preconditions and the results. 
 
 \begin{center}
-\footnotesize
+\scriptsize
 \renewcommand{\arraystretch}{1.25} %vertical cell padding
 \begin{tabular}[pos]{|m{35pt}|m{45pt}|m{80pt}|m{90pt}|m{105pt}|m{40pt}|}
 \hline \textbf{Number} & \textbf{Name} & \textbf{Description} & \textbf{Conditions} & \textbf{Expected} & \textbf{Results} \\ 
@@ -206,11 +226,10 @@ Below is a table of the different tests we ran, the preconditions and the result
 
 \newpage
 
-
 \section{Evaluation of assignment}
-We found it interesting to learn more about the inner workings of linux and how a device driver is written. 
+We found it interesting to learn more about the inner workings of Linux and how a device driver is written. 
 
-We had quite a lot of problems with getting linux operational. This was much due to the guide we got didn't really seem to work, at least no one that we talked to made it work through following that guide. Another group posted a different guide that we managed to get working. But in general this wasted much time for us and should be improved. 
+We had quite a lot of problems with getting Linux operational. This was much due to the guide we got didn't really seem to work, at least no one that we talked to made it work through following that guide. Another group posted a different guide that we managed to get working. But in general this wasted much time for us and should be improved. 
 
 \section{Conclusion}
 During this exercise we have gained better insight..
@@ -221,20 +240,22 @@ During this exercise we have gained better insight..
 \bibitem{ldd} Linux Device Drivers, Third Edition. Retrieved 04.04.13.
 \url{http://http://lwn.net/Kernel/LDD3/}
 
-\bibitem{sokoban} Description of the game Sokoban on Sokoban Wiki . Retrieved 23.04.13.
+\bibitem{sokoban} Description of the game Sokoban on Sokoban Wiki. Retrieved 23.04.13.
 \url{http://www.sokobano.de/wiki/index.php?title=The_rules_of_the_game}
 
 \bibitem{sokobanlevel} Description of Sokobon levels on Sokoban Wiki. Retrieved 23.04.13.
 \url{http://www.sokobano.de/wiki/index.php?title=Level_format}
 
-\bibitem{avrdoc} AVR32 Architecture Document
+\bibitem{avrdoc} AVR32 Architecture Document.
 \url{http://www.atmel.com/images/doc32000.pdf}
 
-\bibitem{stkdoc} AT32AP7000 Datasheet
+\bibitem{stkdoc} AT32AP7000 Datasheet.
 \url{http://www.atmel.com/Images/doc32003.pdf}
 
-\bibitem{komp} TDT4258 Compendium
+\bibitem{komp} TDT4258 Compendium.
 \url{http://www.idi.ntnu.no/emner/tdt4258/_media/kompendium.pdf}
+
+\bibitem{youtube} Video of the Sokoban gameplay on Youtube. \url{https://www.youtube.com/watch?v=E7rSl4hEsEI}
 
 \end{thebibliography}  
 }
