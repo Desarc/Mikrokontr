@@ -43,9 +43,8 @@ To be able to communicate with the LEDs and the buttons on the STK1000 developme
 
 
 \section{Description and methodology}
-\textbf{Forrige rapport: organize report better (overview and block diagram before description of code fragments and functions). Ergo, block diagram her?}\\
 
-%Nevne uboot og bootloader
+%Nevne uboot og bootloader?
 First off we started out with trying to install Linux on the STK1000 development board. This turned out to be a tricky affair. We had a step by step guide for compiling Linux that we followed, but with no luck. Luckily there was mentioned an image of a precompiled Linux that we could extract to the SD card. After some mixing back and forth with environment variables from the other \textit{u-boot.bin} file(from itslearning) into the one we were using we finally started to get somewhere. Another group posted a guide on itslearning that worked for us.
 
 Once we had Linux up and running we started out with a simple "Hello world" program to verify that things were working. Now we started out with programming a driver for the LEDs. We sometimes thought we had found the solution regarding how to turn the LEDs on or off, but we weren't quite right yet. We gave the LED driver a pause and started to communicate with the frame buffer in Linux instead. 
@@ -179,7 +178,7 @@ This exercise resulted in a working Sokoban game on the STK1000 development boar
 \subsection{Feedback}There are sounds and LEDs to help you understand the game play better through audiovisual feedback. The LEDs show how many crates you have left in the game, and when you win all LEDs will blink several times.
 
 \subsection{Levels}
-We 
+We implemented 8 levels since we only have 8 buttons available. Those levels should provide the player with a nice introduction to the game. 
 
 \subsection{Sounds}There are sounds for the start of the game, when you place a crate on a target, when you remove a crate from a target, when you hit a wall and when you win. When you win there will also be a splash screen telling you that you've won. 
 
