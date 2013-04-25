@@ -27,12 +27,13 @@ TDT4258 Energy Efficient Computer Design \\}
 
 \begin{document}
 \maketitle
+\bigskip\bigskip\bigskip\bigskip\bigskip\bigskip\bigskip\bigskip\bigskip
 
 \begin{abstract}
 In this assignment the goal is to program a simple computer game in C on a Linux-variant which runs on an AVR STK1000 development board. To accomplish this one needs to understand and write Linux device drivers for I/O. We therefore wrote our own drivers for operating LEDs and switches on the development board. The game we chose to implement is a simple puzzle game called Sokoban which used these drivers.
 \end{abstract}
 
-\bigskip
+\newpage
 \tableofcontents
 \newpage
 
@@ -138,6 +139,7 @@ In order to interact with the development board we wrote two separate device dri
 \subsubsection{Sound}
 
 \subsection{Debugging}
+During the development of the drivers we often ran into various issues. As we now had a terminal we opted to make sure to print out the program state often in order to track down bugs. We also took care to check and exit the program when we were reading image and sound files. Figure~\ref{fig:consolestart} shows the terminal output of a successful load of the drivers and a run through of level 1 of the game.
 
 \begin{figure}[H]
 \centering
