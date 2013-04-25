@@ -55,8 +55,7 @@ First off we thought maybe this file had to be a kernel module as well, but we s
 
 From the previous exercise we learnt how to handle sound in C which came in handy for the game sounds. We wanted the player to get good feedback through sound effects by telling the player when he does something right or wrong. Therefore we constructed a negative sound when you hit the wall or removed a crate from a target and a more positive sound when you push a crate on a target. 
 
-
-\subsection{Game}
+\subsection{The game}
 \subsubsection{Sokoban}
 The game we chose to implement was a simple top-down puzzle game called \textit{Sokoban}\cite{sokoban}. The point of the game is for the player to push boxes onto marked goal squares. The levels are small maps confined by walls which cannot be walked through. The puzzle is solved when all the boxes are on the goal squares. We had some previous experience of implementing this game in Java in the course TDT4100: Object Oriented Programming. We therefore chose to port it to C. See Figure~\ref{fig:sokobanscreen} for a screenshot of another implementation of Sokoban.
 
@@ -73,7 +72,6 @@ The game we chose to implement was a simple top-down puzzle game called \textit{
 \caption{A screenshot of Sokoban at the main menu.}
 \label{fig:sokobanmainmenu}
 \end{figure}
-
 
 \subsubsection{Levels}
 The levels are defined by it's dimensions and an array of characters of the different elements. For more information see the level format page on Sokoban Wiki \cite{sokobanlevel}. See Table~\ref{tab:levelformat} for the level format we use. The first level is defined in Figure~\ref{fig:leveldef} and is the simplest solvable level. The only move available is to push the box to the left.
@@ -164,19 +162,13 @@ In regards to the game play we have movement in four directions, the ability to 
 
 \subsection{Technical aspects}Technically the resulting game is written in C code on top of a linux operating system. To manage the LEDs and buttons we have written two corresponding linux drivers that operates as interfaces between the STK1000 development board and linux. 
 
-
 \section{Tests}
 \subsection{Description}
 
 We've created a few test scenarios in order to test different aspects of our game functionality. The tests were conducted by a person interacting with the switches and looking at the LCD screen, wearing a headset. Another person logged the results of the test. The main equipment was the STK1000 development board and a headset with the main focus on the LCD screen. The jumpers of the board were set as specified in the compendium (section 4.2) \cite{komp}. The GPIO was set up with both LEDs and switches connected to B as follows: LEDs on 8-15, switches on 0-7. 
 
-
-
-
-
 \subsection{Results}
 Below is a table of the different tests we ran, the preconditions and the results. 
-
 
 \begin{center}
 \footnotesize
@@ -210,7 +202,6 @@ Below is a table of the different tests we ran, the preconditions and the result
 \newpage
 
 \section{Evaluation of assignment}
-
 We found it interesting to learn more about the inner workings of linux and how a device driver is written. 
 
 We had quite a lot of problems with getting linux operational. This was much due to the guide we got didn't really seem to work, at least no one that we talked to made it work through following that guide. Another group posted a different guide that we managed to get working. But in general this wasted much time for us and should be improved. 
@@ -221,27 +212,24 @@ We had quite a lot of problems with getting linux operational. This was much due
 \footnotesize{  % This makes the Reference items print in footnotesize fonts
 \begin{thebibliography}{N}
 
-\bibitem[1]{avrdoc} AVR32 Architecture Document
-\url{http://www.atmel.com/images/doc32000.pdf}
-
-\bibitem[2]{stkdoc} AT32AP7000 Datasheet
-\url{http://www.atmel.com/Images/doc32003.pdf}
-
-\bibitem[3]{komp} TDT4258 Compendium
-\url{http://www.idi.ntnu.no/emner/tdt4258/_media/kompendium.pdf}
-
-\bibitem[4]{sokoban} Description of the game Sokoban on Sokoban Wiki . Retrieved 23.04.13.
-\url{http://www.sokobano.de/wiki/index.php?title=The_rules_of_the_game}
-
-\bibitem[5]{sokobanlevel} Description of Sokobon levels on Sokoban Wiki. Retrieved 23.04.13.
-\url{http://www.sokobano.de/wiki/index.php?title=Level_format}
-
-\bibitem[6]{ldd} Linux Device Drivers, Third Edition. Retrieved 04.04.13.
+\bibitem{ldd} Linux Device Drivers, Third Edition. Retrieved 04.04.13.
 \url{http://http://lwn.net/Kernel/LDD3/}
 
+\bibitem{sokoban} Description of the game Sokoban on Sokoban Wiki . Retrieved 23.04.13.
+\url{http://www.sokobano.de/wiki/index.php?title=The_rules_of_the_game}
 
+\bibitem{sokobanlevel} Description of Sokobon levels on Sokoban Wiki. Retrieved 23.04.13.
+\url{http://www.sokobano.de/wiki/index.php?title=Level_format}
+
+\bibitem{avrdoc} AVR32 Architecture Document
+\url{http://www.atmel.com/images/doc32000.pdf}
+
+\bibitem{stkdoc} AT32AP7000 Datasheet
+\url{http://www.atmel.com/Images/doc32003.pdf}
+
+\bibitem{komp} TDT4258 Compendium
+\url{http://www.idi.ntnu.no/emner/tdt4258/_media/kompendium.pdf}
 
 \end{thebibliography}  
 }
-
 \end{document} 
