@@ -213,8 +213,20 @@ We found it interesting to learn more about the inner workings of linux and how 
 We had quite a lot of problems with getting linux operational. This was much due to the guide we got didn't really seem to work, at least no one that we talked to made it work through following that guide. Another group posted a different guide that we managed to get working. But in general this wasted much time for us and should be improved. 
 
 \section{Conclusion}
-During this exercise we have gained better insight..
-%We learned how to generate and play different sounds in C. This will be helpful when we start coding the next assignment. In the end we have four different sounds. Three short sound effects and one melody. 
+During this exercise we have learned how to write linux device drivers,install linux on a STK1000 development board and implement a game on top of it. 
+
+%Det bør nok vær noge i mellom her
+
+
+
+
+We learned quite a bit about how image files like bitmap is built up since we used this image format for loading images. In our \textit{framebuffer.c} we had to read the image files correctly and then place them correctly in the memory map presentation of linux' framebuffer. 
+
+
+The setup of the buttons are not ideal for playing the game as it is not very intuitive. But for those who are familiar with the unix layout for arrow keys first used in vi text editor, it will be easy to play. In general most people are able to quickly learn how to move with a little bit of training, and the speed is not essential for this game. The main bottleneck of the speed would probably be the players brain since it is a puzzle game.
+
+
+
 
 \footnotesize{  % This makes the Reference items print in footnotesize fonts
 \begin{thebibliography}{N}
