@@ -54,6 +54,21 @@ First off we thought maybe this file had to be a kernel module as well, but we s
 
 From the previous exercise we learned how to handle sound in C which came in handy for the game sounds. We wanted the player to get good feedback through sound effects by telling the player when he does something right or wrong. Therefore we constructed a negative sound when you hit the wall or removed a crate from a target and a more positive sound when you push a crate on a target. 
 
+\subsection{Overview}
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.5]{images/blockdiagram.png}
+\caption{A block diagram overview of the complete game.}
+\label{fig:blockdiagram}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.5]{images/programflow.png}
+\caption{An overview of the main game flow.}
+\label{fig:programflow}
+\end{figure}
+
 \subsection{The game}
 \subsubsection{Sokoban}
 The game we chose to implement was a simple top-down puzzle game called \textit{Sokoban}\cite{sokoban}. The point of the game is for the player to push boxes onto marked goal squares. The levels are small maps confined by walls which cannot be walked through. The puzzle is solved when all the boxes are on the goal squares. We had some previous experience of implementing this game in Java in the course TDT4100: Object Oriented Programming. We therefore chose to port it to C. See figure~\ref{fig:sokobanscreen} for a screenshot of a level in Sokoban.
@@ -103,10 +118,16 @@ char level1[] = "######@$.######";
 \label{fig:level1}
 \end{figure}
 
-\subsubsection{Game logic}
-
 \subsection{Drivers}
 In order to interact with the development board we wrote two separate device drivers. One for the LEDs and one for the buttons. 
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.5]{images/devicedrivers.png}
+\caption{An overview of the device drivers in the kernel and user space.}
+\label{fig:devicedrivers}
+\end{figure}
+
 \subsubsection{LEDs}
 
 \subsubsection{Buttons}
@@ -143,11 +164,10 @@ In the \textit{driver} directory, edit the \textit{compile\_and\_upload\_drivers
 In the \textit{sokoban} directory, edit the \textit{Makefile} and again edit the IP of the board. Then run \textit{make} and \textit{make send}.
 
 \subsection{Run instructions}
-Connect to the board with \textit{Minicom} as described in the compendium. Run the \textit{drivers\_load.sh} script to load the drivers. Then to start the game, simply run the \textit{sokoban} executable. See figure~\ref{fig:consolestart} for the console output if the drivers and the game runs successfully. 
+Connect to the board with \textit{Minicom} as described in the compendium. Run the \textit{drivers\_load.sh} script to load the drivers. Then to start the game, simply run the \textit{sokoban} executable. See figure~\ref{fig:consolestart} for the console output if the drivers and the game run successfully. 
 
 \section{Results}
 \subsection{Description} 
-
 This exercise resulted in a working Sokoban game on the STK1000 development board displayed. The game is played by using the buttons as controllers to move around in the game which is displayed on the LCD screen. In addition to a general "arrow key" setup, there is also a possibility to undo and redo with the buttons. For a quick view of how the game operates see our gameplay video on Youtube\cite{youtube}.
 
 \subsection{Feedback}There are sounds and LEDs to help you understand the game play better through audiovisual feedback. The LEDs show how many crates you have left in the game, and when you win all LEDs will blink several times.
