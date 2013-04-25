@@ -6,8 +6,8 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 
-volatile char led_vector = 0x0;
-volatile int n_of_leds = 0;
+char led_vector = 0x0;
+int n_of_leds = 0;
 int fd_leds = 0;
 
 /* increase the number of active LEDs */

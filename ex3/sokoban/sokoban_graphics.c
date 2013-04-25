@@ -4,7 +4,7 @@
 #include "../buttons/buttons_control.h"
 #include "../sound/sound.h"
 
-volatile int completed;
+volatile int completed, decided;
 
 int main (int argc, char *argv[]) {
 	/* open all drivers */
@@ -24,9 +24,10 @@ int main (int argc, char *argv[]) {
 	/* game loop */
 	int playing = 1;
 	while (playing) {
+		decided = 0;
 		playGame();
 		/* check if you want to play again */
-		int decided = 0;
+		
 		while (!decided) {
 			int cmd = read_button_status();
 			if (cmd == BUTTON7) {
@@ -141,7 +142,9 @@ void performAction(int cmd) {
 	}
 	else if (cmd == BUTTON0) {
 		/* go to main menu */
+		printf("Exiting to main menu\n");
 		completed = 1;
+		decided = 1;
 		stop_sound(MUSIC);
 	}
 }

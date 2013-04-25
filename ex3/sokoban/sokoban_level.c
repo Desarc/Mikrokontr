@@ -47,7 +47,6 @@ char getTile(int x, int y) {
 	int pos = (y*dimX)+x;
 	level_ptr += pos;
 	char tile = *level_ptr;
-	if (tile == WALL) play_sound(HIT_WALL);
 	return *level_ptr;
 }
 

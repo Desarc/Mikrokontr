@@ -52,9 +52,11 @@ void set_leds(void) {
 	piob->codr = SET_ALL_LEDS;
 	char byte3 = led_status >> 7;
 	char byte2 = (led_status << 1) >> 7;
-	char byte1 = (led_status << 2) >> 2;
+	char byte1 = ((led_status << 5) >> 5)+((led_status >> 3) << 5);
 	char byte0 = 0;
+	printk("3: %i, 2: %i, 1: %i, 0: %i\n", byte3, byte2, byte1, byte0);
 	vector = (byte3 << 24)+(byte2 << 16)+(byte1 << 8)+byte0;
+	printk("vector: %i\n", vector);
 	piob->sodr = vector;
 }
 
