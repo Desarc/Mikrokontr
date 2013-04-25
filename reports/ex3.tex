@@ -1,5 +1,4 @@
 \documentclass[a4paper,11pt]{article}
-
 \usepackage[plain]{fullpage} 
 \usepackage{graphicx}  
 \usepackage{wrapfig}
@@ -28,50 +27,48 @@ TDT4258 Energy Efficient Computer Design \\}
 
 \begin{document}
 \maketitle
+\bigskip\bigskip\bigskip\bigskip\bigskip\bigskip\bigskip\bigskip\bigskip
 
 \begin{abstract}
-In this assignment the goal is to program a simple computer game in C for an AVR32 micro controller running Linux. To accomplish this one needs to understand and write Linux device drivers for I/O. We therefore wrote our own drivers for operating LEDs and switches on the development board. The game we chose to implement is a simple puzzle game called Sokoban.
+In this assignment the goal is to program a simple computer game in C on a Linux-variant which runs on an AVR STK1000 development board. To accomplish this one needs to understand and write Linux device drivers for I/O. We therefore wrote our own drivers for operating LEDs and switches on the development board. The game we chose to implement is a simple puzzle game called Sokoban which used these drivers.
 \end{abstract}
 
-\bigskip
+\newpage
 \tableofcontents
 \newpage
 
 \section{Introduction}
-In this exercise we start out with installing Linux on the STK1000 development board from the SD card. We are now able to write C code that benefits from Linux functions. %Greit nok formulert?  
-To be able to communicate with the LEDs and the buttons on the STK1000 development board we wrote a pair of drivers for Linux with great help from \textit{"Linux Device Drivers, Third Edition"} \cite{ldd}
-
+In this exercise we start out with running a Linux-variant on the STK1000 development board from the SD card. Our main tasks were writing device drivers and controllers for using already existing Linux drivers. On top of that we needed to write a game that used all the devices. We'll show how we developed the different parts and how they all work together.
 
 \section{Description and methodology}
-\textbf{Forrige rapport: organize report better (overview and block diagram before description of code fragments and functions). Ergo, block diagram her?}\\
+The first step was getting a Linux-variant to run on the board so we had something to develop on. This turned out to be a bit problematic. The supplied guide was somewhat unclear on the different steps. Luckily there was an image of a precompiled Linux that we could extract to the SD card. 
 
-%Nevne uboot og bootloader
-First off we started out with trying to install Linux on the STK1000 development board. This turned out to be a tricky affair. We had a step by step guide for compiling Linux that we followed, but with no luck. Luckily there was mentioned an image of a precompiled Linux that we could extract to the SD card. After some mixing back and forth with environment variables from the other \textit{u-boot.bin} file(from itslearning) into the one we were using we finally started to get somewhere. Another group posted a guide on itslearning that worked for us.
+Once Linux was up and running we started out with a simple "Hello world" program to verify that things were working. We then looked at how to communicate with the frame buffer in Linux. In the beginning we thought maybe this file had to be a kernel module as well, but we soon understood that we needed access to quite a few libraries to make the memory mapping work. We started with generating a random bit values for the display and went on with more logical values, for example a third of the screen was made red. We organized the screen into a grid of 20 by 15 tiles built up of 16 by 16 pixels for each tile. This made it easy to map the \textit{charmap} to the images and render the levels on the LCD screen. More on this in section~\ref{sec:lcd}.
 
-Once we had Linux up and running we started out with a simple "Hello world" program to verify that things were working. Now we started out with programming a driver for the LEDs. We sometimes thought we had found the solution regarding how to turn the LEDs on or off, but we weren't quite right yet. We gave the LED driver a pause and started to communicate with the frame buffer in Linux instead. 
+After getting the framebuffer to work, we wrote the drivers and controllers for the LEDs and buttons. This took a while to perfect as we had to share one of the GPIO ports and manage to control the different pins separately. In the previous assignment we learned how to handle and generate sounds in C. However, for this assignment we decided to opt for reading in regular sound files instead. This saved us some time and avoided the complexity of composing and generating new sounds.
 
-In the beginning we thought maybe this file had to be a kernel module as well, but we soon understood that we needed access to quite a few libraries to make the memory mapping work. We started with generating a random bit values for the display and went on with more logical values, for example a third of the screen was made red. As we tried to read bit values from an image of the file format bitmap, we started to see that there were some errors in regards to how we read the file. After a lot of trial and error we finally managed to display the image files properly. We organized the screen into a grid of 20 by 15 tiles built up of 16 by 16 pixels for each tile. This made it easy to map the \textit{charmap} to the images and render the levels on the LCD screen. It is also a fairly convenient size for the game when it comes to the variety of the sizes of each level.
-
-From the previous exercise we learned how to handle sound in C which came in handy for the game sounds. We wanted the player to get good feedback through sound effects by telling the player when he does something right or wrong. Therefore we constructed a negative sound when you hit the wall or removed a crate from a target and a more positive sound when you push a crate on a target. 
+Once we managed to control all the device drivers we implemented the game. This was relatively simple as we had already written it in Java in a previous course. We'll now look at an overview of the main code for the game and introduce the different parts in more detail.
 
 \subsection{Overview}
+The game code can be split up into two main parts. The game engine and logic itself, and all the controllers that interface with the drivers. See section~\ref{sec:driversandcontrollers} for a more detailed explanation of the latter part. The main entry point of the game is in \textit{sokoban\_graphics.c}. It opens all the drivers via the controllers and loads the necessary media for the game. It then starts the game loop which can be seen in figure~\ref{fig:programflow}. 
+
 \begin{figure}[H]
 \centering
-\includegraphics[scale=0.5]{images/blockdiagram.png}
+\includegraphics[scale=0.6]{images/blockdiagram.png}
 \caption{A block diagram overview of the complete game.}
 \label{fig:blockdiagram}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[scale=0.5]{images/programflow.png}
-\caption{An overview of the main game flow.}
+\includegraphics[scale=0.6]{images/programflow.png}
+\caption{An overview of the main game flow in \textit{sokoban\_graphics.c}.}
 \label{fig:programflow}
 \end{figure}
 
 \subsection{The game}
 \subsubsection{Sokoban}
-The game we chose to implement was a simple top-down puzzle game called \textit{Sokoban}\cite{sokoban}. The point of the game is for the player to push boxes onto marked goal squares. The levels are small maps confined by walls which cannot be walked through. The puzzle is solved when all the boxes are on the goal squares. We had some previous experience of implementing this game in Java in the course TDT4100: Object Oriented Programming. We therefore chose to port it to C. See figure~\ref{fig:sokobanscreen} for a screenshot of a level in Sokoban.
+The game we chose to implement was a simple top-down puzzle game called \textit{Sokoban}\cite{sokoban}. The point of the game is for the player to push boxes onto marked target squares. The levels are small maps confined by walls which cannot be walked through. The puzzle is solved when all the boxes are on the target squares. We had some previous experience of implementing this game in Java in the course TDT4100: Object Oriented Programming. We therefore chose to port it to C. See figure~\ref{fig:sokobanscreen} for a screenshot of a level in Sokoban.
 
 \begin{figure}[H]
 \centering
@@ -81,7 +78,7 @@ The game we chose to implement was a simple top-down puzzle game called \textit{
 \end{figure}
 
 \subsubsection{Levels}
-The levels are defined by it's dimensions and an array of characters of the different elements. For more information see the level format page on Sokoban Wiki \cite{sokobanlevel}. The  table~\ref{tab:levelformat} shows the level format we used. For an example of how the levels are designed, see figure~\ref{fig:leveldef}. This level 1 and it is the simplest solvable level. The only move available is to push the box to the left. Figure~\ref{fig:level1} shows how it looks on the STK1000.
+The levels are defined by it's dimensions and an array of characters of the different elements. For more information see the level format page on Sokoban Wiki \cite{sokobanlevel}. The  table~\ref{tab:levelformat} shows the level format we used. For an example of how the levels are designed, see figure~\ref{fig:leveldef}. This is level 1 and it is the simplest solvable level. The only move available is to push the box to the right. Figure~\ref{fig:level1} shows how it looks on the STK1000.
 
 \begin{table}[H]
 \centering
@@ -89,10 +86,10 @@ The levels are defined by it's dimensions and an array of characters of the diff
 \hline \textbf{Level element} & \textbf{Character} & \textbf{Graphics} \\ 
 \hline Wall & \# & \includegraphics[scale=0.6]{images/wall.png} \\ 
 \hline Player & @ & \includegraphics[scale=0.6]{images/player.png} \\ 
-\hline Player on goal square & + & \includegraphics[scale=0.6]{images/playertarget.png} \\ 
+\hline Player on target square & + & \includegraphics[scale=0.6]{images/playertarget.png} \\ 
 \hline Box & \$ & \includegraphics[scale=0.6]{images/crate.png}\\ 
-\hline Box on goal square & * & \includegraphics[scale=0.6]{images/cratetarget.png}\\ 
-\hline Goal square & . & \includegraphics[scale=0.6]{images/target.png}\\ 
+\hline Box on target square & * & \includegraphics[scale=0.6]{images/cratetarget.png}\\ 
+\hline Target square & . & \includegraphics[scale=0.6]{images/target.png}\\ 
 \hline Floor & (whitespace) & \includegraphics[scale=0.6]{images/blank.png} \\ 
 \hline 
 \end{tabular}
@@ -119,14 +116,15 @@ char level1[] = "######@$.######";
 \end{figure}
 
 \subsubsection{Game logic}
-
+The game logic itself is reasonably simple. One needs to load a level, identify the different characters, draw the level, then check if the player move is valid. The more tricky part is allowing for undo/redo where one has to keep track of the history of all the moves the player makes. The files \textit{sokoban\_core.c}, \textit{sokoban\_level.c} and \textit{sokoban\_tile.c} handle most of the game logic.
 
 \subsection{Drivers and controllers}
+\label{sec:driversandcontrollers}
 In order to interact with the development board we wrote two separate device drivers. One for the LEDs and one for the buttons. In addition we used the framebuffer device to display images on the LCD and for sound we used the built in sound driver in Linux.
 
 \begin{figure}[H]
 \centering
-\includegraphics[scale=0.5]{images/devicedrivers.png}
+\includegraphics[scale=0.6]{images/devicedrivers.png}
 \caption{An overview of the device drivers we wrote in the kernel and user space.}
 \label{fig:devicedrivers}
 \end{figure}
@@ -141,7 +139,10 @@ For the buttons, we also had to write both a driver for the I/O ports and a cont
 \paragraph{Driver} For the button driver, \textit{buttons.c}, we followed mostly the same procedure as with the LED driver, except this time we implemented only the \textit{read()} file operation, in order to read the current status of the pins the buttons are connected to.
 \paragraph{Controller} The button device controller (\textit{buttons\_control.c}) is very simple, and only holds functions for opening and closing the device file, reading the status of the buttons, and debouncing to avoid one button push activating a series of events.
 
-\subsubsection{LCD} For the LCD display, we only had to write a device controller, \textit{screen.c}, since a driver device (\textit{/dev/fb0}) for this already was active in the operating system. 
+
+\subsubsection{LCD} 
+\label{sec:lcd}
+For the LCD display, we only had to write a device controller, \textit{screen.c}, since a driver device (\textit{/dev/fb0}) for this already was active in the operating system. 
 \paragraph{Controller} Like with the LEDs and buttons, the basic functions for opening and closing the device file had to be implemented in this controller (\textit{screen.c}). Additionally, we mapped the device file to memory, for simplified access to different parts of the file (we don't want to lseek every time we want access to a specific part of the file). We chose to use \textit{.bmp} files for the game graphics, so we implemented a function (\textit{read\_image\_data()}) for reading \textit{.bmp} pixel data into a memory array. Each pixel consists of 3 byte values, representing color values for blue, green and red. This representation is identical to the pixel format of the LCD display, so writing this data to the display driver proved to be rather straightforward (see \textit{write\_to\_screen()}), the only challenge being reversed order of pixel rows. We also implemented some support functions for the game. \textit{clear\_screen()} writes only white pixels to the whole display, \textit{display\_tile()} displays a square image with the given pixel dimension to the given tile position (which is then converted to pixel position), and \textit{display\_image()} displays a given fullscreen image.
 
 \subsubsection{Sound}
@@ -152,9 +153,8 @@ For basic sound function, the easiest implementation would be to simply write sa
 
 However, a new process gets its own variables and address space, so in order to control the sound from the main process, we had to map a shared memory file between the processes (see \textit{map\_shared\_memory()} and \textit{map\_pointers()}). The new process will simply run a loop (see \textit{loop\_sound()}) that reads samples from the shared memory, and writes these to the device file. The main process may then continue executing the game logic, and activate or deactivate sounds (\textit{play\_sound()} and \textit{stop\_sound()}) by writing sample data to the shared memory. This way, playing a new sound does not block the main process until the sound has played, which allows for smooth input response. Some additional data must be shared between the processes to make this work, like the length (in number of samples) of the current longest active sound (generally the music) and the position new samples should be written to in the shared memory.
 
-
 \subsection{Debugging}
-Debugging.
+During the development of the drivers we often ran into various issues. As we now had a terminal we opted to make sure to print out the program state often in order to track down bugs. We also took care to check and exit the program when we were reading image and sound files. Figure~\ref{fig:consolestart} shows the terminal output of a successful load of the drivers and a run through of level 1 of the game.
 
 \begin{figure}[H]
 \centering
@@ -174,7 +174,7 @@ In addition, use the following setup for the GPIO, buttons and LEDs.
 \end{itemize}
 
 \subsection{Build instructions}
-We've setup our build environment to automatically upload the necessary files to the development board. Should you want upload and run the compiled binaries yourself, then simply upload the files found in the \textit{bin} directory to the \textit{root} directory of the board and continue with the run instruction.
+We've setup our build environment to automatically upload the necessary files to the development board. Should you want to upload and run the compiled binaries yourself, then simply upload the files found into the \textit{bin} directory to the \textit{root} directory of the board and continue with the run instruction.
 
 \paragraph{Drivers}
 In the \textit{driver} directory, edit the \textit{compile\_and\_upload\_drivers.sh} script and set the correct IP address of the board. Then run the script which compiles and uploads them.
@@ -186,21 +186,15 @@ In the \textit{sokoban} directory, edit the \textit{Makefile} and again edit the
 Connect to the board with \textit{Minicom} as described in the compendium. Run the \textit{drivers\_load.sh} script to load the drivers. Then to start the game, simply run the \textit{sokoban} executable. See figure~\ref{fig:consolestart} for the console output if the drivers and the game run successfully. 
 
 \section{Results}
-\subsection{Description} 
-This exercise resulted in a working Sokoban game on the STK1000 development board displayed. The game is played by using the buttons as controllers to move around in the game which is displayed on the LCD screen. In addition to a general "arrow key" setup, there is also a possibility to undo and redo with the buttons. For a quick view of how the game operates see our gameplay video on Youtube\cite{youtube}.
+\subsection{Game} 
+This exercise resulted in a working Sokoban game on the STK1000 development board. The game is played by using the buttons as a controller to move around in the game which is displayed on the LCD screen. In addition to a general "arrow key" setup, there is also a possibility to undo and redo with the buttons. For a quick view of how the game operates see our gameplay video on Youtube\cite{youtube}. At the start of the program you are prompted with a main menu where you can choose between 8 different levels. After finishing a level you have the option to go back to the main menu or press \textit{SW7} to end the game.
 
-\subsection{Feedback}There are sounds and LEDs to help you understand the game play better through audiovisual feedback. The LEDs show how many crates you have left in the game, and when you win all LEDs will blink several times.
-
-\subsection{Levels}
-We 
-
-\subsection{Sounds}There are sounds for the start of the game, when you place a crate on a target, when you remove a crate from a target, when you hit a wall and when you win. When you win there will also be a splash screen telling you that you've won. 
-
-\subsection{Game play}
-In regards to the game play we have movement in four directions, the ability to push crates, disability to walk through walls, and the ability to undo and redo. 
+\subsection{LEDs and sounds}
+We've used the LEDs to show how many boxes there are left that need to be moved. If you complete a level the lights will also blink and display a splash screen. As for sounds, we have intro music in the main menu, background music while playing and song for when you win. These all continue looping. Also, while playing there are sound effects for when you move, push boxes on targets, and hit a wall.
 
 \subsection{Game controls}
-The controls of the game are listed below in table~\ref{tab:gamecontrols}. 
+The setup of the buttons are not ideal for playing the game, but for those who are familiar with the Unix layout for arrow keys first used in Vi text editor, it will be easy to play. The controls of the game are listed below in table~\ref{tab:gamecontrols}. 
+
 \begin{table}[H]
 \centering
 \begin{tabular}{|l|l|}
@@ -212,14 +206,12 @@ The controls of the game are listed below in table~\ref{tab:gamecontrols}.
 \hline SW3 & Undo move \\ 
 \hline SW2 & Redo move \\ 
 \hline SW1 & Reset level \\ 
-\hline SW0 & Main menu \\
+\hline SW0 (x2) & Main menu \\
 \hline 
 \end{tabular}
 \caption{Game controls} 
 \label{tab:gamecontrols}
 \end{table}
-
-\subsection{Technical aspects}Technically the resulting game is written in C code on top of a Linux operating system. To manage the LEDs and buttons we have written two corresponding Linux drivers that operates as interfaces between the STK1000 development board and Linux. 
 
 \section{Tests}
 \subsection{Description}
@@ -265,20 +257,10 @@ Below is a table of the different tests we ran, the preconditions and the result
 \newpage
 
 \section{Evaluation of assignment}
-We found it interesting to learn more about the inner workings of Linux and how a device driver is written. 
-
-We had quite a lot of problems with getting Linux running on the STK1000 development board. This was much due to the guide we got didn't really seem to work, at least no one that we talked to made it work by following that guide. Another group posted a different guide that worked for us. But in general this wasted much time for us and should be improved. 
+We found it interesting to learn more about the inner workings of Linux and how a device driver is written. We spent quite some time getting Linux to run on the STK1000 development board. This was much due to the original guide on the course site and Itslearning didn't really seem to work. At least no one that we talked to made it work by following that guide. After working together with another group who wrote the other guide posted later on Itslearning, we finally got it to work. 
 
 \section{Conclusion}
-During this exercise we have learned how to write Linux device drivers,install Linux on a STK1000 development board and implement a game on top of it. 
-
-%Det bør nok vær noge i mellom her
-
-
-We learned quite a bit about how image files like bitmap is built up since we used this image format for loading images. In our \textit{framebuffer.c} we had to read the image files correctly and then place them correctly in the memory map presentation of Linux' framebuffer. 
-
-
-The setup of the buttons are not ideal for playing the game as it is not very intuitive. But for those who are familiar with the unix layout for arrow keys first used in vi text editor, it will be easy to play. In general most people are able to quickly learn how to move with a little bit of training, and the speed is not essential for this game. The main bottleneck of the speed would probably be the players brain since it is a puzzle game.
+During this exercise we have learned how to write Linux device drivers, how to run a Linux-variant on the STK1000 development board and implement a game in C on top of it. Most of the time was spent writing the drivers for controlling the LEDs and getting input from the buttons and also trying to interface with the other devices for the LCD and sound. 
 
 \footnotesize{  % This makes the Reference items print in footnotesize fonts
 \begin{thebibliography}{N}
