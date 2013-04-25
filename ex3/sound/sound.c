@@ -12,7 +12,7 @@
 #define SAMPLES_8S 64000
 #define SAMPLES_1S 8000
 
-#define N_OF_FRAGS 1000
+#define N_OF_FRAGS 512
 
 char one_less[SAMPLES_1S];
 int one_less_size;

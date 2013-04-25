@@ -2,15 +2,15 @@
 #define LEDS_CONTROL_H
 
 // define the values of the leds for the driver
-#define LED7 0x80
-#define LED6 0x40
-#define LED5 0x20
-#define LED4 0x10
-#define LED3 0x08
-#define LED2 0x04
-#define LED1 0x02
-#define LED0 0x01
-#define ALL_LEDS 0xff
+#define LED7 0x400000
+#define LED6 0x0100
+#define LED5 0x0080
+#define LED4 0x0040
+#define LED3 0x0020
+#define LED2 0x0004
+#define LED1 0x0002
+#define LED0 0x0001
+#define ALL_LEDS (LED0+LED1+LED2+LED3+LED4+LED5+LED6+LED7) 
 
 void increment_leds(void);
 void decrement_leds(void);

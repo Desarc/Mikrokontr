@@ -142,7 +142,7 @@ void performAction(int cmd) {
 	}
 	else if (cmd == BUTTON0) {
 		/* go to main menu */
-		printf("Exiting to main menu\n");
+		printf("Exiting to main menu.\n");
 		completed = 1;
 		decided = 1;
 		stop_sound(MUSIC);
