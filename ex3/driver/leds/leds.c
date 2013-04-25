@@ -30,7 +30,7 @@ const char name[] = "leds";
 struct cdev *leds_cdev;
 
 const long SET_ALL_LEDS = 0xffffff00;
-volatile char led_status[4];
+volatile char led_status;
 
 int status;
 long vector;
@@ -49,9 +49,12 @@ static struct file_operations leds_fops = {
 
 /* activate the LEDs indicated by the led_status number by writing to input data register */
 void set_leds(void) {
-	led_status[3] = 0x0;
 	piob->codr = SET_ALL_LEDS;
-	vector = (led_status[0] << 24)+(led_status[1] << 16)+(led_status[2] << 8)+led_status[3];
+	char byte3 = led_status >> 7;
+	char byte2 = (led_status << 1) >> 7;
+	char byte1 = (led_status << 2) >> 2;
+	char byte0 = 0;
+	vector = (byte3 << 24)+(byte2 << 16)+(byte1 << 8)+byte0;
 	piob->sodr = vector;
 }
 

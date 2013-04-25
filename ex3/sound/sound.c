@@ -285,6 +285,7 @@ void map_shared_memory(void) {
 		}
 		map_pointers(counters_addr);
 		loop_sound();
+		printf("Sound looping process stopped.\n");
 		exit(1);
 	}
 
@@ -358,7 +359,6 @@ int open_sound_driver(void) {
 	ioctl(fd_dsp, SOUND_PCM_WRITE_CHANNELS, &channels);
 	ioctl(fd_dsp, SOUND_PCM_WRITE_BITS, &sample_size);
 	ioctl(fd_dsp, SOUND_PCM_WRITE_RATE, &dsp_rate);
-
 }
 
 void close_sound_driver(void) {

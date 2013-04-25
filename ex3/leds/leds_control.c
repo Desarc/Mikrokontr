@@ -6,7 +6,7 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 
-volatile long led_vector = 0x0;
+volatile char led_vector = 0x0;
 volatile int n_of_leds = 0;
 int fd_leds = 0;
 
@@ -85,11 +85,7 @@ void set_led_off(int led) {
 
 /* write data to the led driver */
 void write_to_led_driver(void) {
-	char status[4];
-	status[0] = led_vector >> 16;
-	status[1] = led_vector >> 8;
-	status[2] = led_vector;
-	int write_success = write(fd_leds, status, 3);
+	int write_success = write(fd_leds, &led_vector, 1);
 	if (write_success == -1) {
         	perror("Error: cannot write to LED device\n");
         	exit(1);

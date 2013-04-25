@@ -5,7 +5,7 @@
 \usepackage{wrapfig}
 \usepackage{float}
 \usepackage{array}
-\usepackage[hidelinks]{hyperref}
+\usepackage{hyperref}
 \usepackage{color}
 \definecolor{light-gray}{gray}{0.95}
 \usepackage{listings}
@@ -121,7 +121,7 @@ char level1[] = "######@$.######";
 \subsubsection{Game logic}
 
 
-\subsection{Drivers}
+\subsection{Drivers and controllers}
 In order to interact with the development board we wrote two separate device drivers. One for the LEDs and one for the buttons. In addition we used the framebuffer device to display images on the LCD and for sound we used the built in sound driver in Linux.
 
 \begin{figure}[H]
@@ -132,12 +132,25 @@ In order to interact with the development board we wrote two separate device dri
 \end{figure}
 
 \subsubsection{LEDs}
+For the LEDs, we had to write both a driver for the actual I/O to the pins, and a controller to interface with the LED driver device.
+\paragraph{Driver} The LED driver (\textit{leds.c}) is rather simple; By following the examples in chapter 3 and 9 of the Linux Device Drivers guide\cite{ldd}, we allocated minor and major numbers for the (char) device, requested access to the necessary I/O pins (pins 8-30 on PIO B), initialized these for LED use, and registered the device and its file operations in the system. For our purpose, we only had to implement functionality in the \textit{write()} file operation, as we only need to set the value of these I/O ports. We used a support function, \textit{set\_leds()}, to write the correct data to the correct ports based on input from the controller. We also implemented support for releasing major/minor numbers and reserved ports when deactivating the driver.
+\paragraph{Controller} The LED device controller (\textit{leds\_control.c}) is the interface module we use between the game logic and the LED driver. This module contains functions for opening and closing the LED driver device file, as well as functions for manipulating the LEDs in various ways as needed by our game. The controller writes one byte, indicating which of the 8 LEDs should be active, to the device file. Our only needs for the game is to blink all the LEDs when the game completes (performed by the function \textit{blink\_leds()}), and show as many LEDs as there are empty targets on the board (up to a maximum of 8, performed by the \textit{increment\_leds()} and \textit{decrement\_leds()} functions).
 
 \subsubsection{Buttons}
+For the buttons, we also had to write both a driver for the I/O ports and a controller to interface with this driver.
+\paragraph{Driver} For the button driver, \textit{buttons.c}, we followed mostly the same procedure as with the LED driver, except this time we implemented only the \textit{read()} file operation, in order to read the current status of the pins the buttons are connected to.
+\paragraph{Controller} The button device controller (\textit{buttons\_control.c}) is very simple, and only holds functions for opening and closing the device file, reading the status of the buttons, and debouncing to avoid one button push activating a series of events.
 
-\subsubsection{LCD}
+\subsubsection{LCD} For the LCD display, we only had to write a device controller, \textit{screen.c}, since a driver device (\textit{/dev/fb0}) for this already was active in the operating system. 
+\paragraph{Controller} Like with the LEDs and buttons, the basic functions for opening and closing the device file had to be implemented in this controller (\textit{screen.c}). Additionally, we mapped the device file to memory, for simplified access to different parts of the file (we don't want to lseek every time we want access to a specific part of the file). We chose to use \textit{.bmp} files for the game graphics, so we implemented a function (\textit{read\_image\_data()}) for reading \textit{.bmp} pixel data into a memory array. Each pixel consists of 3 byte values, representing color values for blue, green and red. This representation is identical to the pixel format of the LCD display, so writing this data to the display driver proved to be rather straightforward (see \textit{write\_to\_screen()}), the only challenge being reversed order of pixel rows. We also implemented some support functions for the game. \textit{clear\_screen()} writes only white pixels to the whole display, \textit{display\_tile()} displays a square image with the given pixel dimension to the given tile position (which is then converted to pixel position), and \textit{display\_image()} displays a given fullscreen image.
 
 \subsubsection{Sound}
+Making the sound work properly, was probably the greatest challenge of the whole exercise. Fortunately, the sound driver was already in place (\textit{/dev/dsp}), so we only had to write the controller interfacing with this device. 
+\paragraph{Controller} This controller (\textit{sound.c}) also implements functions to open and close the device file, but we also set the sample size (8 bits), number of channels (1) and sample rate of the device (8 kHz), to make sure these values are consistent with our own sound data. As with the graphics, we load our data from files (with \textit{load\_sound\_from\_file()}), and the format we use for sound files is unsigned 8 bit PCM encoded .wav.
+
+For basic sound function, the easiest implementation would be to simply write sample data to the device on the fly, however this would be inconvenient, because it blocks any other functions until the sound has finished playing, and thus makes playing longer sounds a problem (playing music while playing the game would not be possible). We wanted to be able to continuously play music in addition to shorter sounds based on interaction in the game, while still maintaining a smooth input response. The first step towards this, was forking the write loop to a separate process, so that the program could continuously write samples to the device file without blocking other actions.
+
+However, a new process gets its own variables and address space, so in order to control the sound from the main process, we had to map a shared memory file between the processes (see \textit{map\_shared\_memory()} and \textit{map\_pointers()}). The new process will simply run a loop (see \textit{loop\_sound()}) that reads samples from the shared memory, and writes these to the device file. The main process may then continue executing the game logic, and activate or deactivate sounds (\textit{play\_sound()} and \textit{stop\_sound()}) by writing sample data to the shared memory. This way, playing a new sound does not block the main process until the sound has played, which allows for smooth input response. Some additional data must be shared between the processes to make this work, like the length (in number of samples) of the current longest active sound (generally the music) and the position new samples should be written to in the shared memory.
 
 
 \subsection{Debugging}

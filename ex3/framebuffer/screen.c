@@ -25,13 +25,13 @@ char box_on_target_image[TILE_SIZE][3];
 
 void load_sokoban_images(void) {
 	/* load all sokoban images */
-	read_image_data("crate.bmp", &box_image[0][0], 16, 16);
-	read_image_data("player.bmp", &player_image[0][0], 16, 16);
-	read_image_data("wall.bmp", &wall_image[0][0], 16, 16);
-	read_image_data("blank.bmp", &blank_image[0][0], 16, 16);
-	read_image_data("target.bmp", &target_image[0][0], 16, 16);
-	read_image_data("playertarget.bmp", &player_on_target_image[0][0], 16, 16);
-	read_image_data("cratetarget.bmp", &box_on_target_image[0][0], 16, 16);
+	read_image_data("crate.bmp", &box_image[0][0],16,16);
+	read_image_data("player.bmp", &player_image[0][0],16,16);
+	read_image_data("wall.bmp", &wall_image[0][0],16,16);
+	read_image_data("blank.bmp", &blank_image[0][0],16,16);
+	read_image_data("target.bmp", &target_image[0][0],16,16);
+	read_image_data("playertarget.bmp", &player_on_target_image[0][0],16,16);
+	read_image_data("cratetarget.bmp", &box_on_target_image[0][0],16,16);
 	read_image_data("win.bmp", &win_image[0][0], MAX_HEIGHT, MAX_WIDTH);
 	read_image_data("splash.bmp", &splash_image[0][0], MAX_HEIGHT, MAX_WIDTH);
 	read_image_data("end.bmp", &end_image[0][0], MAX_HEIGHT, MAX_WIDTH);
@@ -76,27 +76,13 @@ void display_image(int image) {
 /* display a tile image with the given dimension at the given position */
 void display_tile(char image, int tilePosX, int tilePosY, int dim) {
 	char *image_ptr;
-	if (image == WALL) {
-		image_ptr = &wall_image[0][0];
-	}
-	else if (image == PLAYER) {
-		image_ptr = &player_image[0][0];
-	}
-	else if (image == BOX) {
-		image_ptr = &box_image[0][0];
-	}
-	else if (image == BLANK) {
-		image_ptr = &blank_image[0][0];
-	}
-	else if (image == TARGET) {
-		image_ptr = &target_image[0][0];
-	}
-	else if (image == PLAYER_ON_TARGET) {
-		image_ptr = &player_on_target_image[0][0];
-	}
-	else if (image == BOX_ON_TARGET) {
-		image_ptr = &box_on_target_image[0][0];
-	}
+	if (image == WALL) image_ptr = &wall_image[0][0];
+	else if (image == PLAYER) image_ptr = &player_image[0][0];
+	else if (image == BOX) image_ptr = &box_image[0][0];
+	else if (image == BLANK) image_ptr = &blank_image[0][0];
+	else if (image == TARGET) image_ptr = &target_image[0][0];
+	else if (image == PLAYER_ON_TARGET) image_ptr = &player_on_target_image[0][0];
+	else if (image == BOX_ON_TARGET) image_ptr = &box_on_target_image[0][0];
 	int posX = tilePosX*dim, posY = tilePosY*dim;
 	write_to_screen(image_ptr, posX, posY, dim, dim);
 }

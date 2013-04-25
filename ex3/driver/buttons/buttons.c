@@ -46,7 +46,6 @@ static struct file_operations buttons_fops = {
 
 /* read data from button status register */
 void read_button_status(void) {
-	piob->isr;
 	status = piob->pdsr;
 	button_status[0] = status >> 8;
 	button_status[1] = status;
@@ -60,11 +59,12 @@ static int __init buttons_init (void) {
 	
   	/* request access to ports */
   	request_region(AVR32_PIOB_ADDRESS+PORT_OFFSET, PORT_RANGE, name);
+  	request_region(AVR32_PIOB_ADDRESS+PER+PORT_OFFSET, PORT_RANGE, name);
   	
 	/* initialisere PIO-maskinvaren (som i øving 2) */
 	piob->per = SET_ALL_BUTTONS;
 	piob->puer = SET_ALL_BUTTONS;
-	piob->ier = SET_ALL_BUTTONS;
+	//piob->ier = SET_ALL_BUTTONS;
  
   	/* registering device in the system */
 	buttons_cdev = cdev_alloc();

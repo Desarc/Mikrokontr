@@ -127,10 +127,10 @@ int chooseLevel(int cmd) {
 
 /* in-game button actions */
 void performAction(int cmd) {
-	if (cmd == BUTTON5) move('u', 0, 0);
-	else if (cmd == BUTTON7) move('l', 0, 0);
-	else if (cmd == BUTTON6) move('d', 0, 0);
-	else if (cmd == BUTTON4) move('r', 0, 0);
+	if (cmd == BUTTON5) move(UP, 0, 0);
+	else if (cmd == BUTTON7) move(LEFT, 0, 0);
+	else if (cmd == BUTTON6) move(DOWN, 0, 0);
+	else if (cmd == BUTTON4) move(RIGHT, 0, 0);
 	else if (cmd == BUTTON3) undoLastMove();
 	else if (cmd == BUTTON2) redoMove();
 	else if (cmd == BUTTON1) {

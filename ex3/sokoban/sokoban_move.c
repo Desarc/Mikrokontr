@@ -26,15 +26,11 @@ int moveTo(int fromX, int fromY, int toX, int toY) {
 	int box = 0;
 	setTile(fromX, fromY, getGridTile(fromX, fromY));
 	char next = getTile(toX, toY);
-	if (next == TARGET) {
-		setTile(toX, toY, PLAYER_ON_TARGET);
-	}
+	if (next == TARGET) setTile(toX, toY, PLAYER_ON_TARGET);
 	else if (next == BOX || next == BOX_ON_TARGET) {
 		box = 1;
 		next = getGridTile(toX, toY);
-		if (next == BLANK) {
-			setTile(toX, toY, PLAYER);
-		}
+		if (next == BLANK) setTile(toX, toY, PLAYER);
 		else if (next == TARGET) {
 			setTile(toX, toY, PLAYER_ON_TARGET);
 			increaseRemaining();
@@ -42,51 +38,36 @@ int moveTo(int fromX, int fromY, int toX, int toY) {
 		int newMovableY = toY+(toY-fromY);
 		int newMovableX = toX+(toX-fromX);
 		char newMovablePos = getTile(newMovableX, newMovableY);
-		if (newMovablePos == BLANK) {
-			setTile(newMovableX, newMovableY, BOX);
-		}
+		if (newMovablePos == BLANK) setTile(newMovableX, newMovableY, BOX);
 		else if (newMovablePos == TARGET) {
 			setTile(newMovableX, newMovableY, BOX_ON_TARGET);
 			decreaseRemaining();
 		}
 	}
-	else if (next == BLANK) {
-		setTile(toX, toY, PLAYER);
-	}
+	else if (next == BLANK) setTile(toX, toY, PLAYER);
 	return box;
 }
 
 /* undo a box push */
 void undoBox(char dir) {
-	int dirX = 0, dirY = 0;
-	if (dir == 'R' || dir == 'r') {
-		dirX = -1;
-	}
-	else if (dir == 'L' || dir == 'l') {
-		dirX = 1;
-	}
-	else if (dir == 'D' || dir == 'd') {
-		dirY = -1;
-	}
-	else if (dir == 'U' || dir == 'u') {
-		dirY = 1;
-	}
-	int boxX = getX()+2*dirX;
-	int boxY = getY()+2*dirY;
-	if (getTile(boxX, boxY) == BOX || getTile(boxX, boxY) == BOX_ON_TARGET) {
-		int newX = getX()+dirX;
-		int newY = getY()+dirY;
-		if (getTile(boxX, boxY) == BOX_ON_TARGET) {
-			increaseRemaining();
-		}
+	int dirX = 0, dirY = 0, push = 0;
+	if (dir == PUSH_RIGHT || dir == RIGHT) dirX = 1;
+	else if (dir == PUSH_LEFT || dir == LEFT) dirX = -1;
+	else if (dir == PUSH_DOWN || dir == DOWN) dirY = 1;
+	else if (dir == PUSH_UP || dir == UP) dirY = -1;
+	int boxX = getX()+dirX;
+	int boxY = getY()+dirY;
+	char old = getTile(boxX, boxY)
+	if (old == BOX || old == BOX_ON_TARGET) {
+		int newX = getX();
+		int newY = getY();
+		if (old == BOX_ON_TARGET) increaseRemaining();
 		setTile(boxX, boxY, getGridTile(boxX, boxY));
 		if (getGridTile(newX, newY) == TARGET) {
 			decreaseRemaining();
 			setTile(newX, newY, BOX_ON_TARGET);
 		}
-		else {
-			setTile(newX, newY, BOX);
-		}	
+		else setTile(newX, newY, BOX);
 	}
 }
 

@@ -21,21 +21,11 @@ void reset_undone_ptr(void) {
 /* move in the direction 'dir' */	
 void move(char dir, int undo, int redo) {
 	int dirX = 0, dirY = 0;
-	if (dir == 'r' || dir == 'R') {
-		dirX = 1;
-	}
-	else if (dir == 'l' || dir == 'L') {
-		dirX = -1;
-	}
-	else if (dir == 'd' || dir == 'D') {
-		dirY = 1;
-	}
-	else if (dir == 'u' || dir == 'U') {
-		dirY = -1;
-	}
-	if (!playing) {
-		return;
-	}
+	if (dir == PUSH_RIGHT || dir == RIGHT) dirX = 1;
+	else if (dir == PUSH_LEFT || dir == LEFT) dirX = -1;
+	else if (dir == PUSH_DOWN || dir == DOWN) dirY = 1;
+	else if (dir == PUSH_UP || dir == UP) dirY = -1;
+	if (!playing) return;
 	if (!undo && !redo) {
 		reset_undone_ptr();
 		undone_length = 0;
@@ -44,30 +34,18 @@ void move(char dir, int undo, int redo) {
 	int valid = validMove(posX, posY, posX+dirX, posY+dirY);
 	if (valid) {
 		int box = moveTo(posX, posY, posX+dirX, posY+dirY);
-		if (!undo && !replaying) {
-			updatePath(dirX, dirY, box);
-		}
+		if (!undo && !replaying) updatePath(dirX, dirY, box);
 	}
-	if (getRemaining() == 0) {
-		playing = 0;
-	}
+	if (getRemaining() == 0) playing = 0;
 }
 
 /* keep track of all moves */
 void updatePath(int dirX, int dirY, int box) {
 	char move;
-	if (dirX == 1) {
-		move = (box) ? 'R' : 'r';
-	}
-	else if (dirX == -1) {
-		move = (box) ? 'L' : 'l';
-	}
-	else if (dirY == 1) {
-		move = (box) ? 'D' : 'd';
-	}
-	else if (dirY == -1) {
-		move = (box) ? 'U' : 'u';
-	}
+	if (dirX == 1) move = (box) ? PUSH_RIGHT : RIGHT;
+	else if (dirX == -1) move = (box) ? PUSH_LEFT : LEFT;
+	else if (dirY == 1) move = (box) ? PUSH_DOWN : DOWN;
+	else if (dirY == -1) move = (box) ? PUSH_UP : UP;
 	*path_ptr = move;
 	path_ptr++;
 	path_length++;
@@ -104,28 +82,18 @@ void setPlaying(int play) {
 
 /* undo the last move done */
 void undoLastMove(void) {
-	if (!playing || path_length == 0) {
-		return;
-	}
+	if (!playing || path_length == 0) return;
 	path_ptr--;
 	char dir = *path_ptr;
 	path_length--;
 	*undone_moves_ptr = dir;
 	undone_moves_ptr++;
 	undone_length++;
-	if (dir == 'r' || dir == 'R') {
-		dir = 'l';
-	}
-	else if (dir == 'l' || dir == 'L') {
-		dir = 'r';
-	}
-	else if (dir == 'd' || dir == 'D') {
-		dir = 'u';
-	}
-	else if (dir == 'u' || dir == 'U') {
-		dir = 'd';
-	}
-	undoBox(dir);
+	if (dir == PUSH_RIGHT || dir == PUSH_LEFT || dir == PUSH_DOWN || dir == PUSH_UP) undoBox(dir);
+	if (dir == PUSH_RIGHT || dir == RIGHT) dir = LEFT;
+	else if (dir == PUSH_LEFT || dir == LEFT) dir = RIGHT;
+	else if (dir == PUSH_DOWN || dir == DOWN) dir = UP;
+	else if (dir == PUSH_UP || dir == UP) dir = DOWN;
 	move(dir, 1, 0);
 }
 	
