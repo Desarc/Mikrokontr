@@ -1,5 +1,4 @@
 \documentclass[a4paper,11pt]{article}
-
 \usepackage[plain]{fullpage} 
 \usepackage{graphicx}  
 \usepackage{wrapfig}
@@ -51,7 +50,7 @@ Once we had Linux up and running we started out with a simple "Hello world" prog
 
 In the beginning we thought maybe this file had to be a kernel module as well, but we soon understood that we needed access to quite a few libraries to make the memory mapping work. We started with generating a random bit values for the display and went on with more logical values, for example a third of the screen was made red. As we tried to read bit values from an image of the file format bitmap, we started to see that there were some errors in regards to how we read the file. After a lot of trial and error we finally managed to display the image files properly. We organized the screen into a grid of 20 by 15 tiles built up of 16 by 16 pixels for each tile. This made it easy to map the \textit{charmap} to the images and render the levels on the LCD screen. It is also a fairly convenient size for the game when it comes to the variety of the sizes of each level.
 
-From the previous exercise we learned how to handle sound in C which came in handy for the game sounds. We wanted the player to get good feedback through sound effects by telling the player when he does something right or wrong. Therefore we constructed a negative sound when you hit the wall or removed a crate from a target and a more positive sound when you push a crate on a target. 
+From the previous exercise we learned how to handle sound in C which came in handy for the game sounds. We wanted the player to get good feedback through sound effects by telling the player when he does something right or wrong. Therefore we constructed a negative sound when you hit the wall or removed a crate from a target square and a more positive sound when you push a crate on a target square. 
 
 \subsection{Overview}
 \begin{figure}[H]
@@ -70,7 +69,7 @@ From the previous exercise we learned how to handle sound in C which came in han
 
 \subsection{The game}
 \subsubsection{Sokoban}
-The game we chose to implement was a simple top-down puzzle game called \textit{Sokoban}\cite{sokoban}. The point of the game is for the player to push boxes onto marked goal squares. The levels are small maps confined by walls which cannot be walked through. The puzzle is solved when all the boxes are on the goal squares. We had some previous experience of implementing this game in Java in the course TDT4100: Object Oriented Programming. We therefore chose to port it to C. See figure~\ref{fig:sokobanscreen} for a screenshot of a level in Sokoban.
+The game we chose to implement was a simple top-down puzzle game called \textit{Sokoban}\cite{sokoban}. The point of the game is for the player to push boxes onto marked target squares. The levels are small maps confined by walls which cannot be walked through. The puzzle is solved when all the boxes are on the target squares. We had some previous experience of implementing this game in Java in the course TDT4100: Object Oriented Programming. We therefore chose to port it to C. See figure~\ref{fig:sokobanscreen} for a screenshot of a level in Sokoban.
 
 \begin{figure}[H]
 \centering
@@ -88,10 +87,10 @@ The levels are defined by it's dimensions and an array of characters of the diff
 \hline \textbf{Level element} & \textbf{Character} & \textbf{Graphics} \\ 
 \hline Wall & \# & \includegraphics[scale=0.6]{images/wall.png} \\ 
 \hline Player & @ & \includegraphics[scale=0.6]{images/player.png} \\ 
-\hline Player on goal square & + & \includegraphics[scale=0.6]{images/playertarget.png} \\ 
+\hline Player on target square & + & \includegraphics[scale=0.6]{images/playertarget.png} \\ 
 \hline Box & \$ & \includegraphics[scale=0.6]{images/crate.png}\\ 
-\hline Box on goal square & * & \includegraphics[scale=0.6]{images/cratetarget.png}\\ 
-\hline Goal square & . & \includegraphics[scale=0.6]{images/target.png}\\ 
+\hline Box on target square & * & \includegraphics[scale=0.6]{images/cratetarget.png}\\ 
+\hline Target square & . & \includegraphics[scale=0.6]{images/target.png}\\ 
 \hline Floor & (whitespace) & \includegraphics[scale=0.6]{images/blank.png} \\ 
 \hline 
 \end{tabular}
@@ -178,9 +177,9 @@ This exercise resulted in a working Sokoban game on the STK1000 development boar
 \subsection{Feedback}There are sounds and LEDs to help you understand the game play better through audiovisual feedback. The LEDs show how many crates you have left in the game, and when you win all LEDs will blink several times.
 
 \subsection{Levels}
-We implemented 8 levels since we only have 8 buttons available. Those levels should provide the player with a nice introduction to the game. 
+We implemented 8 levels since we only have 8 buttons available. These levels should provide the player with a nice introduction to the game. 
 
-\subsection{Sounds}There are sounds for the start of the game, when you place a crate on a target, when you remove a crate from a target, when you hit a wall and when you win. When you win there will also be a splash screen telling you that you've won. 
+\subsection{Sounds}There are sounds for the start of the game, when you place a crate on a target square, when you remove a crate from a target square, when you hit a wall and when you win. When you win there will also be a splash screen telling you that you've won. 
 
 \subsection{Game play}
 In regards to the game play we have movement in four directions, the ability to push crates, disability to walk through walls, and the ability to undo and redo. 
