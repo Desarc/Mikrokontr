@@ -1,4 +1,5 @@
 #include "sokoban_core.h"
+#include "../sound/sound.h"
 
 volatile char path[100];
 volatile char undone_moves[100];
@@ -32,10 +33,12 @@ void move(char dir, int undo, int redo) {
 	}
 	int posX = getX(), posY = getY();
 	int valid = validMove(posX, posY, posX+dirX, posY+dirY);
-	if (valid) {
+	if (!valid) play_sound(HIT_WALL);
+	else {
 		int box = moveTo(posX, posY, posX+dirX, posY+dirY);
 		if (!undo && !replaying) updatePath(dirX, dirY, box);
 	}
+	
 	if (getRemaining() == 0) playing = 0;
 }
 
@@ -89,12 +92,12 @@ void undoLastMove(void) {
 	*undone_moves_ptr = dir;
 	undone_moves_ptr++;
 	undone_length++;
-	if (dir == PUSH_RIGHT || dir == PUSH_LEFT || dir == PUSH_DOWN || dir == PUSH_UP) undoBox(dir);
 	if (dir == PUSH_RIGHT || dir == RIGHT) dir = LEFT;
 	else if (dir == PUSH_LEFT || dir == LEFT) dir = RIGHT;
 	else if (dir == PUSH_DOWN || dir == DOWN) dir = UP;
 	else if (dir == PUSH_UP || dir == UP) dir = DOWN;
 	move(dir, 1, 0);
+	undoBox(dir);
 }
 	
 /* redo the last undone move */

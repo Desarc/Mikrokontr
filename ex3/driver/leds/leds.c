@@ -30,7 +30,7 @@ const char name[] = "leds";
 struct cdev *leds_cdev;
 
 const long SET_ALL_LEDS = 0xffffff00;
-volatile char led_status;
+volatile char led_status[4]; 
 
 int status;
 long vector;
@@ -50,11 +50,8 @@ static struct file_operations leds_fops = {
 /* activate the LEDs indicated by the led_status number by writing to input data register */
 void set_leds(void) {
 	piob->codr = SET_ALL_LEDS;
-	char byte3 = led_status >> 7;
-	char byte2 = (led_status << 1) >> 7;
-	char byte1 = (led_status << 2) >> 2;
-	char byte0 = 0;
-	vector = (byte3 << 24)+(byte2 << 16)+(byte1 << 8)+byte0;
+	led_status[3] = 0x0; 
+	vector = (led_status[0] << 24)+(led_status[1] << 16)+(led_status[2] << 8)+led_status[3];  
 	piob->sodr = vector;
 }
 
@@ -65,7 +62,10 @@ static int __init leds_init (void) {
 	printk("alloc success? %i \n", status);
 
   	/* request access to ports */
-	request_region(AVR32_PIOB_ADDRESS+PORT_OFFSET, PORT_RANGE, name);
+	request_region(AVR32_PIOB_ADDRESS+AVR32_PIO_PER+PORT_OFFSET, PORT_RANGE, name);
+	request_region(AVR32_PIOB_ADDRESS+AVR32_PIO_OER+PORT_OFFSET, PORT_RANGE, name);
+	request_region(AVR32_PIOB_ADDRESS+AVR32_PIO_CODR+PORT_OFFSET, PORT_RANGE, name);
+	request_region(AVR32_PIOB_ADDRESS+AVR32_PIO_SODR+PORT_OFFSET, PORT_RANGE, name);
 
 	/* initialize LEDs */
 	piob->per = SET_ALL_LEDS;
@@ -92,7 +92,10 @@ static void __exit leds_exit (void) {
 
 	/* unregister device and release ports */
 	cdev_del(leds_cdev);
-	release_region(AVR32_PIOB_ADDRESS+PORT_OFFSET, PORT_RANGE);
+	release_region(AVR32_PIOB_ADDRESS+AVR32_PIO_PER+PORT_OFFSET, PORT_RANGE);
+	release_region(AVR32_PIOB_ADDRESS+AVR32_PIO_OER+PORT_OFFSET, PORT_RANGE);
+	release_region(AVR32_PIOB_ADDRESS+AVR32_PIO_CODR+PORT_OFFSET, PORT_RANGE);
+	release_region(AVR32_PIOB_ADDRESS+AVR32_PIO_SODR+PORT_OFFSET, PORT_RANGE);
 
 	/* releasing minor and major numbers */
 	unregister_chrdev_region(dev, count);

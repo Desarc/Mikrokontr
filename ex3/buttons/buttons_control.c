@@ -9,11 +9,11 @@ volatile int button_status;
 
 /* read current status of buttons */
 int read_button_status(void) {
-	char test [2];
-	char *test_ptr = test;
+	char status [2];
+	char *status_ptr = status;
 	int read_success;
-	read_success = read(fd_buttons, test_ptr, 2);
-	button_status = (test[0] << 8)+test[1];
+	read_success = read(fd_buttons, status_ptr, 2);
+	button_status = (status[0] << 8)+status[1];
 	int led_status = get_led_status();
 	button_status -= led_status << 8;
 	return button_status;

@@ -58,13 +58,13 @@ static int __init buttons_init (void) {
 	printk("alloc success? %i\n", status);
 	
   	/* request access to ports */
-  	request_region(AVR32_PIOB_ADDRESS+PORT_OFFSET, PORT_RANGE, name);
-  	request_region(AVR32_PIOB_ADDRESS+PER+PORT_OFFSET, PORT_RANGE, name);
+  	request_region(AVR32_PIOB_ADDRESS+AVR32_PIO_PER+PORT_OFFSET, PORT_RANGE, name);
+  	request_region(AVR32_PIOB_ADDRESS+AVR32_PIO_PUER+PORT_OFFSET, PORT_RANGE, name);
+	request_region(AVR32_PIOB_ADDRESS+AVR32_PIO_PDSR+PORT_OFFSET, PORT_RANGE, name);
   	
 	/* initialisere PIO-maskinvaren (som i øving 2) */
 	piob->per = SET_ALL_BUTTONS;
 	piob->puer = SET_ALL_BUTTONS;
-	//piob->ier = SET_ALL_BUTTONS;
  
   	/* registering device in the system */
 	buttons_cdev = cdev_alloc();
@@ -83,7 +83,10 @@ static void __exit buttons_exit (void) {
 
 	/* unregister and release ports */
 	cdev_del(buttons_cdev);
-	release_region(AVR32_PIOB_ADDRESS+PORT_OFFSET, PORT_RANGE);
+
+	release_region(AVR32_PIOB_ADDRESS+AVR32_PIO_PER+PORT_OFFSET, PORT_RANGE);
+	release_region(AVR32_PIOB_ADDRESS+AVR32_PIO_PUER+PORT_OFFSET, PORT_RANGE);
+	release_region(AVR32_PIOB_ADDRESS+AVR32_PIO_PDSR+PORT_OFFSET, PORT_RANGE);
 
 	/* releasing minor and major numbers */
 	unregister_chrdev_region(dev, count);
